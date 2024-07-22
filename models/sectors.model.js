@@ -1,0 +1,1 @@
+exports.selectSectorsSql = 'SELECT * FROM sectors;';
