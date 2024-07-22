@@ -19,6 +19,46 @@ const findUser = async (companyNumber) => {
     }
 }
 
+const getCompanyInfo = async (companyNumber) => {
+    try {
+        // 사업자 조회 웹 크롤링
+        const crawling = await fetch(`https://bizno.net/article/${companyNumber}`);
+        const htmlString = await crawling.text();
+        const htmlDOM = new jsdom.JSDOM(htmlString);
+
+        const isNotFoundCompanyNumber = htmlDOM.window.document.querySelector('section .titles h4');
+        if (isNotFoundCompanyNumber) {
+            throw new CustomError(
+                '존재하지 않는 사업자번호 입니다.',
+                StatusCodes.BAD_REQUEST
+            )
+        }
+
+        const businessName = htmlDOM.window.document.querySelector('body section a').textContent.trim();
+        const tableHeaders = htmlDOM.window.document.querySelectorAll('section table tbody tr th');
+        const tableDatas = htmlDOM.window.document.querySelectorAll('section table tbody tr td');
+
+        let name = '';
+        let address = '';
+        for (let i = 0; i < tableHeaders.length; i++) {
+            if (tableHeaders[i].textContent === '대표자명') {
+                name = tableDatas[i + 1].textContent.trim() || '비공개';
+            }
+            if (tableHeaders[i].textContent === '회사주소') {
+                address = tableDatas[i + 1].innerHTML.split('<br>')[0].trim() || '비공개';
+                break;
+            }
+        }
+
+        return { businessName, name, address };
+    } catch (err) {
+        throw new CustomError(
+            err.message || '사업자 조회 실패',
+            err.statusCode || StatusCodes.NOT_FOUND
+        );
+    }
+}
+
 exports.insertUser = async ({ contact, companyNumber, password, sectorId }) => {
     try {
         // 사업자 번호 중복 확인
@@ -30,22 +70,8 @@ exports.insertUser = async ({ contact, companyNumber, password, sectorId }) => {
             );
         }
 
-        // 사업자 조회 웹 크롤링
-        const crawling = await fetch(`https://bizno.net/article/${companyNumber}`);
-        const htmlString = await crawling.text();
-        const htmlDOM = new jsdom.JSDOM(htmlString);
-
-        const businessName = htmlDOM.window.document.querySelector('body section a');
-        const name = htmlDOM.window.document.querySelector('section table tbody tr:nth-child(17) td');
-        const address = htmlDOM.window.document.querySelector('section table tbody tr:nth-child(24) td');
-        const isNotFoundCompanyNumber = htmlDOM.window.document.querySelector('section .titles h4');
-
-        if (isNotFoundCompanyNumber) {
-            throw new CustomError(
-                '존재하지 않는 사업자번호 입니다.',
-                StatusCodes.BAD_REQUEST
-            )
-        }
+        // 사업자 정보 조회
+        const { businessName, name, address } = await getCompanyInfo(companyNumber);
 
         // 비밀번호 암호화
         const { salt, hashPassword } = passwordEncryption(password);
@@ -58,10 +84,10 @@ exports.insertUser = async ({ contact, companyNumber, password, sectorId }) => {
                 companyNumber,
                 salt,
                 hashPassword,
-                name ? name.textContent.trim() : '비공개',
-                businessName.textContent.trim(),
+                name,
+                businessName,
                 contact,
-                address.textContent.trim(),
+                address,
                 sectorId,
                 'default'
             ]
