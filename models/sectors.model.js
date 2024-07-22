@@ -1,1 +1,1 @@
-exports.selectSectorsSql = 'SELECT * FROM sectors;';
+exports.selectSectorsSql = 'SELECT * FROM sectors ORDER BY id;';

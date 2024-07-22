@@ -3,8 +3,8 @@ const { insertUser } = require('../services/users.service');
 
 exports.addUser = async (req, res, next) => {
     try {
-        const { contact, companyNumber, password, sectorId } = req.body;
-        await insertUser({ contact, companyNumber, password, sectorId });
+        const { companyNumber, password, businessName, contact, address, sectorId } = req.body;
+        await insertUser({ companyNumber, password, businessName, contact, address, sectorId });
         return res.status(StatusCodes.CREATED).end();
     } catch (err) {
         next(err);
