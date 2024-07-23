@@ -1,8 +1,9 @@
+import errorMiddleware from "./errorHandler/errorMiddleware";
+import { Error } from "sequelize";
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
-const { StatusCodes } = require("http-status-codes");
 const { sequelize } = require('./models/index');
 
 app.use(express.json());
@@ -24,7 +25,7 @@ const connectDB = async () => {
     .then(() => {
       console.log('DB 연결 성공');
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       console.error(err);
     })
 }
@@ -36,23 +37,7 @@ const sectorRouter = require('./routes/sectors.route');
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
-
-
-app.use((req, res, next) => {
-  const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
-  error.status = StatusCodes.NOT_FOUND;
-
-  next(error);
-});
-
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const errMsg = err.message || "서버 내부 오류 발생";
-  console.error(`에러 발생: ${err.name}`);
-  console.error(`에러 메시지: ${err.message}`);
-  console.error(`에러 스택: ${err.stack}`);
-  return res.status(statusCode).json({ message: errMsg });
-});
+app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
