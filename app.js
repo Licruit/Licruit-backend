@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
 const { StatusCodes } = require("http-status-codes");
+const cors = require("cors");
 
 app.use(express.json());
 dotenv.config();
@@ -16,11 +17,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+
 const userRouter = require('./routes/users.route');
 const sectorRouter = require('./routes/sectors.route');
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
+
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);
