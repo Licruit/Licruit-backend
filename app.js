@@ -3,7 +3,6 @@ const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
 const { StatusCodes } = require("http-status-codes");
-const cors = require("cors");
 
 app.use(express.json());
 dotenv.config();
