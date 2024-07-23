@@ -1,13 +1,12 @@
 const { StatusCodes } = require("http-status-codes");
-const initializeConnection = require("../db");
-const { selectSectorsSql } = require("../models/sectors.model");
 const { CustomError } = require('../utils/customError');
+const Sector = require("../models/sectors.model");
 
 exports.selectSectors = async () => {
     try {
-        const connection = await initializeConnection();
-
-        const [sectors, fields] = await connection.query(selectSectorsSql);
+        const sectors = await Sector.findAll({
+            order: [["id", "asc"]]
+        });
         if (!sectors.length) {
             throw new CustomError(
                 '조회할 업종 목록이 없습니다.',
@@ -15,7 +14,6 @@ exports.selectSectors = async () => {
             );
         }
 
-        await connection.end();
         return sectors;
     } catch (err) {
         throw new CustomError(
