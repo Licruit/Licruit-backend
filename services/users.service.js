@@ -20,7 +20,6 @@ const findUser = async (companyNumber) => {
 
 exports.insertUser = async ({ companyNumber, password, businessName, contact, address, sectorId }) => {
     try {
-        // 사업자 번호 중복 확인
         const isExistedUser = await findUser(companyNumber);
         if (isExistedUser.length) {
             throw new CustomError(
@@ -29,10 +28,8 @@ exports.insertUser = async ({ companyNumber, password, businessName, contact, ad
             );
         }
 
-        // 비밀번호 암호화
         const { salt, hashPassword } = passwordEncryption(password);
 
-        // 사용자 추가
         const connection = await initializeConnection();
         await connection.query(
             insertUserSql,
