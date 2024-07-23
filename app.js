@@ -3,9 +3,11 @@ const app = express();
 const dotenv = require("dotenv");
 const cors = require("cors");
 const { StatusCodes } = require("http-status-codes");
+const { sequelize } = require('./models/index');
 
 app.use(express.json());
 dotenv.config();
+
 
 const corsOptions = {
   origin: "http://localhost:5173/",
@@ -15,6 +17,18 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+
+const connectDB = async () => {
+  await sequelize.sync({ force: false })
+    .then(() => {
+      console.log('DB 연결 성공');
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+}
+connectDB();
 
 
 const userRouter = require('./routes/users.route');

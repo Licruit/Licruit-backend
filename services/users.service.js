@@ -1,10 +1,9 @@
 const { CustomError } = require('../utils/customError');
 const { StatusCodes } = require('http-status-codes');
-const initializeConnection = require('../db');
-const { insertUserSql, selectUserSql } = require('../models/users.model');
 const { passwordEncryption } = require('../utils/encryption');
 const AWS = require("aws-sdk");
 const cache = require("memory-cache");
+const User = require('../models/users.model');
 
 const aws = new AWS.SNS({
     region: process.env.AWS_SNS_REGION,
@@ -62,9 +61,10 @@ exports.verifyOtp = async (phoneNumber, code) => {
 
 const findUser = async (companyNumber) => {
     try {
-        const connection = await initializeConnection();
-        const [user, fields] = await connection.query(selectUserSql, [companyNumber]);
-        await connection.end();
+        const user = await User.findOne({
+            where: { company_number: companyNumber }
+        });
+
         return user;
     } catch (err) {
         throw new CustomError(
@@ -77,7 +77,7 @@ const findUser = async (companyNumber) => {
 exports.insertUser = async ({ companyNumber, password, businessName, contact, address, sectorId }) => {
     try {
         const isExistedUser = await findUser(companyNumber);
-        if (isExistedUser.length) {
+        if (isExistedUser) {
             throw new CustomError(
                 '이미 사용된 사업자번호입니다.',
                 StatusCodes.BAD_REQUEST
@@ -86,21 +86,16 @@ exports.insertUser = async ({ companyNumber, password, businessName, contact, ad
 
         const { salt, hashPassword } = passwordEncryption(password);
 
-        const connection = await initializeConnection();
-        await connection.query(
-            insertUserSql,
-            [
-                companyNumber,
-                salt,
-                hashPassword,
-                businessName,
-                contact,
-                address,
-                sectorId,
-                'default'
-            ]
-        );
-        await connection.end();
+        await User.create({
+            company_number: companyNumber,
+            salt: salt,
+            password: hashPassword,
+            business_name: businessName,
+            contact: contact,
+            address: address,
+            sector_id: sectorId,
+            img: 'default'
+        });
     } catch (err) {
         throw new CustomError(
             err.message || '회원 가입 실패',
