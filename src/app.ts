@@ -1,10 +1,10 @@
-import errorMiddleware from "./errorHandler/errorMiddleware";
-import { Error } from "sequelize";
-const express = require("express");
-const app = express();
-const dotenv = require("dotenv");
-const cors = require("cors");
-const { sequelize } = require('./models/index');
+import { errorMiddleware } from "./errorHandler/errorMiddleware";
+import express, { Express } from "express";
+const app: Express = express();
+import dotenv from "dotenv";
+import cors from "cors";
+import { sequelize } from "./models";
+
 
 app.use(express.json());
 dotenv.config();
@@ -20,26 +20,21 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 
-const connectDB = async () => {
-  await sequelize.sync({ force: false })
-    .then(() => {
-      console.log('DB 연결 성공');
-    })
-    .catch((err: Error) => {
-      console.error(err);
-    })
-}
-connectDB();
-
-
-const userRouter = require('./routes/users.route');
-const sectorRouter = require('./routes/sectors.route');
+import { router as userRouter } from "./routes/users.route";
+import { router as sectorRouter } from "./routes/sectors.route";
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`running on port ${PORT}`);
+  await sequelize.authenticate()
+    .then(async () => {
+      console.log('DB 연결 성공');
+    })
+    .catch(e => {
+      console.log(e)
+    })
 });
