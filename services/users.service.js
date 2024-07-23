@@ -1,3 +1,5 @@
+const { CustomError } = require("../utils/customError");
+const { StatusCodes } = require("http-status-codes");
 const AWS = require("aws-sdk");
 const cache = require("memory-cache");
 
@@ -9,33 +11,48 @@ const aws = new AWS.SNS({
 });
 
 exports.sendOtp = async (phoneNumber) => {
-  console.log(aws)
-  cache.del(phoneNumber);
-  const verifyCode = Math.floor(Math.random() * (999999 - 100000)) + 100000;
-  cache.put(phoneNumber, verifyCode);
-
-  const params = {
-    Message: `Licruit 인증번호 : ${verifyCode}`,
-    PhoneNumber: `+82${phoneNumber}`
-  };
-
   try {
-    const publishTextPromise = await aws.publish(params).promise();
-    console.log("인증번호를 전송했습니다.");
-  } catch (error) {
+    if (!/^010[0-9]{8}$/.test(phoneNumber)) {
+      throw new CustomError(
+        "올바른 형식의 번호를 입력해주세요.",
+        StatusCodes.UNAUTHORIZED
+      );
+    }
+
     cache.del(phoneNumber);
-    throw new Error("인증번호 전송에 실패했습니다.");
+    const verifyCode = Math.floor(Math.random() * (999999 - 100000)) + 100000;
+    cache.put(phoneNumber, verifyCode);
+
+    const params = {
+      Message: `Licruit 인증번호 : ${verifyCode}`,
+      PhoneNumber: `+82${phoneNumber}`
+    };
+    
+    const publishTextPromise = await aws.publish(params).promise();
+  } catch (err) {
+    cache.del(phoneNumber);
+    throw new CustomError(
+      err.message || "인증번호 전송에 실패했습니다.",
+      err.statusCode || StatusCodes.UNAUTHORIZED
+    );
   }
 };
 
 exports.verifyOtp = async (phoneNumber, code) => {
-  const cacheOtp = cache.get(phoneNumber);
-  console.log(cacheOtp);
-
-  if (cacheOtp && cacheOtp === code) {
+  try {
+    const cacheOtp = cache.get(phoneNumber);
     cache.del(phoneNumber);
-    return true;
-  }
 
-  return false;
+    if (cacheOtp !== code) {
+      throw new CustomError(
+        "인증번호가 올바르지 않습니다.",
+        StatusCodes.UNAUTHORIZED
+      );
+    }
+  } catch (err) {
+    throw new CustomError(
+      err.message || "인증에 실패했습니다.",
+      err.statusCode || StatusCodes.UNAUTHORIZED
+    );
+  }
 };
