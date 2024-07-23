@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const authService = require("../services/users.service");
+const { insertUser } = require('../services/users.service');
 
 exports.postOtp = async (req, res, next) => {
   try {
@@ -20,3 +21,13 @@ exports.verifyOtp = async (req, res, next) => {
     next(err)
   }
 };
+
+exports.addUser = async (req, res, next) => {
+    try {
+        const { companyNumber, password, businessName, contact, address, sectorId } = req.body;
+        await insertUser({ companyNumber, password, businessName, contact, address, sectorId });
+        return res.status(StatusCodes.CREATED).end();
+    } catch (err) {
+        next(err);
+    }
+}
