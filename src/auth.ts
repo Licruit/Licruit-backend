@@ -1,71 +1,44 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import HttpException from "./utils/httpExeption";
 
-export const getDecodedAccessToken = (req: Request) => {
-    try {
-        if (req.headers.authorization) {
-            const accessToken = req.headers.authorization;
-            const decodedJwt: any = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY!);
-            return decodedJwt;
-        } else {
-            throw new ReferenceError('로그인이 필요한 기능입니다.');
-        }
-    } catch (err) {
-        return err;
-    }
+export interface TokenRequest extends Request {
+    companyNumber: string;
 }
 
-export const getDecodedRefreshToken = (req: Request) => {
-    try {
-        if (req.headers.refresh) {
-            const refreshToken = req.headers.refresh.toString();
-            const decodedJwt: any = jwt.verify(refreshToken, process.env.JWT_PRIVATE_KEY!);
-            return decodedJwt;
-        } else {
-            throw new ReferenceError('refresh token이 필요합니다.');
-        }
-    } catch (err) {
-        return err;
-    }
+export interface DecodedJWT {
+    companyNumber: string;
 }
 
 export const accessTokenValidate = (req: Request, res: Response, next: NextFunction) => {
-    const authorization = getDecodedAccessToken(req);
+    try {
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization;
+            const decodedJwt: DecodedJWT = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
+            (req as TokenRequest).companyNumber = decodedJwt.companyNumber;
 
-    if (authorization instanceof jwt.TokenExpiredError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "로그인이 만료되었습니다.",
-        });
-    } else if (authorization instanceof jwt.JsonWebTokenError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "잘못된 access token입니다.",
-        });
-    } else if (authorization instanceof ReferenceError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "로그인이 필요한 기능입니다.",
-        });
+            next();
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 access token입니다.');
     }
-
-    return next();
 }
 
 export const refreshTokenValidate = (req: Request, res: Response, next: NextFunction) => {
-    const authorization = getDecodedRefreshToken(req);
+    try {
+        if (req.headers.refresh) {
+            const refreshToken = req.headers.refresh.toString();
+            const decodedJwt: DecodedJWT = jwt.verify(refreshToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
+            (req as TokenRequest).companyNumber = decodedJwt.companyNumber;
 
-    if (authorization instanceof jwt.TokenExpiredError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "refresh token이 만료되었습니다.",
-        });
-    } else if (authorization instanceof jwt.JsonWebTokenError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "잘못된 refresh token입니다.",
-        });
-    } else if (authorization instanceof ReferenceError) {
-        return res.status(StatusCodes.UNAUTHORIZED).json({
-            message: "refresh token이 필요한 기능입니다.",
-        });
+            next();
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.')
     }
-
-    return next();
 }

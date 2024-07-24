@@ -3,7 +3,7 @@ import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumber
 import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectRefreshToken, selectWholesaler, sendOtp, setRefreshToken } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
-import { getDecodedAccessToken, getDecodedRefreshToken } from "../auth";
+import { TokenRequest } from "../auth";
 
 const cookieOptions = { sameSite: false, secure: true, httpOnly: true };
 
@@ -45,14 +45,14 @@ export const addUser = async (req: Request, res: Response) => {
 }
 
 export const addWholesaler = async (req: Request, res: Response) => {
-    const decodedAccessToken = getDecodedAccessToken(req);
+    const companyNumber = (req as TokenRequest).companyNumber;
 
-    const wholesaler = await selectWholesaler(decodedAccessToken.companyNumber);
+    const wholesaler = await selectWholesaler(companyNumber);
     if (wholesaler) {
         throw new HttpException(StatusCodes.BAD_REQUEST, '이미 도매업체 권한으로 전환된 사업자번호입니다.');
     }
 
-    await insertWholesaler(decodedAccessToken.companyNumber);
+    await insertWholesaler(companyNumber);
 
     return res.status(StatusCodes.CREATED).end();
 }
@@ -89,16 +89,16 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const createNewAccessToken = async (req: Request, res: Response) => {
-    const decodedRefreshToken = getDecodedRefreshToken(req);
+    const companyNumber = (req as TokenRequest).companyNumber;
 
-    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber);
+    const refreshToken = await selectRefreshToken(companyNumber);
     if (!refreshToken || req.headers.refresh !== refreshToken.refresh_token) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
     }
 
     res.cookie(
         'access_token',
-        createToken(decodedRefreshToken.companyNumber, '1h'),
+        createToken(companyNumber, '1h'),
         cookieOptions
     );
 
@@ -106,9 +106,9 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
 }
 
 export const logout = async (req: Request, res: Response) => {
-    const decodedRefreshToken = getDecodedRefreshToken(req);
+    const companyNumber = (req as TokenRequest).companyNumber;
 
-    const deletedToken = await deleteToken(decodedRefreshToken.companyNumber, req.headers.refresh!.toString());
+    const deletedToken = await deleteToken(companyNumber, req.headers.refresh!.toString());
     if (!deletedToken) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh token입니다.');
     }
