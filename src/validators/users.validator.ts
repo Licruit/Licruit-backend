@@ -8,7 +8,7 @@ const addressValidate = body('address').notEmpty().isString().withMessage('주�
 const sectorIdValidate = body('sectorId').notEmpty().isNumeric().custom((value: number) => {
     return value >= 1 && value <= 9 ? true : false;
 }).withMessage('업종코드 확인 필요');
-const otpValidate = body('otp').notEmpty().isNumeric().isLength({ min: 6, max: 6});
+const otpValidate = body('otp').notEmpty().isNumeric().isLength({ min: 6, max: 6 });
 
 export const registerValidate = [
     contactValidate,
@@ -18,6 +18,8 @@ export const registerValidate = [
     addressValidate,
     sectorIdValidate
 ];
+
+export const loginValidate = [companyNumberValidate, passwordValidate];
 
 export const otpReqValidate = [contactValidate];
 

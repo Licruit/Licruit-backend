@@ -1,9 +1,10 @@
 import { RegisterDTO } from "../dto/users.dto";
 import { User } from "../models/users.model";
-import { passwordEncryption } from "../utils/encryption";
+import { getHashPassword, passwordEncryption } from "../utils/encryption";
 import AWS from "aws-sdk";
 import Cache from "node-cache";
 const myCache = new Cache();
+import jwt from "jsonwebtoken";
 
 export const findUser = async (companyNumber: string) => {
     try {
@@ -36,6 +37,23 @@ export const insertUser = async (registerDTO: RegisterDTO) => {
     } catch {
         throw new Error('사용자 생성 실패');
     }
+}
+
+export const isSamePassword = (inputPassword: string, salt: string, password: string) => {
+    const hashPassword = getHashPassword(inputPassword, salt);
+
+    return hashPassword === password ? true : false;
+}
+
+export const createToken = (companyNumber: string, expirationPeriod: string) => {
+    const token = jwt.sign({
+        companyNumber: companyNumber
+    }, process.env.JWT_PRIVATE_KEY!, {
+        expiresIn: expirationPeriod,
+        issuer: "licruit"
+    });
+
+    return token;
 }
 
 export const sendOtp = async (contact: string) => {
