@@ -5,6 +5,8 @@ import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
 import { getDecodedRefreshToken } from "../auth";
 
+const cookieOptions = { sameSite: false, secure: true, httpOnly: true };
+
 export const addUser = async (req: Request, res: Response) => {
     const registerDTO: RegisterDTO = req.body;
 
@@ -29,8 +31,6 @@ export const login = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
     }
 
-    const cookieOptions = { sameSite: false, secure: true, httpOnly: true }
-
     res.cookie(
         'access_token',
         createToken(companyNumber, '1h'),
@@ -38,7 +38,7 @@ export const login = async (req: Request, res: Response) => {
     );
     res.cookie(
         'refresh_token',
-        createToken(companyNumber, '30d'),
+        createToken(companyNumber, '14d'),
         cookieOptions
     );
 
@@ -47,19 +47,21 @@ export const login = async (req: Request, res: Response) => {
 
 export const createNewAccessToken = (req: Request, res: Response) => {
     const decodedRefreshToken = getDecodedRefreshToken(req);
-    const cookieOptions = { sameSite: false, secure: true, httpOnly: true }
 
-    if (decodedRefreshToken && decodedRefreshToken.companyNumber) {
-        res.cookie(
-            'access_token',
-            createToken(decodedRefreshToken.companyNumber, '1h'),
-            cookieOptions
-        )
+    res.cookie(
+        'access_token',
+        createToken(decodedRefreshToken.companyNumber, '1h'),
+        cookieOptions
+    );
 
-        return res.status(StatusCodes.OK).end();
-    } else {
-        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.');
-    }
+    return res.status(StatusCodes.OK).end();
+}
+
+export const logout = (req: Request, res: Response) => {
+    res.clearCookie('access_token', cookieOptions);
+    res.clearCookie('refresh_token', cookieOptions);
+
+    return res.status(StatusCodes.OK).end();
 }
 
 export const postOtp = async (req: Request, res: Response) => {

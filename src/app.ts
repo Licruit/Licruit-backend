@@ -1,10 +1,11 @@
 import { errorMiddleware } from "./errorHandler/errorMiddleware";
-import express, { Express } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 const app: Express = express();
 import dotenv from "dotenv";
 import cors from "cors";
 import { sequelize } from "./models";
 import cookieParser from "cookie-parser";
+import { StatusCodes } from "http-status-codes";
 
 
 app.use(express.json());
@@ -24,9 +25,17 @@ app.use(cors(corsOptions));
 
 import { router as userRouter } from "./routes/users.route";
 import { router as sectorRouter } from "./routes/sectors.route";
+import HttpException from "./utils/httpExeption";
+
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
+
+  next(error);
+});
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
