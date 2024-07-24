@@ -4,9 +4,8 @@ import jwt from "jsonwebtoken";
 
 export const getDecodedAccessToken = (req: Request) => {
     try {
-        const accessToken = req.cookies.access_token;
-
-        if (accessToken) {
+        if (req.headers.authorization) {
+            const accessToken = req.headers.authorization;
             const decodedJwt: any = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY!);
             return decodedJwt;
         } else {
@@ -19,14 +18,12 @@ export const getDecodedAccessToken = (req: Request) => {
 
 export const getDecodedRefreshToken = (req: Request) => {
     try {
-        const refreshToken = req.cookies.refresh_token;
-
-        if (refreshToken) {
+        if (req.headers.refresh) {
+            const refreshToken = req.headers.refresh.toString();
             const decodedJwt: any = jwt.verify(refreshToken, process.env.JWT_PRIVATE_KEY!);
-
             return decodedJwt;
         } else {
-            throw new ReferenceError('로그인이 필요한 기능입니다.');
+            throw new ReferenceError('refresh token이 필요합니다.');
         }
     } catch (err) {
         return err;

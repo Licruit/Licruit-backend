@@ -20,3 +20,7 @@ export interface OtpVerificationDTO {
     contact: string;
     otp: number;
 }
+
+export interface CompnayNumberCheckDTO {
+    companyNumber: string;
+}

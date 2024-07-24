@@ -4,12 +4,10 @@ const app: Express = express();
 import dotenv from "dotenv";
 import cors from "cors";
 import { sequelize } from "./models";
-import cookieParser from "cookie-parser";
 import { StatusCodes } from "http-status-codes";
 
 
 app.use(express.json());
-app.use(cookieParser());
 dotenv.config();
 
 

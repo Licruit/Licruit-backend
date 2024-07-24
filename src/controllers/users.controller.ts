@@ -1,11 +1,22 @@
 import { Request, Response } from "express";
-import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO } from "../dto/users.dto";
-import { checkOtp, createToken, findUser, insertUser, insertWholesaler, isSamePassword, sendOtp } from "../services/users.service";
+import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumberCheckDTO } from "../dto/users.dto";
+import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectRefreshToken, selectWholesaler, sendOtp, setRefreshToken } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
 import { getDecodedAccessToken, getDecodedRefreshToken } from "../auth";
 
 const cookieOptions = { sameSite: false, secure: true, httpOnly: true };
+
+export const getUser = async (req: Request, res: Response) => {
+    const { companyNumber }: CompnayNumberCheckDTO = req.body;
+
+    const foundUser = await findUser(companyNumber);
+    if (foundUser) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '이미 사용된 사업자번호입니다.');
+    }
+
+    return res.status(StatusCodes.OK).end();
+}
 
 export const addUser = async (req: Request, res: Response) => {
     const registerDTO: RegisterDTO = req.body;
@@ -21,6 +32,11 @@ export const addUser = async (req: Request, res: Response) => {
 
 export const addWholesaler = async (req: Request, res: Response) => {
     const decodedAccessToken = getDecodedAccessToken(req);
+
+    const wholesaler = await selectWholesaler(decodedAccessToken.companyNumber);
+    if (wholesaler) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '이미 도매업체 권한으로 전환된 사업자번호입니다.');
+    }
 
     await insertWholesaler(decodedAccessToken.companyNumber);
 
@@ -39,22 +55,31 @@ export const login = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
     }
 
+    const accessToken = createToken(companyNumber, '1h');
+    const refreshToken = createToken(companyNumber, '30d');
+
+    await setRefreshToken(companyNumber, refreshToken);
+
     res.cookie(
         'access_token',
-        createToken(companyNumber, '1h'),
+        accessToken,
         cookieOptions
     );
     res.cookie(
         'refresh_token',
-        createToken(companyNumber, '14d'),
+        refreshToken,
         cookieOptions
     );
 
     return res.status(StatusCodes.OK).end();
 }
 
-export const createNewAccessToken = (req: Request, res: Response) => {
+export const createNewAccessToken = async (req: Request, res: Response) => {
     const decodedRefreshToken = getDecodedRefreshToken(req);
+    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber);
+    if (!refreshToken || refreshToken.refresh_token !== req.headers.refresh) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
+    }
 
     res.cookie(
         'access_token',
@@ -65,9 +90,12 @@ export const createNewAccessToken = (req: Request, res: Response) => {
     return res.status(StatusCodes.OK).end();
 }
 
-export const logout = (req: Request, res: Response) => {
-    res.clearCookie('access_token', cookieOptions);
-    res.clearCookie('refresh_token', cookieOptions);
+export const logout = async (req: Request, res: Response) => {
+    const decodedRefreshToken = getDecodedRefreshToken(req);
+    const deletedToken = await deleteToken(decodedRefreshToken.companyNumber);
+    if (!deletedToken) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh token입니다.');
+    }
 
     return res.status(StatusCodes.OK).end();
 }

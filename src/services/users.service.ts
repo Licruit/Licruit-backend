@@ -6,6 +6,7 @@ import Cache from "node-cache";
 const myCache = new Cache();
 import jwt from "jsonwebtoken";
 import { Wholesaler } from "../models/wholesalers.model";
+import { Token } from "../models/tokens.model";
 
 export const findUser = async (companyNumber: string) => {
     try {
@@ -41,6 +42,18 @@ export const insertUser = async (registerDTO: RegisterDTO) => {
     }
 }
 
+export const selectWholesaler = async (companyNumber: string) => {
+    try {
+        const wholesalers = await Wholesaler.findOne({
+            where: { user_company_number: companyNumber }
+        });
+
+        return wholesalers;
+    } catch (err) {
+        throw new Error('도매업자 조회 실패');
+    }
+}
+
 export const insertWholesaler = async (companyNumber: string) => {
     try {
         const newWholesaler = await Wholesaler.create({
@@ -68,6 +81,50 @@ export const createToken = (companyNumber: string, expirationPeriod: string) => 
     });
 
     return token;
+}
+
+export const selectRefreshToken = async (companyNumber: string) => {
+    try {
+        const refreshToken = await Token.findOne({
+            where: { user_company_number: companyNumber }
+        });
+
+        return refreshToken;
+    } catch (err) {
+        throw new Error('refresh token 조회 실패');
+    }
+}
+
+export const setRefreshToken = async (companyNumber: string, refreshToken: string) => {
+    try {
+        const isExistedToken = await selectRefreshToken(companyNumber);
+
+        if (isExistedToken) {
+            await Token.update(
+                { refresh_token: refreshToken },
+                { where: { user_company_number: companyNumber } }
+            );
+        } else {
+            await Token.create({
+                user_company_number: companyNumber,
+                refresh_token: refreshToken
+            });
+        }
+    } catch (err) {
+        throw new Error('refresh token 설정 실패');
+    }
+}
+
+export const deleteToken = async (companyNumber: string) => {
+    try {
+        const deletedToken = await Token.destroy({
+            where: { user_company_number: companyNumber }
+        });
+
+        return deletedToken;
+    } catch (err) {
+        throw new Error('refresh token 삭제 실패');
+    }
 }
 
 export const sendOtp = async (contact: string) => {
