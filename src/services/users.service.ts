@@ -1,12 +1,12 @@
 import { RegisterDTO } from "../dto/users.dto";
 import { User } from "../models/users.model";
 import { getHashPassword, passwordEncryption } from "../utils/encryption";
-import AWS from "aws-sdk";
 import Cache from "node-cache";
 const myCache = new Cache();
 import jwt from "jsonwebtoken";
 import { Wholesaler } from "../models/wholesalers.model";
 import { Token } from "../models/tokens.model";
+import { awsSns } from "../utils/aws";
 
 export const findUser = async (companyNumber: string) => {
     try {
@@ -141,13 +141,6 @@ export const deleteToken = async (companyNumber: string, refreshToken: string) =
 
 export const sendOtp = async (contact: string) => {
     try {
-        const aws = new AWS.SNS({
-            region: process.env.AWS_SNS_REGION,
-            accessKeyId: process.env.AWS_SNS_ACCESS_KEY_ID,
-            secretAccessKey: process.env.AWS_SNS_SECRET_ACCESS_KEY,
-            apiVersion: "2010-03-31"
-        });
-
         myCache.del(contact);
         const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
         myCache.set(contact, verifyCode, 180000);
@@ -157,23 +150,20 @@ export const sendOtp = async (contact: string) => {
             PhoneNumber: `+82${contact}`
         };
 
-        const publishTextPromise = await aws.publish(params).promise();
+        const publishTextPromise = await awsSns.publish(params).promise();
     } catch (err) {
         myCache.del(contact);
         throw new Error('인증번호 전송에 실패했습니다.');
     }
-}
+};
 
 export const checkOtp = async (contact: string, otp: number) => {
     try {
         const cacheOtp: number | undefined = myCache.get(contact);
         myCache.del(contact);
 
-        if (cacheOtp && cacheOtp === otp) {
-            return true;
-        }
-        return false;
+        return cacheOtp && cacheOtp === otp;
     } catch (err) {
-        throw new Error('인증에 실패했습니다.')
+        throw new Error('사용자 인증에 실패했습니다.');
     }
 };
