@@ -39,6 +39,6 @@ export const refreshTokenValidate = (req: Request, res: Response, next: NextFunc
             throw new Error();
         }
     } catch (err) {
-        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.')
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.');
     }
 }
