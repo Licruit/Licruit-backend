@@ -2,23 +2,21 @@ import { Association, DataTypes, Model } from "sequelize";
 import { sequelize } from "./index";
 import { User } from "./users.model";
 
-interface WholesalersAttributes {
+interface TokensAttributes {
     user_company_number: string;
-    homepage?: string;
-    introduce?: string;
+    refresh_token: string;
 }
 
-export class Wholesaler extends Model<WholesalersAttributes> {
+export class Token extends Model<TokensAttributes> {
     public readonly user_company_number!: string;
-    public homepage!: string;
-    public introduce!: string;
+    public refresh_token!: string;
 
     public static associations: {
-        wholesalerUserTag: Association<User, Wholesaler>;
+        tokenUserTag: Association<User, Token>;
     };
 }
 
-Wholesaler.init({
+Token.init({
     user_company_number: { // 사업자 번호
         type: DataTypes.STRING(10),
         allowNull: false,
@@ -28,33 +26,29 @@ Wholesaler.init({
             key: 'company_number'
         }
     },
-    homepage: {
-        type: DataTypes.STRING(100),
-        allowNull: true
-    },
-    introduce: { // 소개글
-        type: DataTypes.STRING(200),
-        allowNull: true
+    refresh_token: {
+        type: DataTypes.STRING(188),
+        allowNull: false
     }
 }, {
     timestamps: false,
     underscored: false,
     paranoid: false,
-    modelName: 'Wholesaler',
-    tableName: 'wholesalers',
+    modelName: 'Token',
+    tableName: 'tokens',
     sequelize,
     freezeTableName: true,
     charset: 'utf8',
     collate: 'utf8_general_ci'
 });
 
-Wholesaler.belongsTo(User, {
+Token.belongsTo(User, {
     foreignKey: 'user_company_number',
-    as: 'wholesalerUserTag'
+    as: 'tokenUserTag'
 });
 
-User.hasOne(Wholesaler, {
+User.hasOne(Token, {
     sourceKey: 'company_number',
     foreignKey: 'user_company_number',
-    as: 'wholesalerUserTag'
+    as: 'tokenUserTag'
 });

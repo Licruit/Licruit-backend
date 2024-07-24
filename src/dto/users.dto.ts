@@ -7,6 +7,11 @@ export interface RegisterDTO {
     sectorId: number;
 }
 
+export interface LoginDTO {
+    companyNumber: string;
+    password: string;
+}
+
 export interface OtpRequestDTO {
     contact: string;
 }
@@ -14,4 +19,8 @@ export interface OtpRequestDTO {
 export interface OtpVerificationDTO {
     contact: string;
     otp: number;
+}
+
+export interface CompnayNumberCheckDTO {
+    companyNumber: string;
 }
