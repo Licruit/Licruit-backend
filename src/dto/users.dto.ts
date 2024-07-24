@@ -6,3 +6,12 @@ export interface RegisterDTO {
     address: string;
     sectorId: number;
 }
+
+export interface OtpRequestDTO {
+    contact: string;
+}
+
+export interface OtpVerificationDTO {
+    contact: string;
+    otp: number;
+}
