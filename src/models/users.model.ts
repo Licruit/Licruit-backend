@@ -56,7 +56,11 @@ User.init({
     },
     sector_id: { // 업종 코드
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'sectors',
+            key: 'id'
+        }
     },
     img: {
         type: DataTypes.STRING(100),

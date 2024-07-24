@@ -22,7 +22,11 @@ Wholesaler.init({
     user_company_number: { // 사업자 번호
         type: DataTypes.STRING(10),
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
+        references: {
+            model: 'users',
+            key: 'company_number'
+        }
     },
     homepage: {
         type: DataTypes.STRING(100),
@@ -37,19 +41,19 @@ Wholesaler.init({
     underscored: false,
     paranoid: false,
     modelName: 'Wholesaler',
-    tableName: 'Wholesalers',
+    tableName: 'wholesalers',
     sequelize,
     freezeTableName: true,
     charset: 'utf8',
     collate: 'utf8_general_ci'
 });
 
-Wholesaler.hasOne(User, {
+Wholesaler.belongsTo(User, {
     foreignKey: 'user_company_number',
     as: 'wholesalerUserTag'
 });
 
-User.hasOne(User, {
+User.hasOne(Wholesaler, {
     sourceKey: 'company_number',
     foreignKey: 'user_company_number',
     as: 'wholesalerUserTag'
