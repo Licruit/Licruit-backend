@@ -50,12 +50,12 @@ export const sendOtp = async (contact: string) => {
         myCache.del(contact);
         const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
         myCache.set(contact, verifyCode, 180000);
-    
+
         const params = {
-          Message: `Licruit 인증번호 : ${verifyCode}`,
-          PhoneNumber: `+82${contact}`
+            Message: `Licruit 인증번호 : ${verifyCode}`,
+            PhoneNumber: `+82${contact}`
         };
-    
+
         const publishTextPromise = await aws.publish(params).promise();
     } catch (err) {
         myCache.del(contact);
@@ -67,7 +67,7 @@ export const checkOtp = async (contact: string, otp: number) => {
     try {
         const cacheOtp: number | undefined = myCache.get(contact);
         myCache.del(contact);
-    
+
         if (cacheOtp && cacheOtp === otp) {
             return true;
         }
