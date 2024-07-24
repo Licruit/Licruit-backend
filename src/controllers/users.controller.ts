@@ -1,8 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO } from "../dto/users.dto";
 import { checkOtp, createToken, findUser, insertUser, isSamePassword, sendOtp } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
+import { getDecodedRefreshToken } from "../auth";
 
 export const addUser = async (req: Request, res: Response) => {
     const registerDTO: RegisterDTO = req.body;
@@ -28,18 +29,37 @@ export const login = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
     }
 
+    const cookieOptions = { sameSite: false, secure: true, httpOnly: true }
+
     res.cookie(
         'access_token',
         createToken(companyNumber, '1h'),
-        { sameSite: 'none', secure: true, httpOnly: true }
+        cookieOptions
     );
     res.cookie(
         'refresh_token',
         createToken(companyNumber, '30d'),
-        { sameSite: 'none', secure: true, httpOnly: true }
+        cookieOptions
     );
 
     return res.status(StatusCodes.OK).end();
+}
+
+export const createNewAccessToken = (req: Request, res: Response) => {
+    const decodedRefreshToken = getDecodedRefreshToken(req);
+    const cookieOptions = { sameSite: false, secure: true, httpOnly: true }
+
+    if (decodedRefreshToken && decodedRefreshToken.companyNumber) {
+        res.cookie(
+            'access_token',
+            createToken(decodedRefreshToken.companyNumber, '1h'),
+            cookieOptions
+        )
+
+        return res.status(StatusCodes.OK).end();
+    } else {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.');
+    }
 }
 
 export const postOtp = async (req: Request, res: Response) => {

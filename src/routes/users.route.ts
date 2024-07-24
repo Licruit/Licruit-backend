@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { addUser, login, postOtp, verifyOtp } from "../controllers/users.controller";
+import { addUser, createNewAccessToken, login, postOtp, verifyOtp } from "../controllers/users.controller";
 import { loginValidate, otpCheckValidate, otpReqValidate, registerValidate } from "../validators/users.validator";
 import { validate } from "../validators/validate";
 import { wrapAsyncController } from "../utils/wrapAsyncController";
@@ -15,6 +15,12 @@ router.post(
     '/login',
     [...loginValidate, validate],
     wrapAsyncController(login)
+)
+
+router.post(
+    '/refresh',
+    [],
+    createNewAccessToken
 )
 
 router.post(
