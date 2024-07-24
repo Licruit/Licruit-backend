@@ -5,6 +5,7 @@ import AWS from "aws-sdk";
 import Cache from "node-cache";
 const myCache = new Cache();
 import jwt from "jsonwebtoken";
+import { Wholesaler } from "../models/wholesalers.model";
 
 export const findUser = async (companyNumber: string) => {
     try {
@@ -14,6 +15,7 @@ export const findUser = async (companyNumber: string) => {
 
         return user;
     } catch (err) {
+        console.log(err);
         throw new Error('사용자 조회 실패');
     }
 }
@@ -36,6 +38,18 @@ export const insertUser = async (registerDTO: RegisterDTO) => {
         return newUser;
     } catch {
         throw new Error('사용자 생성 실패');
+    }
+}
+
+export const insertWholesaler = async (companyNumber: string) => {
+    try {
+        const newWholesaler = await Wholesaler.create({
+            user_company_number: `${companyNumber}`
+        });
+
+        return newWholesaler;
+    } catch (err) {
+        throw new Error('도매업자 권한 신청 실패');
     }
 }
 

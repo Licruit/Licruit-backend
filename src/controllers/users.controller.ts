@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO } from "../dto/users.dto";
-import { checkOtp, createToken, findUser, insertUser, isSamePassword, sendOtp } from "../services/users.service";
+import { checkOtp, createToken, findUser, insertUser, insertWholesaler, isSamePassword, sendOtp } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
-import { getDecodedRefreshToken } from "../auth";
+import { getDecodedAccessToken, getDecodedRefreshToken } from "../auth";
 
 const cookieOptions = { sameSite: false, secure: true, httpOnly: true };
 
@@ -15,6 +15,14 @@ export const addUser = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.BAD_REQUEST, '이미 사용된 사업자번호입니다.');
     }
     await insertUser(registerDTO);
+
+    return res.status(StatusCodes.CREATED).end();
+}
+
+export const addWholesaler = async (req: Request, res: Response) => {
+    const decodedAccessToken = getDecodedAccessToken(req);
+
+    await insertWholesaler(decodedAccessToken.companyNumber);
 
     return res.status(StatusCodes.CREATED).end();
 }
