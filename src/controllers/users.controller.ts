@@ -76,8 +76,11 @@ export const login = async (req: Request, res: Response) => {
 
 export const createNewAccessToken = async (req: Request, res: Response) => {
     const decodedRefreshToken = getDecodedRefreshToken(req);
-    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber);
-    if (!refreshToken || refreshToken.refresh_token !== req.headers.refresh) {
+    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber, req.headers.refresh!.toString());
+    // if (!refreshToken || refreshToken.refresh_token !== req.headers.refresh) {
+    //     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
+    // }
+    if (!refreshToken) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
     }
 
@@ -92,7 +95,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
     const decodedRefreshToken = getDecodedRefreshToken(req);
-    const deletedToken = await deleteToken(decodedRefreshToken.companyNumber);
+    const deletedToken = await deleteToken(decodedRefreshToken.companyNumber, req.headers.refresh!.toString());
     if (!deletedToken) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh token입니다.');
     }

@@ -83,13 +83,16 @@ export const createToken = (companyNumber: string, expirationPeriod: string) => 
     return token;
 }
 
-export const selectRefreshToken = async (companyNumber: string) => {
+export const selectRefreshToken = async (companyNumber: string, refreshToken: string) => {
     try {
-        const refreshToken = await Token.findOne({
-            where: { user_company_number: companyNumber }
+        const token = await Token.findOne({
+            where: {
+                user_company_number: companyNumber,
+                refresh_token: refreshToken
+            }
         });
 
-        return refreshToken;
+        return token;
     } catch (err) {
         throw new Error('refresh token 조회 실패');
     }
@@ -97,7 +100,7 @@ export const selectRefreshToken = async (companyNumber: string) => {
 
 export const setRefreshToken = async (companyNumber: string, refreshToken: string) => {
     try {
-        const isExistedToken = await selectRefreshToken(companyNumber);
+        const isExistedToken = await selectRefreshToken(companyNumber, refreshToken);
 
         if (isExistedToken) {
             await Token.update(
@@ -115,10 +118,13 @@ export const setRefreshToken = async (companyNumber: string, refreshToken: strin
     }
 }
 
-export const deleteToken = async (companyNumber: string) => {
+export const deleteToken = async (companyNumber: string, refreshToken: string) => {
     try {
         const deletedToken = await Token.destroy({
-            where: { user_company_number: companyNumber }
+            where: {
+                user_company_number: companyNumber,
+                refresh_token: refreshToken
+            }
         });
 
         return deletedToken;
