@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import HttpException from "./utils/httpExeption";
 
 export interface TokenRequest extends Request {
-    companyNumber: string;
+    token: JwtPayload;
 }
 
 export interface DecodedJWT {
-    companyNumber: string;
+    decodedJwt: JwtPayload;
 }
 
 export const accessTokenValidate = (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +16,7 @@ export const accessTokenValidate = (req: Request, res: Response, next: NextFunct
         if (req.headers.authorization) {
             const accessToken = req.headers.authorization;
             const decodedJwt: DecodedJWT = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
-            (req as TokenRequest).companyNumber = decodedJwt.companyNumber;
+            (req as TokenRequest).token = decodedJwt;
 
             next();
         } else {
@@ -32,7 +32,7 @@ export const refreshTokenValidate = (req: Request, res: Response, next: NextFunc
         if (req.headers.refresh) {
             const refreshToken = req.headers.refresh.toString();
             const decodedJwt: DecodedJWT = jwt.verify(refreshToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
-            (req as TokenRequest).companyNumber = decodedJwt.companyNumber;
+            (req as TokenRequest).token = decodedJwt;
 
             next();
         } else {

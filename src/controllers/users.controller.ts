@@ -45,7 +45,7 @@ export const addUser = async (req: Request, res: Response) => {
 }
 
 export const addWholesaler = async (req: Request, res: Response) => {
-    const companyNumber = (req as TokenRequest).companyNumber;
+    const companyNumber = (req as TokenRequest).token.companyNumber;
 
     const wholesaler = await selectWholesaler(companyNumber);
     if (wholesaler) {
@@ -89,7 +89,7 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const createNewAccessToken = async (req: Request, res: Response) => {
-    const companyNumber = (req as TokenRequest).companyNumber;
+    const companyNumber = (req as TokenRequest).token.companyNumber;
 
     const refreshToken = await selectRefreshToken(companyNumber);
     if (!refreshToken || req.headers.refresh !== refreshToken.refresh_token) {
@@ -106,7 +106,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
 }
 
 export const logout = async (req: Request, res: Response) => {
-    const companyNumber = (req as TokenRequest).companyNumber;
+    const companyNumber = (req as TokenRequest).token.companyNumber;
 
     const deletedToken = await deleteToken(companyNumber, req.headers.refresh!.toString());
     if (!deletedToken) {
