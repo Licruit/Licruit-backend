@@ -21,20 +21,27 @@ export const findUser = async (companyNumber: string) => {
     }
 }
 
-export const insertUser = async (registerDTO: RegisterDTO) => {
+export const insertUser = async ({
+    companyNumber,
+    password,
+    businessName,
+    contact,
+    address,
+    sectorId
+}: RegisterDTO) => {
     try {
-        const { salt, hashPassword } = passwordEncryption(registerDTO.password);
+        const { salt, hashPassword } = passwordEncryption(password);
 
         const newUser = await User.create({
-            company_number: registerDTO.companyNumber,
+            company_number: companyNumber,
             salt: salt,
             password: hashPassword,
-            business_name: registerDTO.businessName,
-            contact: registerDTO.contact,
-            address: registerDTO.address,
-            sector_id: registerDTO.sectorId,
+            business_name: businessName,
+            contact: contact,
+            address: address,
+            sector_id: sectorId,
             img: 'default'
-        })
+        });
 
         return newUser;
     } catch {
@@ -83,12 +90,11 @@ export const createToken = (companyNumber: string, expirationPeriod: string) => 
     return token;
 }
 
-export const selectRefreshToken = async (companyNumber: string, refreshToken: string) => {
+export const selectRefreshToken = async (companyNumber: string) => {
     try {
         const token = await Token.findOne({
             where: {
-                user_company_number: companyNumber,
-                refresh_token: refreshToken
+                user_company_number: companyNumber
             }
         });
 
@@ -100,7 +106,7 @@ export const selectRefreshToken = async (companyNumber: string, refreshToken: st
 
 export const setRefreshToken = async (companyNumber: string, refreshToken: string) => {
     try {
-        const isExistedToken = await selectRefreshToken(companyNumber, refreshToken);
+        const isExistedToken = await selectRefreshToken(companyNumber);
 
         if (isExistedToken) {
             await Token.update(

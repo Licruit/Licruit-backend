@@ -19,13 +19,27 @@ export const getUser = async (req: Request, res: Response) => {
 }
 
 export const addUser = async (req: Request, res: Response) => {
-    const registerDTO: RegisterDTO = req.body;
+    const {
+        companyNumber,
+        password,
+        businessName,
+        contact,
+        address,
+        sectorId
+    }: RegisterDTO = req.body;
 
-    const foundUser = await findUser(registerDTO.companyNumber);
+    const foundUser = await findUser(companyNumber);
     if (foundUser) {
         throw new HttpException(StatusCodes.BAD_REQUEST, '이미 사용된 사업자번호입니다.');
     }
-    await insertUser(registerDTO);
+    await insertUser({
+        companyNumber,
+        password,
+        businessName,
+        contact,
+        address,
+        sectorId
+    });
 
     return res.status(StatusCodes.CREATED).end();
 }
@@ -77,8 +91,8 @@ export const login = async (req: Request, res: Response) => {
 export const createNewAccessToken = async (req: Request, res: Response) => {
     const decodedRefreshToken = getDecodedRefreshToken(req);
 
-    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber, req.headers.refresh!.toString());
-    if (!refreshToken) {
+    const refreshToken = await selectRefreshToken(decodedRefreshToken.companyNumber);
+    if (!refreshToken || req.headers.refresh !== refreshToken.refresh_token) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
     }
 
