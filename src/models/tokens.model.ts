@@ -35,7 +35,7 @@ Token.init(
       allowNull: false,
     },
     token: {
-      type: DataTypes.STRING(188),
+      type: DataTypes.STRING(250),
       allowNull: false,
     },
   },
