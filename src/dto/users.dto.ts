@@ -1,26 +1,26 @@
 export interface RegisterDTO {
-    companyNumber: string;
-    password: string;
-    businessName: string;
-    contact: string;
-    address: string;
-    sectorId: number;
+  companyNumber: string;
+  password: string;
+  businessName: string;
+  contact: string;
+  address: string;
+  sectorId: number;
 }
 
 export interface LoginDTO {
-    companyNumber: string;
-    password: string;
+  companyNumber: string;
+  password: string;
 }
 
 export interface OtpRequestDTO {
-    contact: string;
+  contact: string;
 }
 
 export interface OtpVerificationDTO {
-    contact: string;
-    otp: number;
+  contact: string;
+  otp: number;
 }
 
 export interface CompnayNumberCheckDTO {
-    companyNumber: string;
+  companyNumber: string;
 }
