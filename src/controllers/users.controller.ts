@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumberCheckDTO } from "../dto/users.dto";
-import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectRefreshToken, selectWholesaler, sendOtp, setRefreshToken } from "../services/users.service";
+import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectToken, selectWholesaler, sendOtp, setToken } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
 import { TokenRequest } from "../auth";
@@ -69,10 +69,10 @@ export const login = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
     }
 
-    const accessToken = createToken(companyNumber, '1h');
-    const refreshToken = createToken(companyNumber, '30d');
+    const accessToken = createToken(companyNumber, 'access', '1h');
+    const refreshToken = createToken(companyNumber, 'refresh', '30d');
 
-    await setRefreshToken(companyNumber, refreshToken);
+    await setToken(companyNumber, 'refresh', refreshToken);
 
     res.cookie(
         'access_token',
@@ -91,14 +91,14 @@ export const login = async (req: Request, res: Response) => {
 export const createNewAccessToken = async (req: Request, res: Response) => {
     const companyNumber = (req as TokenRequest).token.companyNumber;
 
-    const refreshToken = await selectRefreshToken(companyNumber);
-    if (!refreshToken || req.headers.refresh !== refreshToken.refresh_token) {
+    const refreshToken = await selectToken(companyNumber, 'refresh');
+    if (!refreshToken || req.headers.refresh !== refreshToken.token) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
     }
 
     res.cookie(
         'access_token',
-        createToken(companyNumber, '1h'),
+        createToken(companyNumber, 'access', '1h'),
         cookieOptions
     );
 
@@ -108,7 +108,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
     const companyNumber = (req as TokenRequest).token.companyNumber;
 
-    const deletedToken = await deleteToken(companyNumber, req.headers.refresh!.toString());
+    const deletedToken = await deleteToken(companyNumber, 'refresh', req.headers.refresh!.toString());
     if (!deletedToken) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh token입니다.');
     }

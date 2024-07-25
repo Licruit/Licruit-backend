@@ -79,9 +79,10 @@ export const isSamePassword = (inputPassword: string, salt: string, password: st
     return hashPassword === password ? true : false;
 }
 
-export const createToken = (companyNumber: string, expirationPeriod: string) => {
+export const createToken = (companyNumber: string, tokenType: string, expirationPeriod: string) => {
     const token = jwt.sign({
-        companyNumber: companyNumber
+        companyNumber: companyNumber,
+        tokenType: tokenType
     }, process.env.JWT_PRIVATE_KEY!, {
         expiresIn: expirationPeriod,
         issuer: "licruit"
@@ -90,52 +91,58 @@ export const createToken = (companyNumber: string, expirationPeriod: string) => 
     return token;
 }
 
-export const selectRefreshToken = async (companyNumber: string) => {
+export const selectToken = async (companyNumber: string, tokenType: string) => {
     try {
         const token = await Token.findOne({
             where: {
-                user_company_number: companyNumber
+                user_company_number: companyNumber,
+                token_type: tokenType
             }
         });
 
         return token;
     } catch (err) {
-        throw new Error('refresh token 조회 실패');
+        throw new Error(`${tokenType} token 조회 실패`);
     }
 }
 
-export const setRefreshToken = async (companyNumber: string, refreshToken: string) => {
+export const setToken = async (companyNumber: string, tokenType: string, token: string) => {
     try {
-        const isExistedToken = await selectRefreshToken(companyNumber);
+        const isExistedToken = await selectToken(companyNumber, tokenType);
 
         if (isExistedToken) {
             await Token.update(
-                { refresh_token: refreshToken },
-                { where: { user_company_number: companyNumber } }
+                { token: token },
+                { where: { 
+                    user_company_number: companyNumber,
+                    token_type: tokenType
+                } }
             );
         } else {
             await Token.create({
                 user_company_number: companyNumber,
-                refresh_token: refreshToken
+                token_type: tokenType,
+                token: token
             });
         }
     } catch (err) {
-        throw new Error('refresh token 설정 실패');
+        throw new Error(`${tokenType} token 설정 실패`);
     }
 }
 
-export const deleteToken = async (companyNumber: string, refreshToken: string) => {
+export const deleteToken = async (companyNumber: string, tokenType: string, token: string) => {
     try {
         const deletedToken = await Token.destroy({
             where: {
                 user_company_number: companyNumber,
-                refresh_token: refreshToken
+                token_type: tokenType,
+                token: token
             }
         });
 
         return deletedToken;
     } catch (err) {
-        throw new Error('refresh token 삭제 실패');
+        throw new Error(`${tokenType} token 삭제 실패`);
     }
 }
 
@@ -149,7 +156,6 @@ export const sendOtp = async (contact: string) => {
             Message: `Licruit 인증번호 : ${verifyCode}`,
             PhoneNumber: `+82${contact}`
         };
-
         const publishTextPromise = await awsSns.publish(params).promise();
     } catch (err) {
         myCache.del(contact);

@@ -42,3 +42,19 @@ export const refreshTokenValidate = (req: Request, res: Response, next: NextFunc
         throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 refresh token입니다.');
     }
 }
+
+export const verifyTokenValidate = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (req.headers.verify) {
+            const verifyToken = req.headers.verify.toString();
+            const decodedJwt: DecodedJWT = jwt.verify(verifyToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
+            (req as TokenRequest).token = decodedJwt;
+
+            next();
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 verify token입니다.');
+    }
+}
