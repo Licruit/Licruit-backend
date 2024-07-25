@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumberCheckDTO } from "../dto/users.dto";
-import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectToken, selectWholesaler, sendOtp, setToken } from "../services/users.service";
+import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectToken, selectWholesaler, sendOtp, setToken, updatePwd } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
 import { TokenRequest } from "../auth";
@@ -138,6 +138,24 @@ export const resetPwd = async (req: Request, res: Response) => {
         cookieOptions
     );
 
+    return res.status(StatusCodes.OK).end();
+};
+
+export const putPwd = async (req: Request, res: Response) => {
+    const companyNumber = (req as TokenRequest).token.companyNumber;
+
+    const verifyToken = await selectToken(companyNumber, 'verify');
+    if (!verifyToken || req.headers.verify !== verifyToken.token) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 시간이 만료되었습니다.'});
+    }
+    
+    const { password, rePassword } = req.body;
+    if (password !== rePassword) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '비밀번호가 일치하지 않습니다.');
+    }
+
+    await updatePwd(companyNumber, password);
+    await deleteToken(companyNumber, 'verify', req.headers.verify!.toString());
     return res.status(StatusCodes.OK).end();
 };
 

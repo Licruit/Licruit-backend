@@ -146,6 +146,24 @@ export const deleteToken = async (companyNumber: string, tokenType: string, toke
     }
 }
 
+export const updatePwd = async (companyNumber: string, password: string) => {
+    try {
+        const { salt, hashPassword } = passwordEncryption(password);
+
+        const user = await User.findOne({
+            where: { company_number: companyNumber }
+        }).then(user => {
+            if (user) {
+                user.update({ password: hashPassword })
+            }
+        })
+
+        return user;
+    } catch (err) {
+        throw new Error('비밀번호 변경 실패');
+    }
+};
+
 export const sendOtp = async (contact: string) => {
     try {
         myCache.del(contact);

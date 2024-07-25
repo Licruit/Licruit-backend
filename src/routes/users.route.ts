@@ -1,6 +1,6 @@
 import express, { Router } from "express";
-import { addUser, addWholesaler, createNewAccessToken, getUser, login, logout, postOtp, resetPwd, verifyOtp } from "../controllers/users.controller";
-import { companyNumberValidate, loginValidate, otpCheckValidate, otpReqValidate, registerValidate, resetPwValidate } from "../validators/users.validator";
+import { addUser, addWholesaler, createNewAccessToken, getUser, login, logout, postOtp, putPwd, resetPwd, verifyOtp } from "../controllers/users.controller";
+import { companyNumberValidate, loginValidate, otpCheckValidate, otpReqValidate, putPwValidate, registerValidate, resetPwValidate } from "../validators/users.validator";
 import { validate } from "../validators/validate";
 import { wrapAsyncController } from "../utils/wrapAsyncController";
 import { accessTokenValidate, refreshTokenValidate } from "../auth";
@@ -47,6 +47,12 @@ router.post(
     [...resetPwValidate, validate],
     wrapAsyncController(resetPwd)
 );
+
+router.put(
+    '/password_reset',
+    [...putPwValidate, validate],
+    wrapAsyncController(putPwd)
+)
 
 router.post(
     '/auth/otp',
