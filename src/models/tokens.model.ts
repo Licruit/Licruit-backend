@@ -4,12 +4,14 @@ import { User } from "./users.model";
 
 interface TokensAttributes {
     user_company_number: string;
-    refresh_token: string;
+    token_type: string;
+    token: string;
 }
 
 export class Token extends Model<TokensAttributes> {
     public readonly user_company_number!: string;
-    public refresh_token!: string;
+    public readonly token_type!: string;
+    public token!: string;
 
     public static associations: {
         tokenUserTag: Association<User, Token>;
@@ -26,7 +28,11 @@ Token.init({
             key: 'company_number'
         }
     },
-    refresh_token: {
+    token_type: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
+    },
+    token: {
         type: DataTypes.STRING(188),
         allowNull: false
     }

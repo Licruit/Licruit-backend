@@ -26,6 +26,10 @@ export const registerValidate = [
 
 export const loginValidate = [loginPasswordValidate, loginPasswordValidate];
 
+export const resetPwValidate = [companyNumberValidate, contactValidate];
+
+export const putPwValidate = [passwordValidate, passwordValidate];
+
 export const otpReqValidate = contactValidate;
 
 export const otpCheckValidate = [

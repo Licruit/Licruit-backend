@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumberCheckDTO } from "../dto/users.dto";
-import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectRefreshToken, selectWholesaler, sendOtp, setRefreshToken } from "../services/users.service";
+import { checkOtp, createToken, deleteToken, findUser, insertUser, insertWholesaler, isSamePassword, selectToken, selectWholesaler, sendOtp, setToken, updatePwd } from "../services/users.service";
 import HttpException from "../utils/httpExeption";
 import { StatusCodes } from "http-status-codes";
 import { TokenRequest } from "../auth";
@@ -69,10 +69,10 @@ export const login = async (req: Request, res: Response) => {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
     }
 
-    const accessToken = createToken(companyNumber, '1h');
-    const refreshToken = createToken(companyNumber, '30d');
+    const accessToken = createToken(companyNumber, 'access', '1h');
+    const refreshToken = createToken(companyNumber, 'refresh', '30d');
 
-    await setRefreshToken(companyNumber, refreshToken);
+    await setToken(companyNumber, 'refresh', refreshToken);
 
     res.cookie(
         'access_token',
@@ -91,14 +91,14 @@ export const login = async (req: Request, res: Response) => {
 export const createNewAccessToken = async (req: Request, res: Response) => {
     const companyNumber = (req as TokenRequest).token.companyNumber;
 
-    const refreshToken = await selectRefreshToken(companyNumber);
-    if (!refreshToken || req.headers.refresh !== refreshToken.refresh_token) {
+    const refreshToken = await selectToken(companyNumber, 'refresh');
+    if (!refreshToken || req.headers.refresh !== refreshToken.token) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
     }
 
     res.cookie(
         'access_token',
-        createToken(companyNumber, '1h'),
+        createToken(companyNumber, 'access', '1h'),
         cookieOptions
     );
 
@@ -108,13 +108,56 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
     const companyNumber = (req as TokenRequest).token.companyNumber;
 
-    const deletedToken = await deleteToken(companyNumber, req.headers.refresh!.toString());
+    const deletedToken = await deleteToken(companyNumber, 'refresh', req.headers.refresh!.toString());
     if (!deletedToken) {
         throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh token입니다.');
     }
 
     return res.status(StatusCodes.OK).end();
 }
+
+export const resetPwd = async (req: Request, res: Response) => {
+    const { companyNumber, contact, otp } = req.body;
+
+    const user = await findUser(companyNumber);
+    if (!user) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '존재하지 않는 사업자 번호입니다.');
+    }
+    else if (user.contact !== contact) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '등록된 번호와 다른 번호입니다.');
+    } else if (!await checkOtp(contact, otp)) {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
+    }
+
+    const verifyToken = createToken(companyNumber, 'verify', '10m');
+    await setToken(companyNumber, 'verify', verifyToken);
+    
+    res.cookie(
+        'verify_token',
+        verifyToken,
+        cookieOptions
+    );
+
+    return res.status(StatusCodes.OK).end();
+};
+
+export const putPwd = async (req: Request, res: Response) => {
+    const companyNumber = (req as TokenRequest).token.companyNumber;
+
+    const verifyToken = await selectToken(companyNumber, 'verify');
+    if (!verifyToken || req.headers.verify !== verifyToken.token) {
+        return res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 시간이 만료되었습니다.'});
+    }
+    
+    const { password, rePassword } = req.body;
+    if (password !== rePassword) {
+        throw new HttpException(StatusCodes.BAD_REQUEST, '비밀번호가 일치하지 않습니다.');
+    }
+
+    await updatePwd(companyNumber, password);
+    await deleteToken(companyNumber, 'verify', req.headers.verify!.toString());
+    return res.status(StatusCodes.OK).end();
+};
 
 export const postOtp = async (req: Request, res: Response) => {
     const { contact }: OtpRequestDTO = req.body;
