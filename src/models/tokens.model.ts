@@ -1,42 +1,45 @@
-import { Association, DataTypes, Model } from "sequelize";
-import { sequelize } from "./index";
-import { User } from "./users.model";
+import { Association, DataTypes, Model } from 'sequelize';
+import { sequelize } from './index';
+import { User } from './users.model';
 
 interface TokensAttributes {
-    user_company_number: string;
-    token_type: string;
-    token: string;
+  user_company_number: string;
+  token_type: string;
+  token: string;
 }
 
 export class Token extends Model<TokensAttributes> {
-    public readonly user_company_number!: string;
-    public readonly token_type!: string;
-    public token!: string;
+  public readonly user_company_number!: string;
+  public readonly token_type!: string;
+  public token!: string;
 
-    public static associations: {
-        tokenUserTag: Association<User, Token>;
-    };
+  public static associations: {
+    tokenUserTag: Association<User, Token>;
+  };
 }
 
-Token.init({
-    user_company_number: { // 사업자 번호
-        type: DataTypes.STRING(10),
-        allowNull: false,
-        primaryKey: true,
-        references: {
-            model: 'users',
-            key: 'company_number'
-        }
+Token.init(
+  {
+    user_company_number: {
+      // 사업자 번호
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'users',
+        key: 'company_number',
+      },
     },
     token_type: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
+      type: DataTypes.STRING(10),
+      allowNull: false,
     },
     token: {
-        type: DataTypes.STRING(188),
-        allowNull: false
-    }
-}, {
+      type: DataTypes.STRING(188),
+      allowNull: false,
+    },
+  },
+  {
     timestamps: false,
     underscored: false,
     paranoid: false,
@@ -45,16 +48,17 @@ Token.init({
     sequelize,
     freezeTableName: true,
     charset: 'utf8',
-    collate: 'utf8_general_ci'
-});
+    collate: 'utf8_general_ci',
+  },
+);
 
 Token.belongsTo(User, {
-    foreignKey: 'user_company_number',
-    as: 'tokenUserTag'
+  foreignKey: 'user_company_number',
+  as: 'tokenUserTag',
 });
 
 User.hasOne(Token, {
-    sourceKey: 'company_number',
-    foreignKey: 'user_company_number',
-    as: 'tokenUserTag'
+  sourceKey: 'company_number',
+  foreignKey: 'user_company_number',
+  as: 'tokenUserTag',
 });
