@@ -117,27 +117,19 @@ export const logout = async (req: Request, res: Response) => {
 }
 
 export const postOtp = async (req: Request, res: Response) => {
-    try {
-        const { contact }: OtpRequestDTO = req.body;
+    const { contact }: OtpRequestDTO = req.body;
 
-        await sendOtp(contact);
-        return res.status(StatusCodes.OK).json({ message: '인증번호 전송에 성공했습니다.' });
-    } catch (err) {
-        throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호 전송에 실패했습니다.');
-    }
-}
+    await sendOtp(contact);
+    return res.status(StatusCodes.OK).end();
+};
 
 export const verifyOtp = async (req: Request, res: Response) => {
-    try {
-        const { contact, otp }: OtpVerificationDTO = req.body;
+    const { contact, otp }: OtpVerificationDTO = req.body;
 
-        const isVerified: boolean = await checkOtp(contact, otp);
-        if (isVerified) {
-            return res.status(StatusCodes.OK).json({ message: '인증에 성공했습니다.' });
-        } else {
-            throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
-        }
-    } catch (err) {
-        throw new HttpException(StatusCodes.UNAUTHORIZED, '인증에 실패했습니다.');
+    const isVerified = await checkOtp(contact, otp);
+    if (isVerified) {
+        return res.status(StatusCodes.OK).end();
+    } else {
+        throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
     }
-}
+};

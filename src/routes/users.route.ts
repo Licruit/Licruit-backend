@@ -44,12 +44,12 @@ router.post(
 
 router.post(
     '/auth/otp',
-    [...otpReqValidate, validate],
-    postOtp
+    [otpReqValidate, validate],
+    wrapAsyncController(postOtp)
 );
 
 router.post(
     '/auth/otp/validation',
     [...otpCheckValidate, validate],
-    verifyOtp
+    wrapAsyncController(verifyOtp)
 );
