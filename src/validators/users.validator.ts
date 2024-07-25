@@ -2,7 +2,12 @@ import { body } from "express-validator";
 
 export const contactValidate = body('contact').notEmpty().isString().withMessage('연락처 확인 필요');
 export const companyNumberValidate = body('companyNumber').notEmpty().isString().isLength({ min: 10, max: 10 }).withMessage('사업자번호 확인 필요');
-export const passwordValidate = body('password').notEmpty().isString().isLength({ min: 6, max: 20 }).withMessage('비밀번호 확인 필요');
+export const loginCompanyNumberValidate = body('companyNumber').notEmpty().withMessage('사업자번호 필요');
+export const passwordValidate = body('password').notEmpty().isString().isLength({ min: 8, max: 15 }).custom((value: string) => {
+    const regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/;
+    return regExp.test(value);
+}).withMessage('비밀번호 확인 필요');
+export const loginPasswordValidate = body('password').notEmpty().withMessage('비밀번호 필요');
 export const businessNameValidate = body('businessName').notEmpty().isString().withMessage('상호명 확인 필요');
 export const addressValidate = body('address').notEmpty().isString().withMessage('주소 확인 필요');
 export const sectorIdValidate = body('sectorId').notEmpty().isNumeric().custom((value: number) => {
@@ -19,7 +24,7 @@ export const registerValidate = [
     sectorIdValidate
 ];
 
-export const loginValidate = [companyNumberValidate, passwordValidate];
+export const loginValidate = [loginPasswordValidate, loginPasswordValidate];
 
 export const resetPwValidate = [companyNumberValidate, contactValidate];
 
