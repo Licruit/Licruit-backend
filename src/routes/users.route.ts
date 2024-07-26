@@ -37,9 +37,9 @@ router.post('/refresh', [refreshTokenValidate], wrapAsyncController(createNewAcc
 
 router.post('/logout', [refreshTokenValidate], wrapAsyncController(logout));
 
-router.post('/password_reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
+router.post('/password-reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
 
-router.put('/password_reset', [verifyTokenValidate, ...putPwValidate, validate], wrapAsyncController(putPwd));
+router.put('/password-reset', [verifyTokenValidate, ...putPwValidate, validate], wrapAsyncController(putPwd));
 
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
