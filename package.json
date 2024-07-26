@@ -23,6 +23,7 @@
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-prettier": "^5.2.1",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
@@ -31,6 +32,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/app.js",
-    "dev": "concurrently \"npx tsc --watch\" \"ts-node src/app.ts\""
+    "dev": "concurrently \"npx tsc --watch\" \"ts-node src/app.ts\"",
+    "lint": "eslint ./src"
   }
 }
