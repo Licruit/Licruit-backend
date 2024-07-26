@@ -16,7 +16,6 @@ export const findUser = async (companyNumber: string) => {
 
     return user;
   } catch (err) {
-    console.log(err);
     throw new Error('사용자 조회 실패');
   }
 };

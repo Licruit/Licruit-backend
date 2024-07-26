@@ -10,9 +10,9 @@ app.use(express.json());
 dotenv.config();
 
 const corsOptions = {
-  origin: 'http://localhost:5173/',
+  origin: ['http://localhost:5173', 'https://licruit-web.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Refresh', 'Verify', 'Origin', 'Accept'],
   optionsSuccessStatus: 204,
   credentials: true,
 };
