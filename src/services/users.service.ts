@@ -151,6 +151,18 @@ export const deleteToken = async (companyNumber: string, tokenType: string, toke
   }
 };
 
+export const deleteAllToken = async (companyNumber: string) => {
+  try {
+    await Token.destroy({
+      where: {
+        user_company_number: companyNumber,
+      }
+    });
+  } catch (err) {
+    throw new Error(`token 삭제 실패`)
+  }
+}
+
 export const updatePwd = async (companyNumber: string, password: string) => {
   try {
     const { salt, hashPassword } = passwordEncryption(password);
@@ -174,7 +186,7 @@ export const sendOtp = async (contact: string) => {
     myCache.del(contact);
     const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
     myCache.set(contact, verifyCode, 180000);
-
+  
     const params = {
       Message: `Licruit 인증번호 : ${verifyCode}`,
       PhoneNumber: `+82${contact}`,

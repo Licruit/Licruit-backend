@@ -33,6 +33,7 @@ Token.init(
     token_type: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      primaryKey: true,
     },
     token: {
       type: DataTypes.STRING(250),
