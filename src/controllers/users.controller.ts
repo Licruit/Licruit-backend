@@ -3,6 +3,7 @@ import { RegisterDTO, OtpRequestDTO, OtpVerificationDTO, LoginDTO, CompnayNumber
 import {
   checkOtp,
   createToken,
+  deleteAllToken,
   deleteToken,
   findUser,
   insertUser,
@@ -144,7 +145,7 @@ export const putPwd = async (req: Request, res: Response) => {
   }
 
   await updatePwd(companyNumber, password);
-  await deleteToken(companyNumber, 'verify', req.headers.verify!.toString());
+  await deleteAllToken(companyNumber);
   return res.status(StatusCodes.OK).end();
 };
 

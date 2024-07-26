@@ -22,7 +22,7 @@ import {
 } from '../validators/users.validator';
 import { validate } from '../validators/validate';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
-import { accessTokenValidate, refreshTokenValidate } from '../auth';
+import { accessTokenValidate, refreshTokenValidate, verifyTokenValidate } from '../auth';
 export const router: Router = express.Router();
 
 router.post('/company-number/check', [companyNumberValidate, validate], wrapAsyncController(getUser));
@@ -37,9 +37,9 @@ router.post('/refresh', [refreshTokenValidate], wrapAsyncController(createNewAcc
 
 router.post('/logout', [refreshTokenValidate], wrapAsyncController(logout));
 
-router.post('/password_reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
+router.post('/password-reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
 
-router.put('/password_reset', [...putPwValidate, validate], wrapAsyncController(putPwd));
+router.put('/password-reset', [verifyTokenValidate, ...putPwValidate, validate], wrapAsyncController(putPwd));
 
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
