@@ -16,7 +16,7 @@ import {
   loginValidate,
   otpCheckValidate,
   otpReqValidate,
-  putPwValidate,
+  passwordValidate,
   registerValidate,
   resetPwValidate,
 } from '../validators/users.validator';
@@ -39,7 +39,7 @@ router.post('/logout', [refreshTokenValidate], wrapAsyncController(logout));
 
 router.post('/password-reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
 
-router.put('/password-reset', [verifyTokenValidate, ...putPwValidate, validate], wrapAsyncController(putPwd));
+router.put('/password-reset', [verifyTokenValidate, passwordValidate, validate], wrapAsyncController(putPwd));
 
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
