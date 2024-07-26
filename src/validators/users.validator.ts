@@ -17,15 +17,6 @@ export const passwordValidate = body('password')
   })
   .withMessage('비밀번호 확인 필요');
 export const loginPasswordValidate = body('password').notEmpty().withMessage('비밀번호 필요');
-export const rePasswordValidate = body('rePassword')
-  .notEmpty()
-  .isString()
-  .isLength({ min: 8, max: 15 })
-  .custom((value: string) => {
-    const regExp = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/;
-    return regExp.test(value);
-  })
-  .withMessage('비밀번호 확인 필요');
 export const businessNameValidate = body('businessName').notEmpty().isString().withMessage('상호명 확인 필요');
 export const addressValidate = body('address').notEmpty().isString().withMessage('주소 확인 필요');
 export const sectorIdValidate = body('sectorId')
@@ -49,8 +40,6 @@ export const registerValidate = [
 export const loginValidate = [loginCompanyNumberValidate, loginPasswordValidate];
 
 export const resetPwValidate = [companyNumberValidate, contactValidate];
-
-export const putPwValidate = [passwordValidate, rePasswordValidate];
 
 export const otpReqValidate = contactValidate;
 

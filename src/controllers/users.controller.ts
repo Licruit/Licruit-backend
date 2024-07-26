@@ -139,10 +139,7 @@ export const putPwd = async (req: Request, res: Response) => {
     return res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 시간이 만료되었습니다.' });
   }
 
-  const { password, rePassword } = req.body;
-  if (password !== rePassword) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '비밀번호가 일치하지 않습니다.');
-  }
+  const { password } = req.body;
 
   await updatePwd(companyNumber, password);
   await deleteAllToken(companyNumber);
