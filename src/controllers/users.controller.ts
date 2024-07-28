@@ -149,8 +149,8 @@ export const putPwd = async (req: Request, res: Response) => {
 export const postOtp = async (req: Request, res: Response) => {
   const { contact }: OtpRequestDTO = req.body;
 
-  await sendOtp(contact);
-  return res.status(StatusCodes.OK).end();
+  const expTime = await sendOtp(contact);
+  return res.status(StatusCodes.OK).json({ expTime: expTime.toISOString() });
 };
 
 export const verifyOtp = async (req: Request, res: Response) => {
