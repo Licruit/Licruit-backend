@@ -186,12 +186,17 @@ export const sendOtp = async (contact: string) => {
     myCache.del(contact);
     const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
     myCache.set(contact, verifyCode, 180000);
+    
+    const offset = new Date().getTimezoneOffset() * 60000;
+    const expTime = new Date(Date.now() + 180000 - offset);
   
     const params = {
       Message: `Licruit 인증번호 : ${verifyCode}`,
       PhoneNumber: `+82${contact}`,
     };
+    
     const publishTextPromise = await awsSns.publish(params).promise();
+    return expTime;
   } catch (err) {
     myCache.del(contact);
     throw new Error('인증번호 전송에 실패했습니다.');
