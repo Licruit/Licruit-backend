@@ -20,10 +20,12 @@ app.use(cors(corsOptions));
 
 import { router as userRouter } from './routes/users.route';
 import { router as sectorRouter } from './routes/sectors.route';
+import { router as liquorRouter } from './routes/liquors.route';
 import HttpException from './utils/httpExeption';
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
+app.use('/liquors', liquorRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
