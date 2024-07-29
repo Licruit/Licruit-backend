@@ -1,8 +1,8 @@
 import { RegisterDTO } from '../dto/users.dto';
 import { User } from '../models/users.model';
 import { getHashPassword, passwordEncryption } from '../utils/encryption';
-import Cache from 'node-cache';
-const myCache = new Cache();
+import NodeCache from 'node-cache';
+const myCache = new NodeCache({ stdTTL: 180});
 import jwt from 'jsonwebtoken';
 import { Wholesaler } from '../models/wholesalers.model';
 import { Token } from '../models/tokens.model';
