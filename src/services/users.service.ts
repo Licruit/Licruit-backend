@@ -218,6 +218,36 @@ export const checkOtp = async (contact: string, otp: number) => {
   }
 };
 
+export const updateUser = async (
+  companyNumber: string,
+  businessName: string,
+  homepage: string,
+  introduce: string,
+  contact: string,
+  sectorId: number,
+) => {
+  try {
+    await User.update(
+      {
+        business_name: businessName,
+        contact: contact,
+        sector_id: sectorId,
+      },
+      { where: { company_number: companyNumber } },
+    );
+
+    await Wholesaler.update(
+      {
+        homepage: homepage,
+        introduce: introduce,
+      },
+      { where: { user_company_number: companyNumber } },
+    );
+  } catch (err) {
+    throw new Error('프로필 변경 실패');
+  }
+};
+
 export const updateProfileImg = async (companyNumber: string, file: Express.Multer.File) => {
   try {
     const uploadDirectory = 'profile-images';

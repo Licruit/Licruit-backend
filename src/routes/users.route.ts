@@ -7,6 +7,7 @@ import {
   login,
   logout,
   postOtp,
+  putProfile,
   putProfileImg,
   putPwd,
   resetPwd,
@@ -18,6 +19,7 @@ import {
   otpCheckValidate,
   otpReqValidate,
   passwordValidate,
+  profileValidate,
   registerValidate,
   resetPwValidate,
 } from '../validators/users.validator';
@@ -46,5 +48,7 @@ router.put('/password-reset', [verifyTokenValidate, passwordValidate, validate],
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
 router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncController(verifyOtp));
+
+router.put('/profile', [refreshTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
 
 router.put('/profile/img', [refreshTokenValidate, imageUploader.single('img')], wrapAsyncController(putProfileImg));
