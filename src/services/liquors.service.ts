@@ -14,6 +14,18 @@ export const selectLiquorCategories = async () => {
   }
 };
 
+export const selectLiquor = async (liquorId: number) => {
+  try {
+    const liquor = await Liquor.findOne({
+      where: { id: liquorId },
+    });
+
+    return liquor;
+  } catch (err) {
+    throw new Error('전통주 조회 실패');
+  }
+};
+
 export const selectAllLiquors = async ({ search, category, min_alcohol, max_alcohol, page }: AllLiquorsDTO) => {
   try {
     const LIMIT = 9;

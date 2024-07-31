@@ -4,6 +4,7 @@ import {
   insertLike,
   selectAllLiquors,
   selectLike,
+  selectLiquor,
   selectLiquorCategories,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
@@ -34,6 +35,10 @@ export const likeLiquor = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const liquorId = parseInt(req.params.liquorId);
 
+  const liquor = await selectLiquor(liquorId);
+  if (!liquor) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 전통주입니다.');
+  }
   const isLiked = await selectLike(liquorId, companyNumber);
   if (isLiked) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '이미 좋아요되어있는 전통주입니다.');
@@ -47,6 +52,10 @@ export const unlikeLiquor = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const liquorId = parseInt(req.params.liquorId);
 
+  const liquor = await selectLiquor(liquorId);
+  if (!liquor) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 전통주입니다.');
+  }
   const isLiked = await selectLike(liquorId, companyNumber);
   if (!isLiked) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '좋아요되어있지 않은 전통주입니다.');
