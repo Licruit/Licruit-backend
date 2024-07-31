@@ -56,22 +56,22 @@ Like.init(
 
 Like.belongsTo(Liquor, {
   foreignKey: 'liquor_id',
-  as: 'likeLiquorTag',
+  // as: 'likeLiquorTag',
 });
 
 Liquor.hasMany(Like, {
   sourceKey: 'id',
   foreignKey: 'liquor_id',
-  as: 'likeLiquorTag',
+  // as: 'likeLiquorTag',
 });
 
 Like.belongsTo(User, {
   foreignKey: 'user_company_number',
-  as: 'likeUserTag',
+  // as: 'likeUserTag',
 });
 
 User.hasMany(Like, {
   sourceKey: 'company_number',
   foreignKey: 'user_company_number',
-  as: 'likeUserTag',
+  // as: 'likeUserTag',
 });

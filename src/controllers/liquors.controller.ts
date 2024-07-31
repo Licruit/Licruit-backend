@@ -6,11 +6,12 @@ import {
   selectLike,
   selectLiquor,
   selectLiquorCategories,
+  selectLiquorDetail,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
 import { Request, Response } from 'express';
 import { AllLiquorsDTO } from '../dto/liquors.dto';
-import { TokenRequest } from '../auth';
+import { isExistedAccessToken, TokenRequest } from '../auth';
 
 export const getLiquorCategories = async (req: Request, res: Response) => {
   const liquorCategories = await selectLiquorCategories();
@@ -19,6 +20,18 @@ export const getLiquorCategories = async (req: Request, res: Response) => {
   }
 
   return res.status(StatusCodes.OK).json(liquorCategories);
+};
+
+export const getLiquorDetail = async (req: Request, res: Response) => {
+  const companyNumber = isExistedAccessToken(req) ? (req as TokenRequest).token.companyNumber : null;
+  const liquorId = parseInt(req.params.liquorId);
+
+  const liquor = await selectLiquorDetail(liquorId, companyNumber);
+  if (!liquor?.name) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 전통주입니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(liquor);
 };
 
 export const getAllLiquors = async (req: Request, res: Response) => {

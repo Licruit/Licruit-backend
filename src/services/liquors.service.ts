@@ -26,6 +26,47 @@ export const selectLiquor = async (liquorId: number) => {
   }
 };
 
+export const selectLiquorDetail = async (liquorId: number, companyNumber: string | null) => {
+  try {
+    const liquor = await Liquor.findOne({
+      attributes: {
+        include: [
+          [col('LiquorCategory.name'), 'category_name'],
+          [literal('COUNT(*)'), 'likes'],
+          [
+            literal(
+              '(SELECT COUNT(*) FROM likes WHERE likes.liquor_id = :liquorId AND user_company_number = :companyNumber)',
+            ),
+            'liked',
+          ],
+        ],
+        exclude: ['id', 'category_id'],
+      },
+      include: [
+        {
+          model: Like,
+          attributes: [],
+        },
+        {
+          model: LiquorCategory,
+          attributes: [],
+        },
+      ],
+      where: {
+        id: liquorId,
+      },
+      replacements: {
+        liquorId: liquorId,
+        companyNumber: companyNumber || '',
+      },
+    });
+
+    return liquor;
+  } catch (err) {
+    throw new Error('전통주 상세 조회 실패');
+  }
+};
+
 export const selectAllLiquors = async ({ search, category, min_alcohol, max_alcohol, page }: AllLiquorsDTO) => {
   try {
     const LIMIT = 9;
