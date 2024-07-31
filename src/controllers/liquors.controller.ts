@@ -1,8 +1,15 @@
 import { StatusCodes } from 'http-status-codes';
-import { selectAllLiquors, selectLiquorCategories } from '../services/liquors.service';
+import {
+  deleteLike,
+  insertLike,
+  selectAllLiquors,
+  selectLike,
+  selectLiquorCategories,
+} from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
 import { Request, Response } from 'express';
 import { AllLiquorsDTO } from '../dto/liquors.dto';
+import { TokenRequest } from '../auth';
 
 export const getLiquorCategories = async (req: Request, res: Response) => {
   const liquorCategories = await selectLiquorCategories();
@@ -21,4 +28,30 @@ export const getAllLiquors = async (req: Request, res: Response) => {
   }
 
   return res.status(StatusCodes.OK).json(liquorsAndPagination);
+};
+
+export const likeLiquor = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const liquorId = parseInt(req.params.liquorId);
+
+  const isLiked = await selectLike(liquorId, companyNumber);
+  if (isLiked) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 좋아요되어있는 전통주입니다.');
+  }
+  await insertLike(liquorId, companyNumber);
+
+  return res.status(StatusCodes.CREATED).end();
+};
+
+export const unlikeLiquor = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const liquorId = parseInt(req.params.liquorId);
+
+  const isLiked = await selectLike(liquorId, companyNumber);
+  if (!isLiked) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '좋아요되어있지 않은 전통주입니다.');
+  }
+  await deleteLike(liquorId, companyNumber);
+
+  return res.status(StatusCodes.OK).end();
 };

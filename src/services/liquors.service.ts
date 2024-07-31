@@ -2,6 +2,7 @@ import { col, literal, Op } from 'sequelize';
 import { AllLiquorsDTO } from '../dto/liquors.dto';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Liquor } from '../models/liquors.model';
+import { Like } from '../models/likes.model';
 
 export const selectLiquorCategories = async () => {
   try {
@@ -65,5 +66,44 @@ export const selectAllLiquors = async ({ search, category, min_alcohol, max_alco
     return liquorsAndPagination;
   } catch (err) {
     throw new Error('주류 카탈로그 목록 조회 실패');
+  }
+};
+
+export const selectLike = async (liquorId: number, companyNumber: string) => {
+  try {
+    const isLiked = await Like.findOne({
+      where: {
+        liquor_id: liquorId,
+        user_company_number: companyNumber,
+      },
+    });
+
+    return isLiked;
+  } catch (err) {
+    throw new Error('좋아요 조회 실패');
+  }
+};
+
+export const insertLike = async (liquorId: number, companyNumber: string) => {
+  try {
+    await Like.create({
+      liquor_id: liquorId,
+      user_company_number: companyNumber,
+    });
+  } catch (err) {
+    throw new Error('좋아요 실패');
+  }
+};
+
+export const deleteLike = async (liquorId: number, companyNumber: string) => {
+  try {
+    await Like.destroy({
+      where: {
+        liquor_id: liquorId,
+        user_company_number: companyNumber,
+      },
+    });
+  } catch (err) {
+    throw new Error('좋아요 취소 실패');
   }
 };
