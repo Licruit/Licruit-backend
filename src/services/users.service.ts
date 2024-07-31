@@ -2,11 +2,15 @@ import { RegisterDTO } from '../dto/users.dto';
 import { User } from '../models/users.model';
 import { getHashPassword, passwordEncryption } from '../utils/encryption';
 import NodeCache from 'node-cache';
-const myCache = new NodeCache({ stdTTL: 180});
+const myCache = new NodeCache({ stdTTL: 180 });
 import jwt from 'jsonwebtoken';
 import { Wholesaler } from '../models/wholesalers.model';
 import { Token } from '../models/tokens.model';
-import { awsSns } from '../utils/aws';
+import { awsSns, s3Client } from '../utils/aws';
+import dotenv from 'dotenv';
+import { ObjectCannedACL, PutObjectCommand } from '@aws-sdk/client-s3';
+
+dotenv.config();
 
 export const findUser = async (companyNumber: string) => {
   try {
@@ -156,12 +160,12 @@ export const deleteAllToken = async (companyNumber: string) => {
     await Token.destroy({
       where: {
         user_company_number: companyNumber,
-      }
+      },
     });
   } catch (err) {
-    throw new Error(`token 삭제 실패`)
+    throw new Error(`token 삭제 실패`);
   }
-}
+};
 
 export const updatePwd = async (companyNumber: string, password: string) => {
   try {
@@ -186,15 +190,15 @@ export const sendOtp = async (contact: string) => {
     myCache.del(contact);
     const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
     myCache.set(contact, verifyCode, 180000);
-    
+
     const offset = new Date().getTimezoneOffset() * 60000;
     const expTime = new Date(Date.now() + 180000 - offset);
-  
+
     const params = {
       Message: `Licruit 인증번호 : ${verifyCode}`,
       PhoneNumber: `+82${contact}`,
     };
-    
+
     const publishTextPromise = await awsSns.publish(params).promise();
     return expTime;
   } catch (err) {
@@ -211,5 +215,29 @@ export const checkOtp = async (contact: string, otp: number) => {
     return cacheOtp && cacheOtp === otp;
   } catch (err) {
     throw new Error('사용자 인증에 실패했습니다.');
+  }
+};
+
+export const updateProfileImg = async (companyNumber: string, file: Express.Multer.File) => {
+  try {
+    const uploadDirectory = 'profile-images';
+    const filename = `${uploadDirectory}/${companyNumber}_${file.originalname}`;
+
+    const params = {
+      Bucket: process.env.AWS_BUCKET as string,
+      Key: filename,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+      ACL: 'public-read-write' as ObjectCannedACL,
+    };
+
+    const command = new PutObjectCommand(params);
+    await s3Client.send(command);
+
+    const fileUrl = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${filename}`;
+    await User.update({ img: fileUrl }, { where: { company_number: companyNumber } });
+    return fileUrl;
+  } catch (err) {
+    throw new Error('이미지 업로드 실패');
   }
 };
