@@ -11,6 +11,21 @@ export interface DecodedJWT {
   decodedJwt: JwtPayload;
 }
 
+export const isExistedAccessToken = (req: Request) => {
+  try {
+    const accessToken = req.headers.authorization;
+    if (accessToken) {
+      const decodedJwt: DecodedJWT = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
+      (req as TokenRequest).token = decodedJwt;
+      return true;
+    }
+
+    return false;
+  } catch (err) {
+    return false;
+  }
+};
+
 export const accessTokenValidate = (req: Request, res: Response, next: NextFunction) => {
   try {
     if (req.headers.authorization) {
