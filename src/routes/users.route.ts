@@ -3,6 +3,7 @@ import {
   addUser,
   addWholesaler,
   createNewAccessToken,
+  getProfile,
   getUser,
   login,
   logout,
@@ -48,6 +49,8 @@ router.put('/password-reset', [verifyTokenValidate, passwordValidate, validate],
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
 router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncController(verifyOtp));
+
+router.get('/profile', [accessTokenValidate], wrapAsyncController(getProfile));
 
 router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
 

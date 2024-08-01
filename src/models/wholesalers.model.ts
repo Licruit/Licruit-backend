@@ -55,11 +55,9 @@ Wholesaler.init(
 
 Wholesaler.belongsTo(User, {
   foreignKey: 'user_company_number',
-  as: 'wholesalerUserTag',
 });
 
 User.hasOne(Wholesaler, {
   sourceKey: 'company_number',
   foreignKey: 'user_company_number',
-  as: 'wholesalerUserTag',
 });

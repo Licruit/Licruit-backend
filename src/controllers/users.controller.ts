@@ -10,7 +10,9 @@ import {
   insertWholesaler,
   isSamePassword,
   selectToken,
+  selectUserProfile,
   selectWholesaler,
+  selectWholesalerProfile,
   sendOtp,
   setToken,
   updateProfileImg,
@@ -161,6 +163,19 @@ export const verifyOtp = async (req: Request, res: Response) => {
     return res.status(StatusCodes.OK).end();
   } else {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
+  }
+};
+
+export const getProfile = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+
+  const isWholesaler = await selectWholesaler(companyNumber);
+  if (isWholesaler) {
+    const wholesaler = await selectWholesalerProfile(companyNumber);
+    return res.status(StatusCodes.OK).json({ wholesaler });
+  } else {
+    const user = await selectUserProfile(companyNumber);
+    return res.status(StatusCodes.OK).json({ user });
   }
 };
 
