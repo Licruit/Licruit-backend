@@ -7,6 +7,8 @@ import {
   login,
   logout,
   postOtp,
+  putProfile,
+  putProfileImg,
   putPwd,
   resetPwd,
   verifyOtp,
@@ -17,12 +19,14 @@ import {
   otpCheckValidate,
   otpReqValidate,
   passwordValidate,
+  profileValidate,
   registerValidate,
   resetPwValidate,
 } from '../validators/users.validator';
 import { validate } from '../validators/validate';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
 import { accessTokenValidate, refreshTokenValidate, verifyTokenValidate } from '../auth';
+import { imageUploader } from '../utils/aws';
 export const router: Router = express.Router();
 
 router.post('/company-number/check', [companyNumberValidate, validate], wrapAsyncController(getUser));
@@ -44,3 +48,7 @@ router.put('/password-reset', [verifyTokenValidate, passwordValidate, validate],
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
 router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncController(verifyOtp));
+
+router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
+
+router.put('/profile/img', [accessTokenValidate, imageUploader.single('img')], wrapAsyncController(putProfileImg));

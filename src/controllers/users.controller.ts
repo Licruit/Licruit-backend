@@ -13,7 +13,9 @@ import {
   selectWholesaler,
   sendOtp,
   setToken,
+  updateProfileImg,
   updatePwd,
+  updateUser,
 } from '../services/users.service';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
@@ -162,4 +164,24 @@ export const verifyOtp = async (req: Request, res: Response) => {
   } else {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
   }
+};
+
+export const putProfile = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const { businessName, introduce, homepage, contact, sectorId } = req.body;
+
+  await updateUser(companyNumber, businessName, introduce, homepage, contact, sectorId);
+  return res.status(StatusCodes.OK).end();
+};
+
+export const putProfileImg = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+
+  if (!req.file) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '파일을 선택해 주세요.');
+  }
+
+  const fileData: Express.Multer.File = req.file;
+  const imgUrl = await updateProfileImg(companyNumber, fileData);
+  return res.status(StatusCodes.OK).json({ imgUrl: imgUrl });
 };
