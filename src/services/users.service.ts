@@ -9,6 +9,8 @@ import { Token } from '../models/tokens.model';
 import { awsSns, s3Client } from '../utils/aws';
 import dotenv from 'dotenv';
 import { ObjectCannedACL, PutObjectCommand } from '@aws-sdk/client-s3';
+import { col } from 'sequelize';
+import { Sector } from '../models/sectors.model';
 
 dotenv.config();
 
@@ -215,6 +217,51 @@ export const checkOtp = async (contact: string, otp: number) => {
     return cacheOtp && cacheOtp === otp;
   } catch (err) {
     throw new Error('사용자 인증에 실패했습니다.');
+  }
+};
+
+export const selectUserProfile = async (companyNumber: string) => {
+  const user = await User.findOne({
+    attributes: ['business_name', 'contact', 'img', [col('Sector.name'), 'sector_name']],
+    include: [
+      {
+        model: Sector,
+        attributes: [],
+      },
+    ],
+    where: { company_number: companyNumber },
+  });
+
+  return user;
+};
+
+export const selectWholesalerProfile = async (companyNumber: string) => {
+  try {
+    const wholesaler = await User.findOne({
+      attributes: [
+        'business_name',
+        'contact',
+        'img',
+        [col('Sector.name'), 'sector_name'],
+        [col('Wholesaler.homepage'), 'homepage'],
+        [col('Wholesaler.introduce'), 'introduce'],
+      ],
+      include: [
+        {
+          model: Wholesaler,
+          attributes: [],
+        },
+        {
+          model: Sector,
+          attributes: [],
+        },
+      ],
+      where: { company_number: companyNumber },
+    });
+
+    return wholesaler;
+  } catch (err) {
+    throw new Error('도매업자 조회에 실패했습니다.');
   }
 };
 

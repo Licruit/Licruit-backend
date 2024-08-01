@@ -87,11 +87,9 @@ User.init(
 
 User.belongsTo(Sector, {
   foreignKey: 'sector_id',
-  as: 'userSectorTag',
 });
 
 Sector.hasMany(User, {
   sourceKey: 'id',
   foreignKey: 'sector_id',
-  as: 'userSectorTag',
 });
