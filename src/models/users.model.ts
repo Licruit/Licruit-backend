@@ -11,6 +11,7 @@ interface UsersAttributes {
   address: string;
   sector_id: number;
   img: string;
+  marketing: boolean;
 }
 
 export class User extends Model<UsersAttributes> {
@@ -22,6 +23,7 @@ export class User extends Model<UsersAttributes> {
   public address!: string;
   public sector_id!: number;
   public img!: string;
+  public marketing!: boolean;
 
   public static associations: {
     userSectorTag: Association<Sector, User>;
@@ -69,6 +71,11 @@ User.init(
     },
     img: {
       type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    marketing: {
+      // 마케팅 활용 동의 여부
+      type: DataTypes.BOOLEAN,
       allowNull: false,
     },
   },
