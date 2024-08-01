@@ -2,7 +2,7 @@ import { RegisterDTO } from '../dto/users.dto';
 import { User } from '../models/users.model';
 import { getHashPassword, passwordEncryption } from '../utils/encryption';
 import NodeCache from 'node-cache';
-const myCache = new NodeCache({ stdTTL: 180});
+const myCache = new NodeCache({ stdTTL: 180 });
 import jwt from 'jsonwebtoken';
 import { Wholesaler } from '../models/wholesalers.model';
 import { Token } from '../models/tokens.model';
@@ -27,6 +27,7 @@ export const insertUser = async ({
   contact,
   address,
   sectorId,
+  marketing,
 }: RegisterDTO) => {
   try {
     const { salt, hashPassword } = passwordEncryption(password);
@@ -40,6 +41,7 @@ export const insertUser = async ({
       address: address,
       sector_id: sectorId,
       img: 'default',
+      marketing: marketing,
     });
 
     return newUser;
@@ -156,12 +158,12 @@ export const deleteAllToken = async (companyNumber: string) => {
     await Token.destroy({
       where: {
         user_company_number: companyNumber,
-      }
+      },
     });
   } catch (err) {
-    throw new Error(`token 삭제 실패`)
+    throw new Error(`token 삭제 실패`);
   }
-}
+};
 
 export const updatePwd = async (companyNumber: string, password: string) => {
   try {
@@ -186,15 +188,15 @@ export const sendOtp = async (contact: string) => {
     myCache.del(contact);
     const verifyCode: number = Math.floor(Math.random() * (999999 - 100000)) + 100000;
     myCache.set(contact, verifyCode, 180000);
-    
+
     const offset = new Date().getTimezoneOffset() * 60000;
     const expTime = new Date(Date.now() + 180000 - offset);
-  
+
     const params = {
       Message: `Licruit 인증번호 : ${verifyCode}`,
       PhoneNumber: `+82${contact}`,
     };
-    
+
     const publishTextPromise = await awsSns.publish(params).promise();
     return expTime;
   } catch (err) {

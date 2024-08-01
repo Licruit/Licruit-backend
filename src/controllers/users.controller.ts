@@ -33,7 +33,7 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const addUser = async (req: Request, res: Response) => {
-  const { companyNumber, password, businessName, contact, address, sectorId }: RegisterDTO = req.body;
+  const { companyNumber, password, businessName, contact, address, sectorId, marketing }: RegisterDTO = req.body;
 
   const foundUser = await findUser(companyNumber);
   if (foundUser) {
@@ -46,6 +46,7 @@ export const addUser = async (req: Request, res: Response) => {
     contact,
     address,
     sectorId,
+    marketing,
   });
 
   return res.status(StatusCodes.CREATED).end();
