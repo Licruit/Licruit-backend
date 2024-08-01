@@ -49,6 +49,6 @@ router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp
 
 router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncController(verifyOtp));
 
-router.put('/profile', [refreshTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
+router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
 
-router.put('/profile/img', [refreshTokenValidate, imageUploader.single('img')], wrapAsyncController(putProfileImg));
+router.put('/profile/img', [accessTokenValidate, imageUploader.single('img')], wrapAsyncController(putProfileImg));
