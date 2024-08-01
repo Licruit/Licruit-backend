@@ -1,9 +1,16 @@
-const config = require('../config/config');
 import dotenv from 'dotenv';
-import { Sequelize } from 'sequelize';
+import { Options, Sequelize } from 'sequelize';
+import { dbConfig } from '../config/config';
 
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'development';
+type EnvType = 'development' | 'test' | 'production';
 
-export const sequelize = new Sequelize(config[env].database, config[env].username, config[env].password, config[env]);
+const env = (process.env.NODE_ENV || 'development') as EnvType;
+
+export const sequelize = new Sequelize(
+  dbConfig[env].database!,
+  dbConfig[env].username!,
+  dbConfig[env].password,
+  dbConfig[env] as Options,
+);
