@@ -15,9 +15,9 @@ import {
   selectWholesalerProfile,
   sendOtp,
   setToken,
-  updateProfileImg,
   updatePwd,
   updateUser,
+  uploadImg,
 } from '../services/users.service';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
@@ -187,14 +187,10 @@ export const putProfile = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).end();
 };
 
-export const putProfileImg = async (req: Request, res: Response) => {
+export const uploadProfileImg = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
+  const fileData = req.file as Express.Multer.File;
 
-  if (!req.file) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '파일을 선택해 주세요.');
-  }
-
-  const fileData: Express.Multer.File = req.file;
-  const imgUrl = await updateProfileImg(companyNumber, fileData);
+  const imgUrl = await uploadImg(companyNumber, fileData);
   return res.status(StatusCodes.OK).json({ imgUrl: imgUrl });
 };

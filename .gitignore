@@ -3,3 +3,4 @@ node_modules
 /dist
 /deploy
 /.ebextensions
+.DS_Store
