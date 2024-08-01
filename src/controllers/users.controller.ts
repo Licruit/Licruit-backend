@@ -114,7 +114,7 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const resetPwd = async (req: Request, res: Response) => {
-  const { companyNumber, contact, otp } = req.body;
+  const { companyNumber, contact } = req.body;
 
   const user = await findUser(companyNumber);
   if (!user) {
