@@ -37,7 +37,7 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const addUser = async (req: Request, res: Response) => {
-  const { companyNumber, password, businessName, contact, address, sectorId, marketing }: RegisterDTO = req.body;
+  const { companyNumber, password, businessName, contact, address, sectorId, isMarketing }: RegisterDTO = req.body;
 
   const foundUser = await findUser(companyNumber);
   if (foundUser) {
@@ -50,7 +50,7 @@ export const addUser = async (req: Request, res: Response) => {
     contact,
     address,
     sectorId,
-    marketing,
+    isMarketing,
   });
 
   return res.status(StatusCodes.CREATED).end();
@@ -80,7 +80,7 @@ export const login = async (req: Request, res: Response) => {
   if (!isLoggedInSuccess) {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
   }
-  const isWholesaler = await selectWholesaler(companyNumber);
+  const wholesaler = await selectWholesaler(companyNumber);
 
   const accessToken = createToken(companyNumber, 'access', '1h');
   const refreshToken = createToken(companyNumber, 'refresh', '30d');
@@ -91,7 +91,7 @@ export const login = async (req: Request, res: Response) => {
   res.cookie('refresh_token', refreshToken);
 
   return res.status(StatusCodes.OK).json({
-    isWholesaler: isWholesaler ? true : false,
+    isWholesaler: wholesaler ? true : false,
   });
 };
 
