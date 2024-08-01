@@ -38,5 +38,9 @@
     "start": "node dist/app.js",
     "dev": "concurrently \"npx tsc --watch\" \"ts-node src/app.ts\"",
     "lint": "eslint ./src"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
