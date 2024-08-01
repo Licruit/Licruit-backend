@@ -8,9 +8,9 @@ import {
   login,
   logout,
   postOtp,
-  putProfile,
   putPwd,
   resetPwd,
+  updateProfile,
   uploadProfileImg,
   verifyOtp,
 } from '../controllers/users.controller';
@@ -53,7 +53,7 @@ router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncCo
 
 router.get('/profile', [accessTokenValidate], wrapAsyncController(getProfile));
 
-router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
+router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(updateProfile));
 
 router.post(
   '/profile/img',
