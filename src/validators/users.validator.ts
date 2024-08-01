@@ -28,6 +28,8 @@ export const sectorIdValidate = body('sectorId')
   .withMessage('업종코드 확인 필요');
 export const marketingValidate = body('marketing').notEmpty().isBoolean().withMessage('마케팅 동의 여부 확인 필요');
 const otpValidate = body('otp').notEmpty().isNumeric().isLength({ min: 6, max: 6 });
+export const introduceValidate = body('introduce').optional().isString();
+export const homepageValidate = body('homepage').optional().isString();
 
 export const registerValidate = [
   contactValidate,
@@ -46,3 +48,11 @@ export const resetPwValidate = [companyNumberValidate, contactValidate];
 export const otpReqValidate = contactValidate;
 
 export const otpCheckValidate = [contactValidate, otpValidate];
+
+export const profileValidate = [
+  businessNameValidate,
+  introduceValidate,
+  homepageValidate,
+  contactValidate,
+  sectorIdValidate,
+];
