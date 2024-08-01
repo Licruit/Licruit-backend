@@ -121,8 +121,6 @@ export const resetPwd = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.BAD_REQUEST, '존재하지 않는 사업자 번호입니다.');
   } else if (user.contact !== contact) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '등록된 번호와 다른 번호입니다.');
-  } else if (!(await checkOtp(contact, otp))) {
-    throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
   }
 
   const verifyToken = createToken(companyNumber, 'verify', '10m');
