@@ -1,6 +1,5 @@
 import AWS from 'aws-sdk';
 import multer from 'multer';
-import path from 'path';
 import dotenv from 'dotenv';
 import { S3Client } from '@aws-sdk/client-s3';
 
@@ -24,13 +23,6 @@ export const s3Client = new S3Client({
 export const imageUploader = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, callback) => {
-    console.log('file uploader');
-    const extension = path.extname(file.originalname).toLowerCase();
-    const allowExtensions = ['.png', '.jpg', '.jpeg'];
-    if (!allowExtensions.includes(extension)) {
-      return callback(new Error('Invalid file extension'));
-    }
-    console.log('file uploader');
     callback(null, true);
   },
 });

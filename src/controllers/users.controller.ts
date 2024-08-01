@@ -15,9 +15,9 @@ import {
   selectWholesalerProfile,
   sendOtp,
   setToken,
-  updateProfileImg,
   updatePwd,
   updateUser,
+  uploadImg,
 } from '../services/users.service';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
@@ -173,32 +173,28 @@ export const verifyOtp = async (req: Request, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
 
-  const isWholesaler = await selectWholesaler(companyNumber);
-  if (isWholesaler) {
-    const wholesaler = await selectWholesalerProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ wholesaler });
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (wholesaler) {
+    const wholesalerInfo = await selectWholesalerProfile(companyNumber);
+    return res.status(StatusCodes.OK).json({ wholesalerInfo });
   } else {
     const user = await selectUserProfile(companyNumber);
     return res.status(StatusCodes.OK).json({ user });
   }
 };
 
-export const putProfile = async (req: Request, res: Response) => {
+export const updateProfile = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
-  const { businessName, introduce, homepage, contact, sectorId } = req.body;
+  const { businessName, introduce, homepage, contact, sectorId, img } = req.body;
 
-  await updateUser(companyNumber, businessName, introduce, homepage, contact, sectorId);
+  await updateUser(companyNumber, businessName, introduce, homepage, contact, sectorId, img);
   return res.status(StatusCodes.OK).end();
 };
 
-export const putProfileImg = async (req: Request, res: Response) => {
+export const uploadProfileImg = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
+  const fileData = req.file as Express.Multer.File;
 
-  if (!req.file) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '파일을 선택해 주세요.');
-  }
-
-  const fileData: Express.Multer.File = req.file;
-  const imgUrl = await updateProfileImg(companyNumber, fileData);
+  const imgUrl = await uploadImg(companyNumber, fileData);
   return res.status(StatusCodes.OK).json({ imgUrl: imgUrl });
 };

@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import { ObjectCannedACL, PutObjectCommand } from '@aws-sdk/client-s3';
 import { col } from 'sequelize';
 import { Sector } from '../models/sectors.model';
+import { sequelize } from '../models';
 
 dotenv.config();
 
@@ -223,18 +224,22 @@ export const checkOtp = async (contact: string, otp: number) => {
 };
 
 export const selectUserProfile = async (companyNumber: string) => {
-  const user = await User.findOne({
-    attributes: ['business_name', 'contact', 'img', [col('Sector.name'), 'sector_name']],
-    include: [
-      {
-        model: Sector,
-        attributes: [],
-      },
-    ],
-    where: { company_number: companyNumber },
-  });
+  try {
+    const user = await User.findOne({
+      attributes: ['business_name', 'contact', 'img', [col('Sector.name'), 'sector_name']],
+      include: [
+        {
+          model: Sector,
+          attributes: [],
+        },
+      ],
+      where: { company_number: companyNumber },
+    });
 
-  return user;
+    return user;
+  } catch (err) {
+    throw new Error('소상공인 조회에 실패했습니다.');
+  }
 };
 
 export const selectWholesalerProfile = async (companyNumber: string) => {
@@ -274,30 +279,39 @@ export const updateUser = async (
   introduce: string,
   contact: string,
   sectorId: number,
+  img: string,
 ) => {
+  const transaction = await sequelize.transaction();
   try {
     await User.update(
       {
         business_name: businessName,
         contact: contact,
         sector_id: sectorId,
+        img: img,
       },
-      { where: { company_number: companyNumber } },
+      { where: { company_number: companyNumber }, transaction },
     );
 
-    await Wholesaler.update(
-      {
-        homepage: homepage,
-        introduce: introduce,
-      },
-      { where: { user_company_number: companyNumber } },
-    );
+    const wholesaler = await selectWholesaler(companyNumber);
+    if (wholesaler) {
+      await Wholesaler.update(
+        {
+          homepage: homepage,
+          introduce: introduce,
+        },
+        { where: { user_company_number: companyNumber }, transaction },
+      );
+    }
+
+    await transaction.commit();
   } catch (err) {
+    await transaction.rollback();
     throw new Error('프로필 변경 실패');
   }
 };
 
-export const updateProfileImg = async (companyNumber: string, file: Express.Multer.File) => {
+export const uploadImg = async (companyNumber: string, file: Express.Multer.File) => {
   try {
     const uploadDirectory = 'profile-images';
     const filename = `${uploadDirectory}/${companyNumber}_${file.originalname}`;
@@ -314,7 +328,6 @@ export const updateProfileImg = async (companyNumber: string, file: Express.Mult
     await s3Client.send(command);
 
     const fileUrl = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${filename}`;
-    await User.update({ img: fileUrl }, { where: { company_number: companyNumber } });
     return fileUrl;
   } catch (err) {
     throw new Error('이미지 업로드 실패');

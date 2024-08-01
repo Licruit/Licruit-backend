@@ -8,10 +8,10 @@ import {
   login,
   logout,
   postOtp,
-  putProfile,
-  putProfileImg,
   putPwd,
   resetPwd,
+  updateProfile,
+  uploadProfileImg,
   verifyOtp,
 } from '../controllers/users.controller';
 import {
@@ -23,6 +23,7 @@ import {
   profileValidate,
   registerValidate,
   resetPwValidate,
+  uploadImgValidate,
 } from '../validators/users.validator';
 import { validate } from '../validators/validate';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
@@ -52,6 +53,10 @@ router.post('/auth/otp/validation', [...otpCheckValidate, validate], wrapAsyncCo
 
 router.get('/profile', [accessTokenValidate], wrapAsyncController(getProfile));
 
-router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(putProfile));
+router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(updateProfile));
 
-router.put('/profile/img', [accessTokenValidate, imageUploader.single('img')], wrapAsyncController(putProfileImg));
+router.post(
+  '/profile/img',
+  [accessTokenValidate, imageUploader.single('image'), uploadImgValidate, validate],
+  wrapAsyncController(uploadProfileImg),
+);
