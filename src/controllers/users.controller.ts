@@ -173,10 +173,10 @@ export const verifyOtp = async (req: Request, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
 
-  const isWholesaler = await selectWholesaler(companyNumber);
-  if (isWholesaler) {
-    const wholesaler = await selectWholesalerProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ wholesaler });
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (wholesaler) {
+    const wholesalerInfo = await selectWholesalerProfile(companyNumber);
+    return res.status(StatusCodes.OK).json({ wholesalerInfo });
   } else {
     const user = await selectUserProfile(companyNumber);
     return res.status(StatusCodes.OK).json({ user });

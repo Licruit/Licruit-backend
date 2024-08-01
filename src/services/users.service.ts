@@ -293,8 +293,8 @@ export const updateUser = async (
       { where: { company_number: companyNumber }, transaction },
     );
 
-    const isWholesaler = await selectWholesaler(companyNumber);
-    if (isWholesaler) {
+    const wholesaler = await selectWholesaler(companyNumber);
+    if (wholesaler) {
       await Wholesaler.update(
         {
           homepage: homepage,

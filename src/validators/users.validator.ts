@@ -39,7 +39,6 @@ export const uploadImgValidate = check('file')
   .custom((value, { req }) => {
     const type = req.file.mimetype;
     const allowTypes = ['image/png', 'image/jpg', 'image/jpeg'];
-    console.log(type);
     return allowTypes.includes(type);
   })
   .withMessage('허용되지 않는 파일 확장자')
