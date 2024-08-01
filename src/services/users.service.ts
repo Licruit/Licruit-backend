@@ -34,6 +34,7 @@ export const insertUser = async ({
   contact,
   address,
   sectorId,
+  isMarketing,
 }: RegisterDTO) => {
   try {
     const { salt, hashPassword } = passwordEncryption(password);
@@ -47,6 +48,7 @@ export const insertUser = async ({
       address: address,
       sector_id: sectorId,
       img: 'default',
+      isMarketing: isMarketing,
     });
 
     return newUser;

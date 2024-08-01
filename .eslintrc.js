@@ -11,6 +11,8 @@ module.exports = {
   rules: {
     'prettier/prettier': 0,
     '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/ban-types': 'warn',
+    '@typescript-eslint/no-unsafe-function-type': 'off',
   },
   settings: {
     'import/resolver': {

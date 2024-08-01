@@ -5,6 +5,7 @@ export interface RegisterDTO {
   contact: string;
   address: string;
   sectorId: number;
+  isMarketing: boolean;
 }
 
 export interface LoginDTO {

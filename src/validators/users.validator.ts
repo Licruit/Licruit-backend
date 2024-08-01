@@ -26,6 +26,7 @@ export const sectorIdValidate = body('sectorId')
     return value >= 1 && value <= 9 ? true : false;
   })
   .withMessage('업종코드 확인 필요');
+export const marketingValidate = body('isMarketing').isBoolean().withMessage('마케팅 동의 여부 확인 필요');
 const otpValidate = body('otp').notEmpty().isNumeric().isLength({ min: 6, max: 6 });
 export const imgValidate = body('img').optional().isString();
 export const introduceValidate = body('introduce').optional().isString();
@@ -54,6 +55,7 @@ export const registerValidate = [
   businessNameValidate,
   addressValidate,
   sectorIdValidate,
+  marketingValidate,
 ];
 
 export const loginValidate = [loginCompanyNumberValidate, loginPasswordValidate];

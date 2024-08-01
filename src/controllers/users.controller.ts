@@ -37,7 +37,7 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const addUser = async (req: Request, res: Response) => {
-  const { companyNumber, password, businessName, contact, address, sectorId }: RegisterDTO = req.body;
+  const { companyNumber, password, businessName, contact, address, sectorId, isMarketing }: RegisterDTO = req.body;
 
   const foundUser = await findUser(companyNumber);
   if (foundUser) {
@@ -50,6 +50,7 @@ export const addUser = async (req: Request, res: Response) => {
     contact,
     address,
     sectorId,
+    isMarketing,
   });
 
   return res.status(StatusCodes.CREATED).end();
@@ -79,16 +80,19 @@ export const login = async (req: Request, res: Response) => {
   if (!isLoggedInSuccess) {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
   }
+  const wholesaler = await selectWholesaler(companyNumber);
 
   const accessToken = createToken(companyNumber, 'access', '1h');
   const refreshToken = createToken(companyNumber, 'refresh', '30d');
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
-  res.cookie('access_token', accessToken, cookieOptions);
-  res.cookie('refresh_token', refreshToken, cookieOptions);
+  res.cookie('access_token', accessToken);
+  res.cookie('refresh_token', refreshToken);
 
-  return res.status(StatusCodes.OK).end();
+  return res.status(StatusCodes.OK).json({
+    isWholesaler: wholesaler ? true : false,
+  });
 };
 
 export const createNewAccessToken = async (req: Request, res: Response) => {
@@ -99,7 +103,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  res.cookie('access_token', createToken(companyNumber, 'access', '1h'), cookieOptions);
+  res.cookie('access_token', createToken(companyNumber, 'access', '1h'));
 
   return res.status(StatusCodes.OK).end();
 };
