@@ -13,25 +13,25 @@ dotenv.config();
 
 app.use('/users', userRouter);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
 
-  next(error);
-});
-app.use(errorMiddleware);
+//   next(error);
+// });
+// app.use(errorMiddleware);
 
-const PORT = process.env.PORT;
-app.listen(PORT, async () => {
-  console.log(`running on port ${PORT}`);
-  await sequelize
-    .authenticate()
-    .then(async () => {
-      console.log('DB 연결 성공');
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-});
+// const PORT = process.env.PORT;
+// app.listen(PORT, async () => {
+//   console.log(`running on port ${PORT}`);
+//   await sequelize
+//     .authenticate()
+//     .then(async () => {
+//       console.log('DB 연결 성공');
+//     })
+//     .catch((e) => {
+//       console.log(e);
+//     });
+// });
 
 describe('User API', () => {
   it('POST /users/login - 로그인 테스트', async () => {
@@ -40,6 +40,6 @@ describe('User API', () => {
       password: 'abc123',
     });
 
-    expect(res.statusCode).toEqual(200);
+    expect(res.statusCode).toBe(200);
   });
 });
