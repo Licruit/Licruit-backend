@@ -1,13 +1,37 @@
 import request from 'supertest';
-import express, { Express } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import { router as userRouter } from '../routes/users.route';
 const app: Express = express();
 import dotenv from 'dotenv';
+import HttpException from '../utils/httpExeption';
+import { StatusCodes } from 'http-status-codes';
+import { errorMiddleware } from '../errorHandler/errorMiddleware';
+import { sequelize } from '../models';
 
 app.use(express.json());
 dotenv.config();
 
 app.use('/users', userRouter);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
+
+  next(error);
+});
+app.use(errorMiddleware);
+
+const PORT = process.env.PORT;
+app.listen(PORT, async () => {
+  console.log(`running on port ${PORT}`);
+  await sequelize
+    .authenticate()
+    .then(async () => {
+      console.log('DB 연결 성공');
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+});
 
 describe('User API', () => {
   it('POST /users/login - 로그인 테스트', async () => {
