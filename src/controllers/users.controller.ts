@@ -23,7 +23,13 @@ import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
 import { TokenRequest } from '../auth';
 
-const cookieOptions = { sameSite: false, secure: true, httpOnly: true };
+type CookieType = {
+  sameSite: 'none' | 'strict' | 'lax';
+  secure: boolean;
+  httpOnly: boolean;
+};
+
+const cookieOptions: CookieType = { sameSite: 'none', secure: true, httpOnly: false };
 
 export const getUser = async (req: Request, res: Response) => {
   const { companyNumber }: CompnayNumberCheckDTO = req.body;
@@ -87,8 +93,8 @@ export const login = async (req: Request, res: Response) => {
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
-  res.cookie('access_token', accessToken);
-  res.cookie('refresh_token', refreshToken);
+  res.cookie('access_token', accessToken, cookieOptions);
+  res.cookie('refresh_token', refreshToken, cookieOptions);
 
   return res.status(StatusCodes.OK).json({
     isWholesaler: wholesaler ? true : false,
@@ -103,7 +109,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  res.cookie('access_token', createToken(companyNumber, 'access', '1h'));
+  res.cookie('access_token', createToken(companyNumber, 'access', '1h'), cookieOptions);
 
   return res.status(StatusCodes.OK).end();
 };
