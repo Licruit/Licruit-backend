@@ -90,12 +90,7 @@ export const selectAllLiquors = async ({ search, category, min_alcohol, max_alco
     }
 
     const liquors = await Liquor.findAndCountAll({
-      attributes: [
-        ['id', 'id'],
-        ['name', 'name'],
-        ['description', 'description'],
-        [col('LiquorCategory.name'), 'category_name'],
-      ],
+      attributes: ['id', 'name', 'description', 'img', [col('LiquorCategory.name'), 'category_name']],
       include: [
         {
           model: LiquorCategory,
