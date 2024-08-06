@@ -3,6 +3,9 @@ name: backEnd CI/CD
 on:
   pull_request:
     branches: [dev, main]
+  push:
+    branches:
+      - dev
 
 jobs:
   build:
@@ -26,6 +29,8 @@ jobs:
   deploy:
     name: CD Pipeline
     runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/dev'
     
     strategy:
       matrix:
@@ -79,3 +84,4 @@ jobs:
           version_label: ${{ github.SHA }}
           deployment_package: deploy.zip
           use_existing_version_if_available: true
+          wait_for_ready: true
