@@ -8,7 +8,9 @@ import {
   findUser,
   insertUser,
   insertWholesaler,
+  insertWithdrawal,
   isSamePassword,
+  isWithdrewCompanyNumber,
   selectToken,
   selectUserProfile,
   selectWholesaler,
@@ -44,6 +46,11 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const addUser = async (req: Request, res: Response) => {
   const { companyNumber, password, businessName, contact, address, sectorId, isMarketing }: RegisterDTO = req.body;
+
+  const isWithdrewUser = await isWithdrewCompanyNumber(companyNumber);
+  if (isWithdrewUser) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '탈퇴한 사업자 번호로는 재가입이 불가능합니다.');
+  }
 
   const foundUser = await findUser(companyNumber);
   if (foundUser) {
@@ -93,10 +100,9 @@ export const login = async (req: Request, res: Response) => {
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
-  res.cookie('access_token', accessToken, cookieOptions);
-  res.cookie('refresh_token', refreshToken, cookieOptions);
-
   return res.status(StatusCodes.OK).json({
+    accessToken: accessToken,
+    refreshToken: refreshToken,
     isWholesaler: wholesaler ? true : false,
   });
 };
@@ -109,9 +115,11 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  res.cookie('access_token', createToken(companyNumber, 'access', '1h'), cookieOptions);
+  const accessToken = createToken(companyNumber, 'access', '1h');
 
-  return res.status(StatusCodes.OK).end();
+  return res.status(StatusCodes.OK).json({
+    accessToken: accessToken,
+  });
 };
 
 export const logout = async (req: Request, res: Response) => {
@@ -182,10 +190,10 @@ export const getProfile = async (req: Request, res: Response) => {
   const wholesaler = await selectWholesaler(companyNumber);
   if (wholesaler) {
     const wholesalerInfo = await selectWholesalerProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ wholesalerInfo });
+    return res.status(StatusCodes.OK).json(wholesalerInfo);
   } else {
     const user = await selectUserProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ user });
+    return res.status(StatusCodes.OK).json(user);
   }
 };
 
@@ -203,4 +211,26 @@ export const uploadProfileImg = async (req: Request, res: Response) => {
 
   const imgUrl = await uploadImg(companyNumber, fileData);
   return res.status(StatusCodes.OK).json({ imgUrl: imgUrl });
+};
+
+export const removeUser = async (req: Request, res: Response) => {
+  const tokenCompanyNumber = (req as TokenRequest).token.companyNumber;
+  const { companyNumber, password, reason } = req.body;
+
+  const foundUser = await findUser(companyNumber);
+  if (tokenCompanyNumber !== companyNumber || !foundUser) {
+    throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
+  }
+  const isLoggedInSuccess = isSamePassword(password, foundUser.salt, foundUser.password);
+  if (!isLoggedInSuccess) {
+    throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
+  }
+  const isWithdrewUser = await isWithdrewCompanyNumber(companyNumber);
+  if (isWithdrewUser) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 탈퇴한 회원입니다.');
+  }
+
+  await insertWithdrawal(companyNumber, reason);
+
+  return res.status(StatusCodes.OK).end();
 };

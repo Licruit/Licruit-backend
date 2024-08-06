@@ -26,6 +26,5 @@ export const dbConfig = {
     host: process.env.DB_HOST,
     port: 3306,
     dialect: 'mysql',
-    logging: false,
   },
 };

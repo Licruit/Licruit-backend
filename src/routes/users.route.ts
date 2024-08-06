@@ -9,6 +9,7 @@ import {
   logout,
   postOtp,
   putPwd,
+  removeUser,
   resetPwd,
   updateProfile,
   uploadProfileImg,
@@ -24,6 +25,7 @@ import {
   registerValidate,
   resetPwValidate,
   uploadImgValidate,
+  withdrawalValidate,
 } from '../validators/users.validator';
 import { validate } from '../validators/validate';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
@@ -60,3 +62,5 @@ router.post(
   [accessTokenValidate, imageUploader.single('image'), uploadImgValidate, validate],
   wrapAsyncController(uploadProfileImg),
 );
+
+router.delete('/withdrawal', [accessTokenValidate, ...withdrawalValidate, validate], wrapAsyncController(removeUser));

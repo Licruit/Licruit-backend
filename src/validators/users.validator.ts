@@ -47,6 +47,8 @@ export const uploadImgValidate = check('file')
   })
   .withMessage('파일 크기 초과');
 
+export const reasonValidate = body('reason').notEmpty().withMessage('탈퇴 사유 확인 필요');
+
 export const registerValidate = [
   contactValidate,
   companyNumberValidate,
@@ -73,3 +75,5 @@ export const profileValidate = [
   sectorIdValidate,
   imgValidate,
 ];
+
+export const withdrawalValidate = [loginCompanyNumberValidate, loginPasswordValidate, reasonValidate];

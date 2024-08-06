@@ -12,6 +12,7 @@ import { ObjectCannedACL, PutObjectCommand } from '@aws-sdk/client-s3';
 import { col } from 'sequelize';
 import { Sector } from '../models/sectors.model';
 import { sequelize } from '../models';
+import { Withdrawal } from '../models/withdrawals.model';
 
 dotenv.config();
 
@@ -226,7 +227,7 @@ export const checkOtp = async (contact: string, otp: number) => {
 export const selectUserProfile = async (companyNumber: string) => {
   try {
     const user = await User.findOne({
-      attributes: ['business_name', 'contact', 'img', [col('Sector.name'), 'sector_name']],
+      attributes: [['business_name', 'businessName'], 'contact', 'img', [col('Sector.name'), 'sectorName']],
       include: [
         {
           model: Sector,
@@ -246,10 +247,10 @@ export const selectWholesalerProfile = async (companyNumber: string) => {
   try {
     const wholesaler = await User.findOne({
       attributes: [
-        'business_name',
+        ['business_name', 'businessName'],
         'contact',
         'img',
-        [col('Sector.name'), 'sector_name'],
+        [col('Sector.name'), 'sectorName'],
         [col('Wholesaler.homepage'), 'homepage'],
         [col('Wholesaler.introduce'), 'introduce'],
       ],
@@ -331,5 +332,45 @@ export const uploadImg = async (companyNumber: string, file: Express.Multer.File
     return fileUrl;
   } catch (err) {
     throw new Error('이미지 업로드 실패');
+  }
+};
+
+export const insertWithdrawal = async (companyNumber: string, reason: string) => {
+  const transaction = await sequelize.transaction();
+  try {
+    await User.destroy({
+      where: {
+        company_number: companyNumber,
+      },
+      transaction: transaction,
+    });
+
+    await Withdrawal.create(
+      {
+        company_number: companyNumber,
+        reason: reason,
+      },
+      { transaction: transaction },
+    );
+
+    await transaction.commit();
+  } catch (err) {
+    await transaction.rollback();
+    console.log(err);
+    throw new Error('회원 탈퇴 실패');
+  }
+};
+
+export const isWithdrewCompanyNumber = async (companyNumber: string) => {
+  try {
+    const withdrewUser = await Withdrawal.findOne({
+      where: {
+        company_number: companyNumber,
+      },
+    });
+
+    return withdrewUser ? true : false;
+  } catch (err) {
+    throw new Error('탈퇴한 사업자 번호 조회 실패');
   }
 };
