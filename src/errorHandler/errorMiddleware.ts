@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction, request } from 'express';
+import { Request, Response } from 'express';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
 
-export const errorMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
+export const errorMiddleware = (error: HttpException, req: Request, res: Response) => {
   const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
 
   console.log('에러 발생: ', error.message);
