@@ -190,10 +190,10 @@ export const getProfile = async (req: Request, res: Response) => {
   const wholesaler = await selectWholesaler(companyNumber);
   if (wholesaler) {
     const wholesalerInfo = await selectWholesalerProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ wholesalerInfo });
+    return res.status(StatusCodes.OK).json(wholesalerInfo);
   } else {
     const user = await selectUserProfile(companyNumber);
-    return res.status(StatusCodes.OK).json({ user });
+    return res.status(StatusCodes.OK).json(user);
   }
 };
 
