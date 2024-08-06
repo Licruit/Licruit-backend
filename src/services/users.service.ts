@@ -175,7 +175,7 @@ export const deleteAllToken = async (companyNumber: string) => {
 
 export const updatePwd = async (companyNumber: string, password: string) => {
   try {
-    const { salt, hashPassword } = passwordEncryption(password);
+    const { hashPassword } = passwordEncryption(password);
 
     const user = await User.findOne({
       where: { company_number: companyNumber },
@@ -205,7 +205,7 @@ export const sendOtp = async (contact: string) => {
       PhoneNumber: `+82${contact}`,
     };
 
-    const publishTextPromise = await awsSns.publish(params).promise();
+    await awsSns.publish(params).promise();
     return expTime;
   } catch (err) {
     myCache.del(contact);
