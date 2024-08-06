@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +81,7 @@ jobs:
           application_name: licruit-backend
           environment_name: Licruit-backend-env
           region: ${{ secrets.AWS_REGION }}
-          version_label: ${{ github.SHA }}
+          version_label: ${{ github.sha }}-${{ github.run_number }}
           deployment_package: deploy.zip
           use_existing_version_if_available: true
           wait_for_ready: true
