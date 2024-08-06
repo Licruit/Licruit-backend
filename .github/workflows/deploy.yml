@@ -23,8 +23,6 @@ jobs:
       - run: npm run build
       - run: npm run lint
 
-
-# 빌드
   deploy:
     name: CD Pipeline
     runs-on: ubuntu-latest
@@ -32,11 +30,10 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x]
-	
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
 
+    steps:
+      - uses: actions/checkout@v4
+        
       - name: Create env file
         run: |
           touch .env
@@ -45,7 +42,7 @@ jobs:
           cat .env
 
       - name: Install Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with: 
           node-version: ${{ matrix.node-version }}
 
@@ -79,5 +76,4 @@ jobs:
           application_name: licruit-backend
           environment_name: Licruit-backend-env
           region: ${{ secrets.AWS_REGION }}
-          version_label: ${{ github.SHA }}
           deployment_package: deploy.zip
