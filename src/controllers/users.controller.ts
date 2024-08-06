@@ -100,10 +100,9 @@ export const login = async (req: Request, res: Response) => {
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
-  res.cookie('access_token', accessToken, cookieOptions);
-  res.cookie('refresh_token', refreshToken, cookieOptions);
-
   return res.status(StatusCodes.OK).json({
+    accessToken: accessToken,
+    refreshToken: refreshToken,
     isWholesaler: wholesaler ? true : false,
   });
 };
@@ -116,9 +115,11 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  res.cookie('access_token', createToken(companyNumber, 'access', '1h'), cookieOptions);
+  const accessToken = createToken(companyNumber, 'access', '1h');
 
-  return res.status(StatusCodes.OK).end();
+  return res.status(StatusCodes.OK).json({
+    accessToken: accessToken,
+  });
 };
 
 export const logout = async (req: Request, res: Response) => {
