@@ -59,7 +59,7 @@ jobs:
           sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_EB_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_EB_ACCESS_KEY }}
@@ -69,7 +69,7 @@ jobs:
         run: zip -r deploy.zip . -x '*.git*' './src/*' './aws/*' './node_modules/*' awscliv2.zip
 
       - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v20
+        uses: einaregilsson/beanstalk-deploy@v22
         with:
           aws_access_key: ${{ secrets.AWS_EB_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_EB_ACCESS_KEY }}
@@ -78,3 +78,4 @@ jobs:
           region: ${{ secrets.AWS_REGION }}
           version_label: ${{ github.SHA }}
           deployment_package: deploy.zip
+          use_existing_version_if_available: true
