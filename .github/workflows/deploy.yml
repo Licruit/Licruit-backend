@@ -59,7 +59,7 @@ jobs:
           sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_EB_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_EB_ACCESS_KEY }}
@@ -69,11 +69,12 @@ jobs:
         run: zip -r deploy.zip . -x '*.git*' './src/*' './aws/*' './node_modules/*' awscliv2.zip
 
       - name: Deploy to EB
-        uses: einaregilsson/beanstalk-deploy@v16
+        uses: einaregilsson/beanstalk-deploy@v20
         with:
           aws_access_key: ${{ secrets.AWS_EB_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_EB_ACCESS_KEY }}
           application_name: licruit-backend
           environment_name: Licruit-backend-env
           region: ${{ secrets.AWS_REGION }}
+          version_label: ${{ github.SHA }}
           deployment_package: deploy.zip
