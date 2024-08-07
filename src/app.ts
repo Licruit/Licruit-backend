@@ -29,24 +29,21 @@ import  cookieParser from 'cookie-parser';
 
 app.use(cookieParser());
 
-app.get('/', (req: Request, res: Response) => {
-  return res.status(StatusCodes.OK).send('licruit-backend');
-});
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
-
-  next(error);
-});
 
 Sentry.setupExpressErrorHandler(app, {
   shouldHandleError(error) {
     process.env.NODE_ENV === 'production' && sendSlackMessage(error);
     return true;
   },
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const error = new HttpException(StatusCodes.NOT_FOUND, `${req.method} ${req.url} 라우터가 없습니다.`);
+
+  next(error);
 });
 
 app.use(errorMiddleware);
