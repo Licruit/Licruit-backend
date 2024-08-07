@@ -23,7 +23,7 @@ import {
 } from '../services/users.service';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
-import { TokenRequest } from '../auth';
+import { TokenRequest, verifyTokenValidate } from '../auth';
 
 type CookieType = {
   sameSite: 'none' | 'strict' | 'lax';
@@ -31,7 +31,7 @@ type CookieType = {
   httpOnly: boolean;
 };
 
-const cookieOptions: CookieType = { sameSite: 'none', secure: true, httpOnly: false };
+const cookieOptions: CookieType = { sameSite: 'none', secure: true, httpOnly: true };
 
 export const getUser = async (req: Request, res: Response) => {
   const { companyNumber }: CompnayNumberCheckDTO = req.body;
@@ -152,14 +152,13 @@ export const resetPwd = async (req: Request, res: Response) => {
 };
 
 export const putPwd = async (req: Request, res: Response) => {
-  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const { companyNumber, password } = req.body;
 
+  const getCookie = req.cookies.verify_token;
   const verifyToken = await selectToken(companyNumber, 'verify');
-  if (!verifyToken || req.headers.verify !== verifyToken.token) {
-    return res.status(StatusCodes.UNAUTHORIZED).json({ message: '인증 시간이 만료되었습니다.' });
+  if (!verifyTokenValidate(getCookie) || !verifyToken || getCookie !== verifyToken.token) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'verify token이 올바르지 않습니다.' });
   }
-
-  const { password } = req.body;
 
   await updatePwd(companyNumber, password);
   await deleteAllToken(companyNumber);
