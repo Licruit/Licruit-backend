@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import HttpException from './utils/httpExeption';
 
 export interface TokenRequest extends Request {
@@ -58,18 +58,17 @@ export const refreshTokenValidate = (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const verifyTokenValidate = (req: Request, res: Response, next: NextFunction) => {
+export const verifyTokenValidate = (verifyToken: string) => {
   try {
-    if (req.headers.verify) {
-      const verifyToken = req.headers.verify.toString();
-      const decodedJwt: DecodedJWT = jwt.verify(verifyToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
-      (req as TokenRequest).token = decodedJwt;
-
-      next();
-    } else {
-      throw new Error();
-    }
+    const decodedJwt: DecodedJWT = jwt.verify(verifyToken, process.env.JWT_PRIVATE_KEY!) as DecodedJWT;
+    return true;
   } catch (err) {
-    throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 verify token입니다.');
+    if (err instanceof TokenExpiredError) {
+      throw new HttpException(StatusCodes.UNAUTHORIZED, '토큰의 유효시간이 지났습니다.');
+    } else if (err instanceof JsonWebTokenError) {
+      throw new HttpException(StatusCodes.UNAUTHORIZED, '잘못된 verify token입니다.');
+    } else {
+      throw new HttpException(StatusCodes.UNAUTHORIZED, '알 수 없는 오류가 발생했습니다');
+    }
   }
 };

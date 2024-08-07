@@ -22,7 +22,9 @@ import { router as userRouter } from './routes/users.route';
 import { router as sectorRouter } from './routes/sectors.route';
 import { router as liquorRouter } from './routes/liquors.route';
 import HttpException from './utils/httpExeption';
+import  cookieParser from 'cookie-parser';
 
+app.use(cookieParser());
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);

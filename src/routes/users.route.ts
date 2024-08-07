@@ -16,11 +16,11 @@ import {
   verifyOtp,
 } from '../controllers/users.controller';
 import {
+  changePwValidate,
   companyNumberValidate,
   loginValidate,
   otpCheckValidate,
   otpReqValidate,
-  passwordValidate,
   profileValidate,
   registerValidate,
   resetPwValidate,
@@ -47,7 +47,7 @@ router.post('/logout', [refreshTokenValidate], wrapAsyncController(logout));
 
 router.post('/password-reset', [...resetPwValidate, validate], wrapAsyncController(resetPwd));
 
-router.put('/password-reset', [verifyTokenValidate, passwordValidate, validate], wrapAsyncController(putPwd));
+router.put('/password-reset', [...changePwValidate, validate], wrapAsyncController(putPwd));
 
 router.post('/auth/otp', [otpReqValidate, validate], wrapAsyncController(postOtp));
 
