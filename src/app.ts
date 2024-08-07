@@ -28,6 +28,7 @@ import HttpException from './utils/httpExeption';
 import  cookieParser from 'cookie-parser';
 
 app.use(cookieParser());
+
 app.get('/', (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).send('licruit-backend');
 });
