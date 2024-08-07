@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { sequelize } from './models';
 import { StatusCodes } from 'http-status-codes';
+import { sendSlackMessage } from './utils/slackWebHook';
 
 app.use(express.json());
 dotenv.config();
@@ -36,7 +37,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 Sentry.setupExpressErrorHandler(app, {
-  shouldHandleError() {
+  shouldHandleError(error) {
+    process.env.NODE_ENV === 'production' && sendSlackMessage(error);
     return true;
   },
 });
