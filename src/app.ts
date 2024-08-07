@@ -1,10 +1,15 @@
 import { errorMiddleware } from './errorHandler/errorMiddleware';
+import * as Sentry from '@sentry/node';
+import { initializeSentry } from './utils/sentry';
 import express, { Express, NextFunction, Request, Response } from 'express';
 const app: Express = express();
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { sequelize } from './models';
 import { StatusCodes } from 'http-status-codes';
+
+initializeSentry();
+app.use(Sentry.Handlers.requestHandler());
 
 app.use(express.json());
 dotenv.config();
@@ -32,6 +37,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   next(error);
 });
+
+// Sentry.setupExpressErrorHandler(app);
+app.use(Sentry.Handlers.errorHandler());
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
