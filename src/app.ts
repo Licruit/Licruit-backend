@@ -1,10 +1,13 @@
+import './utils/sentry';
 import { errorMiddleware } from './errorHandler/errorMiddleware';
+import * as Sentry from '@sentry/node';
 import express, { Express, NextFunction, Request, Response } from 'express';
 const app: Express = express();
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { sequelize } from './models';
 import { StatusCodes } from 'http-status-codes';
+import { sendSlackMessage } from './utils/slackWebHook';
 
 app.use(express.json());
 dotenv.config();
@@ -25,6 +28,9 @@ import HttpException from './utils/httpExeption';
 import  cookieParser from 'cookie-parser';
 
 app.use(cookieParser());
+app.get('/', (req: Request, res: Response) => {
+  return res.status(StatusCodes.OK).send('licruit-backend');
+});
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);
@@ -34,6 +40,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   next(error);
 });
+
+Sentry.setupExpressErrorHandler(app, {
+  shouldHandleError(error) {
+    process.env.NODE_ENV === 'production' && sendSlackMessage(error);
+    return true;
+  },
+});
+
 app.use(errorMiddleware);
 
 const PORT = process.env.PORT;
