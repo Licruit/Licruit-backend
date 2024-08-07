@@ -26,6 +26,9 @@ import { router as sectorRouter } from './routes/sectors.route';
 import { router as liquorRouter } from './routes/liquors.route';
 import HttpException from './utils/httpExeption';
 
+app.get('/', (req: Request, res: Response) => {
+  return res.status(StatusCodes.OK).send('licruit-backend');
+});
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);
