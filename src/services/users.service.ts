@@ -48,7 +48,7 @@ export const insertUser = async ({
       contact: contact,
       address: address,
       sector_id: sectorId,
-      img: 'default',
+      img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
       isMarketing: isMarketing,
     });
 
