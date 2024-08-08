@@ -57,7 +57,7 @@ router.get('/profile', [accessTokenValidate], wrapAsyncController(getProfile));
 
 router.put('/profile', [accessTokenValidate, ...profileValidate, validate], wrapAsyncController(updateProfile));
 
-router.post(
+router.put(
   '/profile/img',
   [accessTokenValidate, imageUploader.single('image'), uploadImgValidate, validate],
   wrapAsyncController(uploadProfileImg),

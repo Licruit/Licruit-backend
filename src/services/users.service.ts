@@ -227,7 +227,13 @@ export const checkOtp = async (contact: string, otp: number) => {
 export const selectUserProfile = async (companyNumber: string) => {
   try {
     const user = await User.findOne({
-      attributes: [['business_name', 'businessName'], 'contact', 'img', [col('Sector.name'), 'sectorName']],
+      attributes: [
+        ['company_number', 'companyNumber'],
+        ['business_name', 'businessName'],
+        'contact',
+        'img',
+        [col('Sector.name'), 'sectorName'],
+      ],
       include: [
         {
           model: Sector,
@@ -247,6 +253,7 @@ export const selectWholesalerProfile = async (companyNumber: string) => {
   try {
     const wholesaler = await User.findOne({
       attributes: [
+        ['company_number', 'companyNumber'],
         ['business_name', 'businessName'],
         'contact',
         'img',
