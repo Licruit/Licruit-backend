@@ -175,13 +175,13 @@ export const deleteAllToken = async (companyNumber: string) => {
 
 export const updatePwd = async (companyNumber: string, password: string) => {
   try {
-    const { hashPassword } = passwordEncryption(password);
+    const { salt, hashPassword } = passwordEncryption(password);
 
     const user = await User.findOne({
       where: { company_number: companyNumber },
     }).then((user) => {
       if (user) {
-        user.update({ password: hashPassword });
+        user.update({ password: hashPassword, salt: salt });
       }
     });
 
