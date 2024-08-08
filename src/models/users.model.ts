@@ -70,7 +70,7 @@ User.init(
       },
     },
     img: {
-      type: DataTypes.STRING(250),
+      type: DataTypes.STRING(1000),
       allowNull: false,
     },
     isMarketing: {
