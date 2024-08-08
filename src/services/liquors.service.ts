@@ -67,7 +67,7 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
   }
 };
 
-export const selectAllLiquors = async ({ search, category, min_alcohol, max_alcohol, page }: AllLiquorsDTO) => {
+export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcohol, page }: AllLiquorsDTO) => {
   try {
     const LIMIT = 9;
     const offset = (page! - 1) * LIMIT;
@@ -80,11 +80,11 @@ export const selectAllLiquors = async ({ search, category, min_alcohol, max_alco
     if (category) {
       whereCondition = { ...whereCondition, category_id: category };
     }
-    if (min_alcohol && max_alcohol) {
+    if (minAlcohol && maxAlcohol) {
       whereCondition = {
         ...whereCondition,
         alcohol: {
-          [Op.between]: [min_alcohol, max_alcohol],
+          [Op.between]: [minAlcohol, maxAlcohol],
         },
       };
     }
