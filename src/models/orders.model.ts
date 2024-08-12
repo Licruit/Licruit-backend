@@ -1,25 +1,25 @@
 import { Association, CreationOptional, DataTypes, Model } from 'sequelize';
 import { sequelize } from './index';
-import { Buying } from './buying.model';
+import { Buying } from './buyings.model';
 import { User } from './users.model';
 import { State } from './states.model';
 
 interface OrdersAttributes {
   id: number;
-  buying_id: number;
-  user_company_number: string;
+  buyingId: number;
+  userCompanyNumber: string;
   quantity: number;
-  state_id: number;
-  updated_at: CreationOptional<Date>;
+  stateId: number;
+  updatedAt: CreationOptional<Date>;
 }
 
 export class Order extends Model<OrdersAttributes> {
   public readonly id!: number;
-  public buying_id!: number;
-  public user_company_number!: string;
+  public buyingId!: number;
+  public userCompanyNumber!: string;
   public quantity!: number;
-  public state_id!: number;
-  public updated_at!: CreationOptional<Date>;
+  public stateId!: number;
+  public updatedAt!: CreationOptional<Date>;
 
   public static associations: {
     orderBuyingTag: Association<Buying, Order>;
@@ -34,17 +34,19 @@ Order.init(
       allowNull: false,
       primaryKey: true,
     },
-    buying_id: {
+    buyingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'buying_id',
       references: {
         model: 'buyings',
         key: 'id',
       },
     },
-    user_company_number: {
+    userCompanyNumber: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
@@ -54,22 +56,24 @@ Order.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    state_id: {
+    stateId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'state_id',
       references: {
         model: 'states',
         key: 'id',
       },
     },
-    updated_at: {
+    updatedAt: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+      field: 'updated_at',
     },
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Order',
     tableName: 'orders',
@@ -81,28 +85,28 @@ Order.init(
 );
 
 Order.belongsTo(Buying, {
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Buying.hasMany(Order, {
   sourceKey: 'id',
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Order.belongsTo(User, {
-  foreignKey: 'user_company_number',
+  foreignKey: 'userCompanyNumber',
 });
 
 User.hasMany(Order, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
 });
 
 Order.belongsTo(State, {
-  foreignKey: 'state_id',
+  foreignKey: 'stateId',
 });
 
 State.hasMany(Order, {
   sourceKey: 'id',
-  foreignKey: 'state_id',
+  foreignKey: 'stateId',
 });

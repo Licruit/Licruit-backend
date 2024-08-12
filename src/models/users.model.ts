@@ -3,25 +3,25 @@ import { sequelize } from './index';
 import { Sector } from './sectors.model';
 
 interface UsersAttributes {
-  company_number: string;
+  companyNumber: string;
   salt: string;
   password: string;
-  business_name: string;
+  businessName: string;
   contact: string;
   address: string;
-  sector_id: number;
+  sectorId: number;
   img: string;
   isMarketing: boolean;
 }
 
 export class User extends Model<UsersAttributes> {
-  public readonly company_number!: string;
+  public readonly companyNumber!: string;
   public salt!: string;
   public password!: string;
-  public business_name!: string;
+  public businessName!: string;
   public contact!: string;
   public address!: string;
-  public sector_id!: number;
+  public sectorId!: number;
   public img!: string;
   public isMarketing!: boolean;
 
@@ -32,11 +32,12 @@ export class User extends Model<UsersAttributes> {
 
 User.init(
   {
-    company_number: {
+    companyNumber: {
       // 사업자 번호
       type: DataTypes.STRING(10),
       allowNull: false,
       primaryKey: true,
+      field: 'company_number',
     },
     salt: {
       type: DataTypes.STRING(20),
@@ -46,10 +47,11 @@ User.init(
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-    business_name: {
+    businessName: {
       // 상호명
       type: DataTypes.STRING(30),
       allowNull: false,
+      field: 'business_name',
     },
     contact: {
       // 연락처
@@ -60,10 +62,11 @@ User.init(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
-    sector_id: {
+    sectorId: {
       // 업종 코드
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'sector_id',
       references: {
         model: 'sectors',
         key: 'id',
@@ -82,7 +85,7 @@ User.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'User',
     tableName: 'users',
@@ -94,10 +97,10 @@ User.init(
 );
 
 User.belongsTo(Sector, {
-  foreignKey: 'sector_id',
+  foreignKey: 'sectorId',
 });
 
 Sector.hasMany(User, {
   sourceKey: 'id',
-  foreignKey: 'sector_id',
+  foreignKey: 'sectorId',
 });

@@ -9,8 +9,6 @@ interface SectorsAttributes {
 export class Sector extends Model<SectorsAttributes> {
   public readonly id!: number;
   public readonly name!: string;
-
-  public static associations: {};
 }
 
 Sector.init(
@@ -28,7 +26,7 @@ Sector.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Sector',
     tableName: 'sectors',

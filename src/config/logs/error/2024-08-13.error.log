@@ -1,0 +1,30 @@
+2024-08-13 00:33:49 error: Error: 사용자 조회 실패
+    at D:\Devcourse\licruit\Licruit-backend\dist\services\users.service.js:42:15
+    at Generator.throw (<anonymous>)
+    at rejected (D:\Devcourse\licruit\Licruit-backend\dist\services\users.service.js:6:65)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-08-13 00:36:03 error: Error: 사용자 조회 실패
+    at D:\Devcourse\licruit\Licruit-backend\dist\services\users.service.js:43:15
+    at Generator.throw (<anonymous>)
+    at rejected (D:\Devcourse\licruit\Licruit-backend\dist\services\users.service.js:6:65)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-08-13 00:37:06 error: Error: 아이디 또는 비밀번호가 잘못되었습니다.
+    at D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:66:15
+    at Generator.next (<anonymous>)
+    at fulfilled (D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:5:58)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-08-13 00:37:50 error: Error: 아이디 또는 비밀번호가 잘못되었습니다.
+    at D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:66:15
+    at Generator.next (<anonymous>)
+    at fulfilled (D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:5:58)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-08-13 00:43:58 error: Error: 아이디 또는 비밀번호가 잘못되었습니다.
+    at D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:66:15
+    at Generator.next (<anonymous>)
+    at fulfilled (D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:5:58)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2024-08-13 00:44:06 error: Error: 아이디 또는 비밀번호가 잘못되었습니다.
+    at D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:66:15
+    at Generator.next (<anonymous>)
+    at fulfilled (D:\Devcourse\licruit\Licruit-backend\dist\controllers\users.controller.js:5:58)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

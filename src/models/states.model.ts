@@ -25,7 +25,7 @@ State.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'State',
     tableName: 'states',

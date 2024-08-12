@@ -26,7 +26,7 @@ Region.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Region',
     tableName: 'regions',

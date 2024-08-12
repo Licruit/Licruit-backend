@@ -26,7 +26,7 @@ LiquorCategory.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'LiquorCategory',
     tableName: 'liquor_categories',

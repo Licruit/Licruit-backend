@@ -10,7 +10,6 @@ import {
   insertWholesaler,
   insertWithdrawal,
   isSamePassword,
-  isWithdrewCompanyNumber,
   selectToken,
   selectUserProfile,
   selectWholesaler,
@@ -46,11 +45,6 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const addUser = async (req: Request, res: Response) => {
   const { companyNumber, password, businessName, contact, address, sectorId, isMarketing }: RegisterDTO = req.body;
-
-  const isWithdrewUser = await isWithdrewCompanyNumber(companyNumber);
-  if (isWithdrewUser) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '탈퇴한 사업자 번호로는 재가입이 불가능합니다.');
-  }
 
   const foundUser = await findUser(companyNumber);
   if (foundUser) {
@@ -224,11 +218,6 @@ export const removeUser = async (req: Request, res: Response) => {
   if (!isLoggedInSuccess) {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
   }
-  const isWithdrewUser = await isWithdrewCompanyNumber(companyNumber);
-  if (isWithdrewUser) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 탈퇴한 회원입니다.');
-  }
-
   await insertWithdrawal(companyNumber, reason);
 
   return res.status(StatusCodes.OK).end();

@@ -1,16 +1,16 @@
 import { Association, DataTypes, Model } from 'sequelize';
 import { sequelize } from './index';
-import { Buying } from './buying.model';
+import { Buying } from './buyings.model';
 import { Region } from './regions.model';
 
 interface DeliveryRegionsAttributes {
-  buying_id: number;
-  region_id: number;
+  buyingId: number;
+  regionId: number;
 }
 
 export class DeliveryRegion extends Model<DeliveryRegionsAttributes> {
-  public buying_id!: number;
-  public region_id!: number;
+  public buyingId!: number;
+  public regionId!: number;
 
   public static associations: {
     deliveryBuyingTag: Association<Buying, DeliveryRegion>;
@@ -20,19 +20,21 @@ export class DeliveryRegion extends Model<DeliveryRegionsAttributes> {
 
 DeliveryRegion.init(
   {
-    buying_id: {
+    buyingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      field: 'buying_id',
       references: {
         model: 'buyings',
         key: 'id',
       },
     },
-    region_id: {
+    regionId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      field: 'region_id',
       references: {
         model: 'regions',
         key: 'id',
@@ -41,7 +43,7 @@ DeliveryRegion.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'DeliveryRegion',
     tableName: 'delivery_regions',
@@ -53,19 +55,19 @@ DeliveryRegion.init(
 );
 
 DeliveryRegion.belongsTo(Buying, {
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Buying.hasMany(DeliveryRegion, {
   sourceKey: 'id',
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 DeliveryRegion.belongsTo(Region, {
-  foreignKey: 'region_id',
+  foreignKey: 'regionId',
 });
 
 Region.hasMany(DeliveryRegion, {
   sourceKey: 'id',
-  foreignKey: 'region_id',
+  foreignKey: 'regionId',
 });
