@@ -4,3 +4,4 @@ node_modules
 /deploy
 /.ebextensions
 .DS_Store
+/src/config/logs
