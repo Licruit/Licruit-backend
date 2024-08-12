@@ -25,9 +25,11 @@ import { router as userRouter } from './routes/users.route';
 import { router as sectorRouter } from './routes/sectors.route';
 import { router as liquorRouter } from './routes/liquors.route';
 import HttpException from './utils/httpExeption';
-import  cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
+import { morganMiddleware } from './config/morganMiddleware';
 
 app.use(cookieParser());
+app.use(morganMiddleware);
 
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
