@@ -3,14 +3,14 @@ import { sequelize } from './index';
 import { User } from './users.model';
 
 interface TokensAttributes {
-  user_company_number: string;
-  token_type: string;
+  userCompanyNumber: string;
+  tokenType: string;
   token: string;
 }
 
 export class Token extends Model<TokensAttributes> {
-  public readonly user_company_number!: string;
-  public readonly token_type!: string;
+  public readonly userCompanyNumber!: string;
+  public readonly tokenType!: string;
   public token!: string;
 
   public static associations: {
@@ -20,20 +20,22 @@ export class Token extends Model<TokensAttributes> {
 
 Token.init(
   {
-    user_company_number: {
+    userCompanyNumber: {
       // 사업자 번호
       type: DataTypes.STRING(10),
       allowNull: false,
       primaryKey: true,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
       },
     },
-    token_type: {
+    tokenType: {
       type: DataTypes.STRING(10),
       allowNull: false,
       primaryKey: true,
+      field: 'token_type',
     },
     token: {
       type: DataTypes.STRING(250),
@@ -42,7 +44,7 @@ Token.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Token',
     tableName: 'tokens',
@@ -54,12 +56,12 @@ Token.init(
 );
 
 Token.belongsTo(User, {
-  foreignKey: 'user_company_number',
+  foreignKey: 'userCompanyNumber',
   as: 'tokenUserTag',
 });
 
 User.hasOne(Token, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
   as: 'tokenUserTag',
 });

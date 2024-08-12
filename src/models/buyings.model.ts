@@ -5,40 +5,40 @@ import { Wholesaler } from './wholesalers.model';
 
 interface BuyingsAttributes {
   id: number;
-  open_date: CreationOptional<Date>;
+  openDate: CreationOptional<Date>;
   deadline: CreationOptional<Date>;
-  delivery_start: CreationOptional<Date>;
-  delivery_end: CreationOptional<Date>;
-  total_min: number;
-  total_max: number;
-  individual_min: number;
+  deliveryStart: CreationOptional<Date>;
+  deliveryEnd: CreationOptional<Date>;
+  totalMin: number;
+  totalMax: number;
+  individualMin: number;
   price: number;
-  delivery_fee: number;
-  free_delivery_fee: number;
+  deliveryFee: number;
+  freeDeliveryFee: number;
   title: string;
   content: string;
-  liquor_id: number;
-  wholesaler_company_number: number;
-  created_at: CreationOptional<Date>;
+  liquorId: number;
+  wholesalerCompanyNumber: string;
+  createdAt: CreationOptional<Date>;
 }
 
 export class Buying extends Model<BuyingsAttributes> {
   public readonly id!: number;
-  public open_date!: CreationOptional<Date>;
+  public openDate!: CreationOptional<Date>;
   public deadline!: CreationOptional<Date>;
-  public delivery_start!: CreationOptional<Date>;
-  public delivery_end!: CreationOptional<Date>;
-  public total_min!: number;
-  public total_max!: number;
-  public individual_min!: number;
+  public deliveryStart!: CreationOptional<Date>;
+  public deliveryEnd!: CreationOptional<Date>;
+  public totalMin!: number;
+  public totalMax!: number;
+  public individualMin!: number;
   public price!: number;
-  public delivery_fee!: number;
-  public free_delivery_fee!: number;
+  public deliveryFee!: number;
+  public freeDeliveryFee!: number;
   public title!: string;
   public content!: string;
-  public liquor_id!: number;
-  public wholesaler_company_number!: number;
-  public created_at!: CreationOptional<Date>;
+  public liquorId!: number;
+  public wholesalerCompanyNumber!: string;
+  public createdAt!: CreationOptional<Date>;
 
   public static associations: {
     buyingLiquorTag: Association<Liquor, Buying>;
@@ -53,45 +53,53 @@ Buying.init(
       allowNull: false,
       primaryKey: true,
     },
-    open_date: {
+    openDate: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: 'open_date',
     },
     deadline: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    delivery_start: {
+    deliveryStart: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+      field: 'delivery_start',
     },
-    delivery_end: {
+    deliveryEnd: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+      field: 'delivery_end',
     },
-    total_min: {
+    totalMin: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'total_min',
     },
-    total_max: {
+    totalMax: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'total_max',
     },
-    individual_min: {
+    individualMin: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'individual_min',
     },
     price: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    delivery_fee: {
+    deliveryFee: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'delivery_fee',
     },
-    free_delivery_fee: {
+    freeDeliveryFee: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'free_delivery_fee',
     },
     title: {
       type: DataTypes.STRING(40),
@@ -101,31 +109,34 @@ Buying.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    liquor_id: {
+    liquorId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'liquor_id',
       references: {
         model: 'liquors',
         key: 'id',
       },
     },
-    wholesaler_company_number: {
+    wholesalerCompanyNumber: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      field: 'wholesaler_company_number',
       references: {
         model: 'wholesalers',
         key: 'user_company_number',
       },
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: 'created_at',
       defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Buying',
     tableName: 'buyings',
@@ -137,19 +148,19 @@ Buying.init(
 );
 
 Buying.belongsTo(Liquor, {
-  foreignKey: 'liquor_id',
+  foreignKey: 'liquorId',
 });
 
 Liquor.hasMany(Buying, {
   sourceKey: 'id',
-  foreignKey: 'liquor_id',
+  foreignKey: 'liquorId',
 });
 
 Buying.belongsTo(Wholesaler, {
-  foreignKey: 'wholesaler_company_number',
+  foreignKey: 'wholesalerCompanyNumber',
 });
 
 Wholesaler.hasMany(Buying, {
-  sourceKey: 'user_company_number',
-  foreignKey: 'wholesaler_company_number',
+  sourceKey: 'userCompanyNumber',
+  foreignKey: 'wholesalerCompanyNumber',
 });

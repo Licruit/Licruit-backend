@@ -13,13 +13,16 @@ import { col } from 'sequelize';
 import { Sector } from '../models/sectors.model';
 import { sequelize } from '../models';
 import { Withdrawal } from '../models/withdrawals.model';
+import { Order } from '../models/orders.model';
+import { Review } from '../models/reviews.model';
+import { Buying } from '../models/buyings.model';
 
 dotenv.config();
 
 export const findUser = async (companyNumber: string) => {
   try {
     const user = await User.findOne({
-      where: { company_number: companyNumber },
+      where: { companyNumber: companyNumber },
     });
 
     return user;
@@ -41,13 +44,13 @@ export const insertUser = async ({
     const { salt, hashPassword } = passwordEncryption(password);
 
     const newUser = await User.create({
-      company_number: companyNumber,
+      companyNumber: companyNumber,
       salt: salt,
       password: hashPassword,
-      business_name: businessName,
+      businessName: businessName,
       contact: contact,
       address: address,
-      sector_id: sectorId,
+      sectorId: sectorId,
       img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
       isMarketing: isMarketing,
     });
@@ -61,7 +64,7 @@ export const insertUser = async ({
 export const selectWholesaler = async (companyNumber: string) => {
   try {
     const wholesalers = await Wholesaler.findOne({
-      where: { user_company_number: companyNumber },
+      where: { userCompanyNumber: companyNumber },
     });
 
     return wholesalers;
@@ -73,7 +76,7 @@ export const selectWholesaler = async (companyNumber: string) => {
 export const insertWholesaler = async (companyNumber: string) => {
   try {
     const newWholesaler = await Wholesaler.create({
-      user_company_number: `${companyNumber}`,
+      userCompanyNumber: `${companyNumber}`,
     });
 
     return newWholesaler;
@@ -108,8 +111,8 @@ export const selectToken = async (companyNumber: string, tokenType: string) => {
   try {
     const token = await Token.findOne({
       where: {
-        user_company_number: companyNumber,
-        token_type: tokenType,
+        userCompanyNumber: companyNumber,
+        tokenType: tokenType,
       },
     });
 
@@ -128,15 +131,15 @@ export const setToken = async (companyNumber: string, tokenType: string, token: 
         { token: token },
         {
           where: {
-            user_company_number: companyNumber,
-            token_type: tokenType,
+            userCompanyNumber: companyNumber,
+            tokenType: tokenType,
           },
         },
       );
     } else {
       await Token.create({
-        user_company_number: companyNumber,
-        token_type: tokenType,
+        userCompanyNumber: companyNumber,
+        tokenType: tokenType,
         token: token,
       });
     }
@@ -149,8 +152,8 @@ export const deleteToken = async (companyNumber: string, tokenType: string, toke
   try {
     const deletedToken = await Token.destroy({
       where: {
-        user_company_number: companyNumber,
-        token_type: tokenType,
+        userCompanyNumber: companyNumber,
+        tokenType: tokenType,
         token: token,
       },
     });
@@ -165,7 +168,7 @@ export const deleteAllToken = async (companyNumber: string) => {
   try {
     await Token.destroy({
       where: {
-        user_company_number: companyNumber,
+        userCompanyNumber: companyNumber,
       },
     });
   } catch (err) {
@@ -178,7 +181,7 @@ export const updatePwd = async (companyNumber: string, password: string) => {
     const { salt, hashPassword } = passwordEncryption(password);
 
     const user = await User.findOne({
-      where: { company_number: companyNumber },
+      where: { companyNumber: companyNumber },
     }).then((user) => {
       if (user) {
         user.update({ password: hashPassword, salt: salt });
@@ -240,7 +243,7 @@ export const selectUserProfile = async (companyNumber: string) => {
           attributes: [],
         },
       ],
-      where: { company_number: companyNumber },
+      where: { companyNumber: companyNumber },
     });
 
     return user;
@@ -271,7 +274,7 @@ export const selectWholesalerProfile = async (companyNumber: string) => {
           attributes: [],
         },
       ],
-      where: { company_number: companyNumber },
+      where: { companyNumber: companyNumber },
     });
 
     return wholesaler;
@@ -293,12 +296,12 @@ export const updateUser = async (
   try {
     await User.update(
       {
-        business_name: businessName,
+        businessName: businessName,
         contact: contact,
-        sector_id: sectorId,
+        sectorId: sectorId,
         img: img,
       },
-      { where: { company_number: companyNumber }, transaction },
+      { where: { companyNumber: companyNumber }, transaction },
     );
 
     const wholesaler = await selectWholesaler(companyNumber);
@@ -308,7 +311,7 @@ export const updateUser = async (
           homepage: homepage,
           introduce: introduce,
         },
-        { where: { user_company_number: companyNumber }, transaction },
+        { where: { userCompanyNumber: companyNumber }, transaction },
       );
     }
 
@@ -345,39 +348,48 @@ export const uploadImg = async (companyNumber: string, file: Express.Multer.File
 export const insertWithdrawal = async (companyNumber: string, reason: string) => {
   const transaction = await sequelize.transaction();
   try {
+    await Order.update(
+      { userCompanyNumber: '0000000000' },
+      {
+        where: {
+          userCompanyNumber: companyNumber,
+        },
+        transaction: transaction,
+      },
+    );
+
+    await Review.update(
+      { userCompanyNumber: '0000000000' },
+      {
+        where: {
+          userCompanyNumber: companyNumber,
+        },
+        transaction: transaction,
+      },
+    );
+
+    await Buying.update(
+      { wholesalerCompanyNumber: '0000000000' },
+      {
+        where: {
+          wholesalerCompanyNumber: companyNumber,
+        },
+        transaction: transaction,
+      },
+    );
+
     await User.destroy({
       where: {
-        company_number: companyNumber,
+        companyNumber: companyNumber,
       },
       transaction: transaction,
     });
 
-    await Withdrawal.create(
-      {
-        company_number: companyNumber,
-        reason: reason,
-      },
-      { transaction: transaction },
-    );
+    await Withdrawal.create({ reason: reason }, { transaction: transaction });
 
     await transaction.commit();
   } catch (err) {
     await transaction.rollback();
-    console.log(err);
     throw new Error('회원 탈퇴 실패');
-  }
-};
-
-export const isWithdrewCompanyNumber = async (companyNumber: string) => {
-  try {
-    const withdrewUser = await Withdrawal.findOne({
-      where: {
-        company_number: companyNumber,
-      },
-    });
-
-    return withdrewUser ? true : false;
-  } catch (err) {
-    throw new Error('탈퇴한 사업자 번호 조회 실패');
   }
 };

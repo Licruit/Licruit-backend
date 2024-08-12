@@ -4,13 +4,13 @@ import { User } from './users.model';
 import { Liquor } from './liquors.model';
 
 interface LikesAttributes {
-  liquor_id: number;
-  user_company_number: string;
+  liquorId: number;
+  userCompanyNumber: string;
 }
 
 export class Like extends Model<LikesAttributes> {
-  public readonly liquor_id!: number;
-  public readonly user_company_number!: string;
+  public readonly liquorId!: number;
+  public readonly userCompanyNumber!: string;
 
   public static associations: {
     likeLiquorTag: Association<Liquor, Like>;
@@ -20,21 +20,23 @@ export class Like extends Model<LikesAttributes> {
 
 Like.init(
   {
-    liquor_id: {
+    liquorId: {
       // 주류 번호
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      field: 'liquor_id',
       references: {
         model: 'liquors',
         key: 'id',
       },
     },
-    user_company_number: {
+    userCompanyNumber: {
       // 사업자 번호
       type: DataTypes.STRING(10),
       allowNull: false,
       primaryKey: true,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
@@ -43,7 +45,7 @@ Like.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Like',
     tableName: 'likes',
@@ -55,23 +57,19 @@ Like.init(
 );
 
 Like.belongsTo(Liquor, {
-  foreignKey: 'liquor_id',
-  // as: 'likeLiquorTag',
+  foreignKey: 'liquorId',
 });
 
 Liquor.hasMany(Like, {
   sourceKey: 'id',
-  foreignKey: 'liquor_id',
-  // as: 'likeLiquorTag',
+  foreignKey: 'liquorId',
 });
 
 Like.belongsTo(User, {
-  foreignKey: 'user_company_number',
-  // as: 'likeUserTag',
+  foreignKey: 'userCompanyNumber',
 });
 
 User.hasMany(Like, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
-  // as: 'likeUserTag',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
 });

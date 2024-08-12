@@ -1,29 +1,29 @@
 import { Association, CreationOptional, DataTypes, literal, Model } from 'sequelize';
 import { sequelize } from './index';
-import { Buying } from './buying.model';
+import { Buying } from './buyings.model';
 import { User } from './users.model';
 import { Liquor } from './liquors.model';
 
 interface ReviewsAttributes {
   id: number;
-  buying_id: number;
-  liquor_id: number;
-  user_company_number: string;
+  buyingId: number;
+  liquorId: number;
+  userCompanyNumber: string;
   score: number;
   title: string;
   content: string;
-  created_at: CreationOptional<Date>;
+  createdAt: CreationOptional<Date>;
 }
 
 export class Review extends Model<ReviewsAttributes> {
   public readonly id!: number;
-  public buying_id!: number;
-  public liquor_id!: number;
-  public user_company_number!: string;
+  public buyingId!: number;
+  public liquorId!: number;
+  public userCompanyNumber!: string;
   public score!: number;
   public title!: string;
   public content!: string;
-  public created_at!: CreationOptional<Date>;
+  public createdAt!: CreationOptional<Date>;
 
   public static associations: {
     reviewBuyingTag: Association<Buying, Review>;
@@ -39,25 +39,28 @@ Review.init(
       allowNull: false,
       primaryKey: true,
     },
-    buying_id: {
+    buyingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'buying_id',
       references: {
         model: 'buyings',
         key: 'id',
       },
     },
-    liquor_id: {
+    liquorId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'liquor_id',
       references: {
         model: 'liquors',
         key: 'id',
       },
     },
-    user_company_number: {
+    userCompanyNumber: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
@@ -75,15 +78,16 @@ Review.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: 'created_at',
       defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Review',
     tableName: 'reviews',
@@ -95,28 +99,28 @@ Review.init(
 );
 
 Review.belongsTo(Buying, {
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Buying.hasMany(Review, {
   sourceKey: 'id',
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Review.belongsTo(Liquor, {
-  foreignKey: 'liquor_id',
+  foreignKey: 'liquorId',
 });
 
 Liquor.hasMany(Review, {
   sourceKey: 'id',
-  foreignKey: 'liquor_id',
+  foreignKey: 'liquorId',
 });
 
 Review.belongsTo(User, {
-  foreignKey: 'user_company_number',
+  foreignKey: 'userCompanyNumber',
 });
 
 User.hasMany(Review, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
 });

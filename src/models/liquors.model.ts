@@ -6,7 +6,7 @@ interface LiquorsAttributes {
   id: number;
   name: string;
   img: string;
-  category_id: number;
+  categoryId: number;
   ingredient?: string;
   alcohol: number;
   volume: number;
@@ -24,7 +24,7 @@ export class Liquor extends Model<LiquorsAttributes> {
   public readonly id!: number;
   public name!: string;
   public img!: string;
-  public category_id!: number;
+  public categoryId!: number;
   public ingredient!: string | null;
   public alcohol!: number;
   public volume!: number;
@@ -59,10 +59,11 @@ Liquor.init(
       type: DataTypes.STRING(80),
       allowNull: false,
     },
-    category_id: {
+    categoryId: {
       // 주류 카테고리 id
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'category_id',
       references: {
         model: 'liquor_categories',
         key: 'id',
@@ -117,7 +118,7 @@ Liquor.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Liquor',
     tableName: 'liquors',
@@ -135,12 +136,10 @@ Liquor.init(
 );
 
 Liquor.belongsTo(LiquorCategory, {
-  foreignKey: 'category_id',
-  // as: 'liquorCategoryTag',
+  foreignKey: 'categoryId',
 });
 
 LiquorCategory.hasMany(Liquor, {
   sourceKey: 'id',
-  foreignKey: 'category_id',
-  // as: 'liquorCategoryTag',
+  foreignKey: 'categoryId',
 });

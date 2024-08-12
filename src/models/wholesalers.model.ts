@@ -3,13 +3,13 @@ import { sequelize } from './index';
 import { User } from './users.model';
 
 interface WholesalersAttributes {
-  user_company_number: string;
+  userCompanyNumber: string;
   homepage?: string;
   introduce?: string;
 }
 
 export class Wholesaler extends Model<WholesalersAttributes> {
-  public readonly user_company_number!: string;
+  public userCompanyNumber!: string;
   public homepage!: string;
   public introduce!: string;
 
@@ -20,11 +20,12 @@ export class Wholesaler extends Model<WholesalersAttributes> {
 
 Wholesaler.init(
   {
-    user_company_number: {
+    userCompanyNumber: {
       // 사업자 번호
       type: DataTypes.STRING(10),
       allowNull: false,
       primaryKey: true,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
@@ -42,7 +43,7 @@ Wholesaler.init(
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Wholesaler',
     tableName: 'wholesalers',
@@ -54,10 +55,10 @@ Wholesaler.init(
 );
 
 Wholesaler.belongsTo(User, {
-  foreignKey: 'user_company_number',
+  foreignKey: 'userCompanyNumber',
 });
 
 User.hasOne(Wholesaler, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
 });

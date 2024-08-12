@@ -121,8 +121,8 @@ export const selectLike = async (liquorId: number, companyNumber: string) => {
   try {
     const isLiked = await Like.findOne({
       where: {
-        liquor_id: liquorId,
-        user_company_number: companyNumber,
+        liquorId: liquorId,
+        userCompanyNumber: companyNumber,
       },
     });
 
@@ -135,8 +135,8 @@ export const selectLike = async (liquorId: number, companyNumber: string) => {
 export const insertLike = async (liquorId: number, companyNumber: string) => {
   try {
     await Like.create({
-      liquor_id: liquorId,
-      user_company_number: companyNumber,
+      liquorId: liquorId,
+      userCompanyNumber: companyNumber,
     });
   } catch (err) {
     throw new Error('좋아요 실패');
@@ -147,8 +147,8 @@ export const deleteLike = async (liquorId: number, companyNumber: string) => {
   try {
     await Like.destroy({
       where: {
-        liquor_id: liquorId,
-        user_company_number: companyNumber,
+        liquorId: liquorId,
+        userCompanyNumber: companyNumber,
       },
     });
   } catch (err) {

@@ -1,23 +1,23 @@
 import { Association, CreationOptional, DataTypes, literal, Model } from 'sequelize';
 import { sequelize } from './index';
-import { Buying } from './buying.model';
+import { Buying } from './buyings.model';
 import { User } from './users.model';
 import { Wholesaler } from './wholesalers.model';
 
 interface BlacklistsAttributes {
   id: number;
-  buying_id: number;
-  user_company_number: string;
-  wholesaler_company_number: string;
-  created_at: CreationOptional<Date>;
+  buyingId: number;
+  userCompanyNumber: string;
+  wholesalerCompanyNumber: string;
+  createdAt: CreationOptional<Date>;
 }
 
 export class Blacklist extends Model<BlacklistsAttributes> {
   public readonly id!: number;
-  public buying_id!: number;
-  public user_company_number!: string;
-  public wholesaler_company_number!: string;
-  public created_at!: CreationOptional<Date>;
+  public buyingId!: number;
+  public userCompanyNumber!: string;
+  public wholesalerCompanyNumber!: string;
+  public createdAt!: CreationOptional<Date>;
 
   public static associations: {
     blacklistBuyingTag: Association<Buying, Blacklist>;
@@ -33,39 +33,43 @@ Blacklist.init(
       allowNull: false,
       primaryKey: true,
     },
-    buying_id: {
+    buyingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      field: 'buying_id',
       references: {
         model: 'buyings',
         key: 'id',
       },
     },
-    user_company_number: {
+    userCompanyNumber: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      field: 'user_company_number',
       references: {
         model: 'users',
         key: 'company_number',
       },
     },
-    wholesaler_company_number: {
+    wholesalerCompanyNumber: {
       type: DataTypes.STRING(10),
       allowNull: false,
+      field: 'wholesaler_company_number',
       references: {
         model: 'wholesalers',
         key: 'user_company_number',
       },
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: 'created_at',
       defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
     timestamps: false,
-    underscored: false,
+    underscored: true,
     paranoid: false,
     modelName: 'Blacklist',
     tableName: 'blacklists',
@@ -82,23 +86,23 @@ Blacklist.belongsTo(Buying, {
 
 Buying.hasMany(Blacklist, {
   sourceKey: 'id',
-  foreignKey: 'buying_id',
+  foreignKey: 'buyingId',
 });
 
 Blacklist.belongsTo(User, {
-  foreignKey: 'user_company_number',
+  foreignKey: 'userCompanyNumber',
 });
 
 User.hasMany(Blacklist, {
-  sourceKey: 'company_number',
-  foreignKey: 'user_company_number',
+  sourceKey: 'companyNumber',
+  foreignKey: 'userCompanyNumber',
 });
 
 Blacklist.belongsTo(Wholesaler, {
-  foreignKey: 'wholesaler_company_number',
+  foreignKey: 'wholesalerCompanyNumber',
 });
 
 Wholesaler.hasMany(Blacklist, {
-  sourceKey: 'user_company_number',
-  foreignKey: 'wholesaler_company_number',
+  sourceKey: 'userCompanyNumber',
+  foreignKey: 'wholesalerCompanyNumber',
 });
