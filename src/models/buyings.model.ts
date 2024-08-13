@@ -4,9 +4,10 @@ import { Liquor } from './liquors.model';
 import { Wholesaler } from './wholesalers.model';
 
 interface BuyingsAttributes {
-  id: number;
+  id?: CreationOptional<number>;
   openDate: CreationOptional<Date>;
   deadline: CreationOptional<Date>;
+  openTime: CreationOptional<string>;
   deliveryStart: CreationOptional<Date>;
   deliveryEnd: CreationOptional<Date>;
   totalMin: number;
@@ -23,9 +24,10 @@ interface BuyingsAttributes {
 }
 
 export class Buying extends Model<BuyingsAttributes> {
-  public readonly id!: number;
+  public readonly id!: CreationOptional<number>;
   public openDate!: CreationOptional<Date>;
   public deadline!: CreationOptional<Date>;
+  public openTime!: CreationOptional<string>;
   public deliveryStart!: CreationOptional<Date>;
   public deliveryEnd!: CreationOptional<Date>;
   public totalMin!: number;
@@ -54,13 +56,18 @@ Buying.init(
       primaryKey: true,
     },
     openDate: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
       field: 'open_date',
     },
     deadline: {
       type: DataTypes.DATEONLY,
       allowNull: false,
+    },
+    openTime: {
+      type: DataTypes.TIME,
+      allowNull: false,
+      field: 'open_time',
     },
     deliveryStart: {
       type: DataTypes.DATEONLY,
