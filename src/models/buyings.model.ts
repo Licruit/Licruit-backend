@@ -20,7 +20,7 @@ interface BuyingsAttributes {
   content: string;
   liquorId: number;
   wholesalerCompanyNumber: string;
-  createdAt: CreationOptional<Date>;
+  createdAt?: CreationOptional<Date>;
 }
 
 export class Buying extends Model<BuyingsAttributes> {
@@ -54,6 +54,7 @@ Buying.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
     openDate: {
       type: DataTypes.DATEONLY,
