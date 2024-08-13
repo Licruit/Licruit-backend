@@ -1,19 +1,18 @@
 import { col, literal, Op } from 'sequelize';
-import { FilterType } from '../dto/buyings.dto';
+import { SortType } from '../dto/buyings.dto';
 import { Buying } from '../models/buyings.model';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 
-export const selectBuyings = async (filter: FilterType, page: number) => {
+export const selectBuyings = async (sort: SortType, page: number) => {
   try {
     const LIMIT = 8;
     const offset = (page - 1) * LIMIT;
-    console.log(filter);
 
     let orderByColumn = ['orderCount', 'DESC'];
-    if (filter === 'recent') {
+    if (sort === 'recent') {
       orderByColumn = ['openDate', 'DESC'];
-    } else if (filter === 'deadline') {
+    } else if (sort === 'deadline') {
       orderByColumn = ['deadline', 'ASC'];
     }
 
@@ -64,7 +63,6 @@ export const selectBuyings = async (filter: FilterType, page: number) => {
 
     return buyingsAndPagination;
   } catch (err) {
-    console.log(err);
     throw new Error('공동구매 조회 실패');
   }
 };

@@ -1,1 +1,1 @@
-export type FilterType = 'ranking' | 'recent' | 'deadline';
+export type SortType = 'ranking' | 'recent' | 'deadline';
