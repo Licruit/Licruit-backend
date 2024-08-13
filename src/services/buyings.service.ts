@@ -4,7 +4,7 @@ import { Buying } from '../models/buyings.model';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 
-export const selectBuyings = async (sort: SortType, page: number) => {
+export const selectAllBuyings = async (sort: SortType, page: number) => {
   try {
     const LIMIT = 8;
     const offset = (page - 1) * LIMIT;
@@ -23,7 +23,7 @@ export const selectBuyings = async (sort: SortType, page: number) => {
         'title',
         'content',
         'price',
-        [literal('(SELECT COUNT(*) FROM orders WHERE orders.buying_id = Buying.id)'), 'orderCount'],
+        [literal('(SELECT SUM(quantity) FROM orders WHERE orders.buying_id = Buying.id)'), 'orderCount'],
         [literal('DATEDIFF(Buying.deadline, :today)'), 'leftDate'],
         [col('Liquor.name'), 'liquorName'],
         [col('Liquor.alcohol'), 'alcohol'],
@@ -56,7 +56,7 @@ export const selectBuyings = async (sort: SortType, page: number) => {
     const buyingsAndPagination = {
       buyings: buyings.rows,
       pagination: {
-        currrentPage: page,
+        currentPage: page,
         totalPage: Math.ceil(buyings.count / LIMIT),
       },
     };
