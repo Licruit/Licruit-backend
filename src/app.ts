@@ -24,6 +24,7 @@ app.use(cors(corsOptions));
 import { router as userRouter } from './routes/users.route';
 import { router as sectorRouter } from './routes/sectors.route';
 import { router as liquorRouter } from './routes/liquors.route';
+import { router as buyingRouter } from './routes/buyings.route';
 import HttpException from './utils/httpExeption';
 import cookieParser from 'cookie-parser';
 import { morganMiddleware } from './config/morganMiddleware';
@@ -34,6 +35,7 @@ app.use(morganMiddleware);
 app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);
+app.use('/buyings', buyingRouter);
 
 Sentry.setupExpressErrorHandler(app, {
   shouldHandleError(error) {
