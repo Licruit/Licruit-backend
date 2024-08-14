@@ -9,6 +9,7 @@ import {
   insertOrder,
   selectAllBuyings,
   selectBuyingDetail,
+  selectDeliveryAvaliableAreas,
   selectOneBuying,
   selectWholesalerInfo,
 } from '../services/buyings.service';
@@ -79,8 +80,12 @@ export const getBuyingDetail = async (req: Request, res: Response) => {
   if (!buyingDetail) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
+  const deliveryRegions = await selectDeliveryAvaliableAreas(buyingId);
 
-  return res.status(StatusCodes.OK).json(buyingDetail);
+  return res.status(StatusCodes.OK).json({
+    ...buyingDetail.dataValues,
+    deliveryRegions,
+  });
 };
 
 export const getWholesalerInfo = async (req: Request, res: Response) => {
@@ -112,6 +117,6 @@ export const participateBuying = async (req: Request, res: Response) => {
   }
 
   await insertOrder(buyingId, companyNumber, quantity);
-  
+
   return res.status(StatusCodes.CREATED).end();
 };

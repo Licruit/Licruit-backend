@@ -194,8 +194,32 @@ export const selectBuyingDetail = async (buyingId: number) => {
 
     return buying;
   } catch (err) {
-    console.log(err);
     throw new Error('공동구매 상세 조회 실패');
+  }
+};
+
+export const selectDeliveryAvaliableAreas = async (buyingId: number) => {
+  try {
+    const deliveryAvaliableRegions = await DeliveryRegion.findAll({
+      attributes: [[col('Region.name'), 'regionName']],
+      include: [
+        {
+          model: Region,
+          attributes: [],
+        },
+      ],
+      where: {
+        buyingId: buyingId,
+      },
+    });
+
+    const regionArray = deliveryAvaliableRegions.map((region) => {
+      return Object.values(region.dataValues)[0];
+    });
+
+    return regionArray;
+  } catch (err) {
+    throw new Error('배송 가능 지역 조회 실패');
   }
 };
 
