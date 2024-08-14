@@ -1,4 +1,4 @@
-import { Association, CreationOptional, DataTypes, Model } from 'sequelize';
+import { Association, CreationOptional, DataTypes, literal, Model } from 'sequelize';
 import { sequelize } from './index';
 import { Buying } from './buyings.model';
 import { User } from './users.model';
@@ -10,6 +10,7 @@ interface OrdersAttributes {
   quantity: number;
   stateId: number;
   updatedAt: CreationOptional<Date>;
+  createdAt?: CreationOptional<Date>;
 }
 
 export class Order extends Model<OrdersAttributes> {
@@ -18,6 +19,7 @@ export class Order extends Model<OrdersAttributes> {
   public quantity!: number;
   public stateId!: number;
   public updatedAt!: CreationOptional<Date>;
+  public createdAt!: CreationOptional<Date>;
 
   public static associations: {
     orderBuyingTag: Association<Buying, Order>;
@@ -62,6 +64,12 @@ Order.init(
       type: DataTypes.DATEONLY,
       allowNull: false,
       field: 'updated_at',
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: 'created_at',
+      defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
