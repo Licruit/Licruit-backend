@@ -3,7 +3,6 @@ import { Order } from '../models/orders.model';
 import { Buying } from '../models/buyings.model';
 import { Liquor } from '../models/liquors.model';
 import { State } from '../models/states.model';
-import { sequelize } from '../models';
 
 export const selectAllOrders = async (companyNumber: string, status: number | undefined, page: number) => {
   try {
@@ -66,23 +65,30 @@ export const selectAllOrders = async (companyNumber: string, status: number | un
 
 export const selectOrderSummary = async (companyNumber: string) => {
   try {
-    const summary = await sequelize.query(
-      `
-      SELECT states.id, states.status, COUNT(all_orders.id) as statusCount
-        FROM states
-        LEFT OUTER JOIN (
-	        SELECT *
-	          FROM orders
-	          WHERE orders.user_company_number = ${companyNumber} AND orders.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)
-          ) as all_orders
-        ON states.id = all_orders.state_id
-        WHERE states.id in (1, 2, 3, 4)
-        GROUP BY states.id;
-      `,
-    );
+    const summary = await Order.findAll({
+      attributes: [
+        [col('State.id'), 'id'],
+        [col('State.status'), 'status'],
+        [literal('COUNT(IF(user_company_number = :companyNumber, 1, null))'), 'statusCount'],
+      ],
+      include: [
+        {
+          model: State,
+          attributes: [],
+          right: true,
+        },
+      ],
+      replacements: {
+        companyNumber: companyNumber,
+      },
+      where: literal(
+        '(Order.created_at is NULL OR Order.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)) AND State.id IN (1, 2, 3, 4)',
+      ),
+      group: 'State.id',
+    });
 
-    return summary[0];
+    return summary;
   } catch (err) {
-    throw new Error('참여한 공동구매 통계 조회 실패');
+    throw new Error('참여한 공동구매 현황 조회 실패');
   }
 };
