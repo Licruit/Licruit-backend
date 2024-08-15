@@ -5,6 +5,7 @@ import { Liquor } from '../models/liquors.model';
 import { Like } from '../models/likes.model';
 import { Review } from '../models/reviews.model';
 import { User } from '../models/users.model';
+import { Buying } from '../models/buyings.model';
 
 export const selectLiquorCategories = async () => {
   try {
@@ -41,12 +42,18 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
             ),
             'liked',
           ],
+          [literal('IF(Reviews.id IS NULL, 0, COUNT(*))'), 'reviewCount'],
+          [literal('ROUND(IF(AVG(Reviews.score) IS NULL, FORMAT(0.0, 1), AVG(Reviews.score)), 1)'), 'reviewAvg'],
         ],
         exclude: ['id', 'category_id'],
       },
       include: [
         {
           model: LiquorCategory,
+          attributes: [],
+        },
+        {
+          model: Review,
           attributes: [],
         },
       ],
@@ -57,6 +64,7 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
         liquorId: liquorId,
         companyNumber: companyNumber || '',
       },
+      group: 'Liquor.id',
     });
 
     return liquor;
@@ -192,7 +200,27 @@ export const selectLiquorReviews = async (liquorId: number, page: number, sort: 
 
     return reviewsAndPagination;
   } catch (err) {
-    console.log(err);
     throw new Error('리뷰 목록 조회 실패');
+  }
+};
+
+export const selectLiquorOngoingBuying = async (liquorId: number) => {
+  try {
+    const buyings = await Buying.findAll({
+      attributes: [
+        'id',
+        [literal('DATEDIFF(deadline, NOW())'), 'leftDate'],
+        ['title', 'buyingTitle'],
+        ['content', 'buyingContent'],
+      ],
+      where: literal(`liquor_id = :liquorId AND CONCAT(open_date, ' ', open_time) <= NOW() AND deadline >= NOW()`),
+      replacements: {
+        liquorId: liquorId,
+      },
+    });
+
+    return buyings;
+  } catch (err) {
+    throw new Error('해당 주류의 진행 중인 공동구매 목록 조회 실패');
   }
 };
