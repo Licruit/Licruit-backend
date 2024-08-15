@@ -5,18 +5,18 @@ import { User } from './users.model';
 import { Liquor } from './liquors.model';
 
 interface ReviewsAttributes {
-  id: number;
+  id?: CreationOptional<number>;
   buyingId: number;
   liquorId: number;
   userCompanyNumber: string;
   score: number;
   title: string;
   content: string;
-  createdAt: CreationOptional<Date>;
+  createdAt?: CreationOptional<Date>;
 }
 
 export class Review extends Model<ReviewsAttributes> {
-  public readonly id!: number;
+  public readonly id!: CreationOptional<number>;
   public buyingId!: number;
   public liquorId!: number;
   public userCompanyNumber!: string;
@@ -38,6 +38,7 @@ Review.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
     buyingId: {
       type: DataTypes.INTEGER,
