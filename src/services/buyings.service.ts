@@ -284,3 +284,15 @@ export const selectWholesalerInfo = async (wholesalerCompanyNumber: string) => {
     throw new Error('도매업체 정보 조회 실패');
   }
 };
+
+export const findBuying = async (buyingTitle: string) => {
+  try {
+    const buyingInfo = await Buying.findOne({
+      attributes: ['id', ['liquor_id', 'liquorId']],
+      where: { title: buyingTitle },
+    });
+    return buyingInfo;
+  } catch (err) {
+    throw new Error('구매 정보 조회 실패');
+  }
+};
