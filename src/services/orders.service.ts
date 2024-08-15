@@ -92,3 +92,79 @@ export const selectOrderSummary = async (companyNumber: string) => {
     throw new Error('참여한 공동구매 현황 조회 실패');
   }
 };
+
+export const isOrderOwner = async (companyNumber: string, orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order && order.userCompanyNumber === companyNumber ? true : false;
+  } catch (err) {
+    throw new Error('주문 접근 권한 조회 실패');
+  }
+};
+
+export const updateCanceledOrder = async (orderId: number) => {
+  try {
+    await Order.update(
+      {
+        stateId: 6,
+        updatedAt: new Date(),
+      },
+      {
+        where: {
+          id: orderId,
+        },
+      },
+    );
+  } catch (err) {
+    throw new Error('주문 취소 실패');
+  }
+};
+
+export const selectOrderDetail = async (orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      attributes: [
+        [col('Buying->Liquor.img'), 'img'],
+        [col('Buying.title'), 'title'],
+        [col('Buying->Liquor.name'), 'liquorName'],
+        [col('Buying.content'), 'content'],
+        [col('State.status'), 'status'],
+        'createdAt',
+        'quantity',
+        [col('Buying.price'), 'pricePerBottle'],
+        [
+          literal('IF(Buying.free_delivery_fee <= Buying.price * Order.quantity, 0, Buying.delivery_fee)'),
+          'devlieryFee',
+        ],
+      ],
+      include: [
+        {
+          model: Buying,
+          attributes: [],
+          include: [
+            {
+              model: Liquor,
+              attributes: [],
+            },
+          ],
+        },
+        {
+          model: State,
+          attributes: [],
+        },
+      ],
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order;
+  } catch (err) {
+    throw new Error('주문 상세 조회 실패');
+  }
+};
