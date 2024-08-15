@@ -9,6 +9,7 @@ import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
 import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
+import { Blacklist } from '../models/blacklists.model';
 
 export const addBuying = async ({
   openDate,
@@ -294,5 +295,19 @@ export const findBuying = async (buyingTitle: string) => {
     return buyingInfo;
   } catch (err) {
     throw new Error('구매 정보 조회 실패');
+  }
+};
+
+export const selectBlacklistCount = async (companyNumber: string) => {
+  try {
+    const blacklistCount = await Blacklist.count({
+      where: {
+        userCompanyNumber: companyNumber,
+      },
+    });
+
+    return blacklistCount;
+  } catch (err) {
+    throw new Error('신고 횟수 조회 실패');
   }
 };
