@@ -25,6 +25,7 @@ import { router as userRouter } from './routes/users.route';
 import { router as sectorRouter } from './routes/sectors.route';
 import { router as liquorRouter } from './routes/liquors.route';
 import { router as buyingRouter } from './routes/buyings.route';
+import { router as orderRouter } from './routes/orders.route';
 import { router as reviewRouter } from './routes/reviews.route';
 import HttpException from './utils/httpExeption';
 import cookieParser from 'cookie-parser';
@@ -37,6 +38,7 @@ app.use('/users', userRouter);
 app.use('/sectors', sectorRouter);
 app.use('/liquors', liquorRouter);
 app.use('/buyings', buyingRouter);
+app.use('/orders', orderRouter);
 app.use('/reviews', reviewRouter);
 
 Sentry.setupExpressErrorHandler(app, {
