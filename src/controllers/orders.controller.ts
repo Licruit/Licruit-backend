@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { TokenRequest } from '../auth';
 import { AllOrdersDTO } from '../dto/orders.dto';
-import { selectAllOrders, selectOrderSummary } from '../services/orders.service';
+import { isOrderOwner, selectAllOrders, selectOrderSummary, updateCanceledOrder } from '../services/orders.service';
 import HttpException from '../utils/httpExeption';
 
 export const getAllOrders = async (req: Request, res: Response) => {
@@ -23,4 +23,17 @@ export const getOrderSummary = async (req: Request, res: Response) => {
   const summary = await selectOrderSummary(companyNumber);
 
   return res.status(StatusCodes.OK).json(summary);
+};
+
+export const cancelOrder = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const orderId = parseInt(req.params.orderId);
+
+  const isOwner = await isOrderOwner(companyNumber, orderId);
+  if (!isOwner) {
+    throw new HttpException(StatusCodes.UNAUTHORIZED, '해당 주문에 접근 권한이 없습니다.');
+  }
+  await updateCanceledOrder(orderId);
+
+  return res.status(StatusCodes.OK).end();
 };

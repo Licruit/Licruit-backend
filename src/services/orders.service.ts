@@ -92,3 +92,35 @@ export const selectOrderSummary = async (companyNumber: string) => {
     throw new Error('참여한 공동구매 현황 조회 실패');
   }
 };
+
+export const isOrderOwner = async (companyNumber: string, orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order && order.userCompanyNumber === companyNumber ? true : false;
+  } catch (err) {
+    throw new Error('주문 접근 권한 조회 실패');
+  }
+};
+
+export const updateCanceledOrder = async (orderId: number) => {
+  try {
+    await Order.update(
+      {
+        stateId: 6,
+        updatedAt: new Date(),
+      },
+      {
+        where: {
+          id: orderId,
+        },
+      },
+    );
+  } catch (err) {
+    throw new Error('주문 취소 실패');
+  }
+};
