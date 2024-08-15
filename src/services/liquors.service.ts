@@ -3,6 +3,8 @@ import { AllLiquorsDTO } from '../dto/liquors.dto';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Liquor } from '../models/liquors.model';
 import { Like } from '../models/likes.model';
+import { Review } from '../models/reviews.model';
+import { User } from '../models/users.model';
 
 export const selectLiquorCategories = async () => {
   try {
@@ -32,7 +34,7 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
       attributes: {
         include: [
           [col('LiquorCategory.name'), 'categoryName'],
-          [literal('COUNT(*)'), 'likes'],
+          [literal('(SELECT COUNT(*) FROM likes WHERE likes.liquor_id = :liquorId)'), 'likes'],
           [
             literal(
               '(SELECT COUNT(*) FROM likes WHERE likes.liquor_id = :liquorId AND user_company_number = :companyNumber)',
@@ -43,10 +45,6 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
         exclude: ['id', 'category_id'],
       },
       include: [
-        {
-          model: Like,
-          attributes: [],
-        },
         {
           model: LiquorCategory,
           attributes: [],
@@ -153,5 +151,48 @@ export const deleteLike = async (liquorId: number, companyNumber: string) => {
     });
   } catch (err) {
     throw new Error('좋아요 취소 실패');
+  }
+};
+
+export const selectLiquorReviews = async (liquorId: number, page: number, sort: string | undefined) => {
+  try {
+    const LIMIT = 5;
+    const offset = (page - 1) * LIMIT;
+
+    const reviews = await Review.findAndCountAll({
+      attributes: [
+        [col('User.img'), 'img'],
+        [col('User.business_name'), 'name'],
+        'userCompanyNumber',
+        'content',
+        'score',
+        'createdAt',
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+      ],
+      where: {
+        liquorId: liquorId,
+      },
+      order: [['score', sort === '1' ? 'asc' : 'desc']],
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const reviewsAndPagination = {
+      reviews: reviews.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(reviews.count / LIMIT),
+      },
+    };
+
+    return reviewsAndPagination;
+  } catch (err) {
+    console.log(err);
+    throw new Error('리뷰 목록 조회 실패');
   }
 };

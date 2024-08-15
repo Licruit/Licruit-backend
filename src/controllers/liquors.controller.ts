@@ -7,10 +7,11 @@ import {
   selectLiquor,
   selectLiquorCategories,
   selectLiquorDetail,
+  selectLiquorReviews,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
 import { Request, Response } from 'express';
-import { AllLiquorsDTO } from '../dto/liquors.dto';
+import { AllLiquorsDTO, LiquorReviewsDTO } from '../dto/liquors.dto';
 import { isExistedAccessToken, TokenRequest } from '../auth';
 
 export const getLiquorCategories = async (req: Request, res: Response) => {
@@ -76,4 +77,16 @@ export const unlikeLiquor = async (req: Request, res: Response) => {
   await deleteLike(liquorId, companyNumber);
 
   return res.status(StatusCodes.OK).end();
+};
+
+export const getLiquorReviews = async (req: Request, res: Response) => {
+  const liquorId = parseInt(req.params.liquorId);
+  const { sort, page }: LiquorReviewsDTO = req.query;
+
+  const liquorReviews = await selectLiquorReviews(liquorId, page!, sort);
+  if (!liquorReviews.reviews.length) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '조회할 리뷰 목록이 없습니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(liquorReviews);
 };
