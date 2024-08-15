@@ -347,7 +347,6 @@ export const selectBuyingSummary = async (companyNumber: string) => {
 
     return summary;
   } catch (err) {
-    console.log(err);
     throw new Error('도매업자 공동구매 현황 조회 실패');
   }
 };
