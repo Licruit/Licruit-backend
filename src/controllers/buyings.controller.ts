@@ -8,6 +8,7 @@ import {
   addBuying,
   insertOrder,
   selectAllBuyings,
+  selectBlacklistCount,
   selectBuyingDetail,
   selectBuyingSummary,
   selectDeliveryAvaliableAreas,
@@ -115,6 +116,11 @@ export const participateBuying = async (req: Request, res: Response) => {
   }
   if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');
+  }
+
+  const blacklistCount = await selectBlacklistCount(companyNumber);
+  if (blacklistCount > 2) {
+    throw new HttpException(StatusCodes.FORBIDDEN, '블랙리스트 회원입니다.');
   }
 
   await insertOrder(buyingId, companyNumber, quantity);
