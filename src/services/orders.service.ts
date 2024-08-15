@@ -165,7 +165,6 @@ export const selectOrderDetail = async (orderId: number) => {
 
     return order;
   } catch (err) {
-    console.log(err);
     throw new Error('주문 상세 조회 실패');
   }
 };
