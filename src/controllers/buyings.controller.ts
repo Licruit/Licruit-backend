@@ -10,6 +10,7 @@ import {
   selectAllBuyings,
   selectBlacklistCount,
   selectBuyingDetail,
+  selectBuyingSummary,
   selectDeliveryAvaliableAreas,
   selectOneBuying,
   selectWholesalerInfo,
@@ -125,4 +126,16 @@ export const participateBuying = async (req: Request, res: Response) => {
   await insertOrder(buyingId, companyNumber, quantity);
 
   return res.status(StatusCodes.CREATED).end();
+};
+
+export const getBuyingSummary = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const summary = await selectBuyingSummary(companyNumber);
+  return res.status(StatusCodes.OK).json(summary);
 };
