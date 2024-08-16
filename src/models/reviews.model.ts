@@ -1,12 +1,12 @@
 import { Association, CreationOptional, DataTypes, literal, Model } from 'sequelize';
 import { sequelize } from './index';
-import { Buying } from './buyings.model';
 import { User } from './users.model';
 import { Liquor } from './liquors.model';
+import { Order } from './orders.model';
 
 interface ReviewsAttributes {
   id?: CreationOptional<number>;
-  buyingId: number;
+  orderId: number;
   liquorId: number;
   userCompanyNumber: string;
   score: number;
@@ -17,7 +17,7 @@ interface ReviewsAttributes {
 
 export class Review extends Model<ReviewsAttributes> {
   public readonly id!: CreationOptional<number>;
-  public buyingId!: number;
+  public orderId!: number;
   public liquorId!: number;
   public userCompanyNumber!: string;
   public score!: number;
@@ -26,7 +26,7 @@ export class Review extends Model<ReviewsAttributes> {
   public createdAt!: CreationOptional<Date>;
 
   public static associations: {
-    reviewBuyingTag: Association<Buying, Review>;
+    reviewOrderTag: Association<Order, Review>;
     reviewLiquorTag: Association<Liquor, Review>;
     reviewUserTag: Association<User, Review>;
   };
@@ -40,12 +40,12 @@ Review.init(
       primaryKey: true,
       autoIncrement: true,
     },
-    buyingId: {
+    orderId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      field: 'buying_id',
+      field: 'order_id',
       references: {
-        model: 'buyings',
+        model: 'orders',
         key: 'id',
       },
     },
@@ -99,13 +99,13 @@ Review.init(
   },
 );
 
-Review.belongsTo(Buying, {
-  foreignKey: 'buyingId',
+Review.belongsTo(Order, {
+  foreignKey: 'orderId',
 });
 
-Buying.hasMany(Review, {
+Order.hasMany(Review, {
   sourceKey: 'id',
-  foreignKey: 'buyingId',
+  foreignKey: 'orderId',
 });
 
 Review.belongsTo(Liquor, {

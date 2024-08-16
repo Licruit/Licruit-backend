@@ -92,3 +92,23 @@ export const selectOrderSummary = async (companyNumber: string) => {
     throw new Error('참여한 공동구매 현황 조회 실패');
   }
 };
+
+export const findOrder = async (orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      include: [
+        {
+          model: Buying,
+          attributes: [],
+        },
+      ],
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order;
+  } catch (err) {
+    throw new Error('주문 조회 실패');
+  }
+};

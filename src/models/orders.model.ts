@@ -5,6 +5,7 @@ import { User } from './users.model';
 import { State } from './states.model';
 
 interface OrdersAttributes {
+  id?: CreationOptional<number>;
   buyingId: number;
   userCompanyNumber: string;
   quantity: number;
@@ -14,6 +15,7 @@ interface OrdersAttributes {
 }
 
 export class Order extends Model<OrdersAttributes> {
+  public readonly id!: CreationOptional<number>;
   public buyingId!: number;
   public userCompanyNumber!: string;
   public quantity!: number;
@@ -29,6 +31,12 @@ export class Order extends Model<OrdersAttributes> {
 
 Order.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     buyingId: {
       type: DataTypes.INTEGER,
       allowNull: false,
