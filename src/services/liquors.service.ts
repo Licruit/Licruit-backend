@@ -73,15 +73,21 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
   }
 };
 
-export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcohol, page }: AllLiquorsDTO) => {
+export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcohol, page, sort }: AllLiquorsDTO) => {
   try {
     const LIMIT = 9;
     const offset = (page! - 1) * LIMIT;
+    const isSorting = sort === '0' || sort === '1';
     let whereCondition = {};
     let replacements = {};
     if (search) {
-      whereCondition = { ...whereCondition, name: literal('MATCH(Liquor.name) AGAINST(:name IN BOOLEAN MODE)') };
-      replacements = { ...replacements, name: `*${search}*` };
+      if (isSorting) {
+        whereCondition = { ...whereCondition, name: literal('Liquor.name LIKE :name') };
+        replacements = { ...replacements, name: `%${search}%` };
+      } else {
+        whereCondition = { ...whereCondition, name: literal('MATCH(Liquor.name) AGAINST(:name IN BOOLEAN MODE)') };
+        replacements = { ...replacements, name: `${search}*` };
+      }
     }
     if (category) {
       whereCondition = { ...whereCondition, category_id: category };
@@ -96,7 +102,19 @@ export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcoho
     }
 
     const liquors = await Liquor.findAndCountAll({
-      attributes: ['id', 'name', 'description', 'img', [col('LiquorCategory.name'), 'categoryName']],
+      attributes: [
+        'id',
+        'name',
+        'description',
+        'img',
+        [col('LiquorCategory.name'), 'categoryName'],
+        [
+          literal(
+            `(SELECT FORMAT(IFNULL(AVG(reviews.score), 0.0), 1) FROM reviews WHERE Liquor.id = reviews.liquor_id)`,
+          ),
+          'reviewAvg',
+        ],
+      ],
       include: [
         {
           model: LiquorCategory,
@@ -105,6 +123,7 @@ export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcoho
       ],
       where: whereCondition,
       replacements: replacements,
+      order: isSorting ? [['reviewAvg', +sort ? 'asc' : 'desc']] : [],
       limit: LIMIT,
       offset: offset,
     });

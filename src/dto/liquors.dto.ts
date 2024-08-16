@@ -4,6 +4,7 @@ export interface AllLiquorsDTO {
   minAlcohol?: number;
   maxAlcohol?: number;
   page?: number;
+  sort?: string;
 }
 
 export interface LiquorReviewsDTO {
