@@ -286,15 +286,17 @@ export const selectWholesalerInfo = async (wholesalerCompanyNumber: string) => {
   }
 };
 
-export const findBuying = async (buyingTitle: string) => {
+export const findBuying = async (buyingId: number) => {
   try {
-    const buyingInfo = await Buying.findOne({
-      attributes: ['id', ['liquor_id', 'liquorId']],
-      where: { title: buyingTitle },
+    const buying = await Buying.findOne({
+      where: {
+        id: buyingId,
+      },
     });
-    return buyingInfo;
+
+    return buying;
   } catch (err) {
-    throw new Error('구매 정보 조회 실패');
+    throw new Error('공동구매 조회 실패');
   }
 };
 

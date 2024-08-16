@@ -1,5 +1,5 @@
 export interface ReviewDTO {
-  buyingId: number;
+  orderId: number;
   liquorId: number;
   companyNumber: string;
   score: number;
@@ -8,8 +8,7 @@ export interface ReviewDTO {
 }
 
 export interface ReviewInputDTO {
-  buyingTitle: string;
-  companyNumber: string;
+  orderId: number;
   score: number;
   title: string;
   content: string;
