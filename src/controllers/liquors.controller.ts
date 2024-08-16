@@ -43,9 +43,9 @@ export const getLiquorDetail = async (req: Request, res: Response) => {
 export const getAllLiquors = async (req: Request, res: Response) => {
   const { search, category, minAlcohol, maxAlcohol, page, sort }: AllLiquorsDTO = req.query;
   const liquorsAndPagination = await selectAllLiquors({ search, category, minAlcohol, maxAlcohol, page, sort });
-  // if (!liquorsAndPagination.liquors.length) {
-  //   throw new HttpException(StatusCodes.NOT_FOUND, '조회할 주류 카탈로그가 없습니다.');
-  // }
+  if (!liquorsAndPagination.liquors.length) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '조회할 주류 카탈로그가 없습니다.');
+  }
 
   return res.status(StatusCodes.OK).json(liquorsAndPagination);
 };
