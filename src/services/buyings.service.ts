@@ -9,6 +9,7 @@ import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
 import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
+import { Blacklist } from '../models/blacklists.model';
 
 export const addBuying = async ({
   openDate,
@@ -296,5 +297,58 @@ export const findBuying = async (buyingId: number) => {
     return buying;
   } catch (err) {
     throw new Error('공동구매 조회 실패');
+  }
+};
+
+export const selectBlacklistCount = async (companyNumber: string) => {
+  try {
+    const blacklistCount = await Blacklist.count({
+      where: {
+        userCompanyNumber: companyNumber,
+      },
+    });
+
+    return blacklistCount;
+  } catch (err) {
+    throw new Error('신고 횟수 조회 실패');
+  }
+};
+
+export const selectBuyingSummary = async (companyNumber: string) => {
+  try {
+    const summary = await Buying.findOne({
+      attributes: [
+        [literal(`COUNT(DISTINCT id)`), 'openBuying'],
+        [
+          literal(
+            `COALESCE((SELECT SUM(quantity) FROM orders WHERE buying_id IN(SELECT id FROM buyings WHERE wholesaler_company_number = :companyNumber)), 0)`,
+          ),
+          'liquorSum',
+        ],
+        [
+          literal(
+            `SUM(CASE WHEN COALESCE((SELECT SUM(quantity) FROM orders WHERE buying_id = Buying.id), 0) < Buying.total_min THEN 1 ELSE 0 END)`,
+          ),
+          'shortfall',
+        ],
+        [
+          literal(
+            `SUM(CASE WHEN (SELECT SUM(quantity) FROM orders WHERE buying_id = Buying.id) >= Buying.total_min AND Buying.deadline < NOW() THEN 1 ELSE 0 END)`,
+          ),
+          'achievement',
+        ],
+      ],
+      where: literal(
+        `(wholesaler_company_number = :companyNumber) AND (Buying.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR))`,
+      ),
+      replacements: {
+        companyNumber,
+      },
+      raw: true,
+    });
+
+    return summary;
+  } catch (err) {
+    throw new Error('도매업자 공동구매 현황 조회 실패');
   }
 };
