@@ -23,6 +23,7 @@ export const selectAllOrders = async (companyNumber: string, status: number | un
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.content'), 'content'],
         [col('State.status'), 'status'],
+        [literal('(SELECT COUNT(*) FROM reviews WHERE reviews.order_id = Order.id)'), 'isWroteReview'],
       ],
       include: [
         {
