@@ -350,3 +350,51 @@ export const selectBuyingSummary = async (companyNumber: string) => {
     throw new Error('도매업자 공동구매 현황 조회 실패');
   }
 };
+
+export const selectWholesalerBuyings = async (companyNumber: string, page: number) => {
+  try {
+    const LIMIT = 12;
+    const offset = (page - 1) * LIMIT;
+    const today = new Date();
+
+    const buyings = await Buying.findAndCountAll({
+      attributes: [
+        'id',
+        'title',
+        'content',
+        [literal('DATEDIFF(Buying.deadline, :today)'), 'leftDate'],
+        [col('Liquor.name'), 'liquorName'],
+        [col('Liquor.img'), 'liquorImg'],
+        [
+          literal(
+            '(SELECT IF(SUM(quantity) IS null, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id)',
+          ),
+          'orderCount',
+        ],
+      ],
+      include: [
+        {
+          model: Liquor,
+          attributes: [],
+        },
+      ],
+      where: {
+        wholesalerCompanyNumber: companyNumber,
+      },
+      replacements: { today: today },
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const buyingsAndPagination = {
+      buyings: buyings.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(buyings.count / LIMIT),
+      },
+    };
+    return buyingsAndPagination;
+  } catch (err) {
+    throw new Error('도매업자 공동구매 목록 조회 실패');
+  }
+};

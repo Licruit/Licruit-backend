@@ -15,12 +15,15 @@ import {
   getWholesalerInfo,
   participateBuying,
   getBuyingSummary,
+  getWholesalerBuyings,
 } from '../controllers/buyings.controller';
+import { pageValidate } from '../validators/liquors.validator';
 export const router: Router = express.Router();
 
 router.post('/', [accessTokenValidate, ...openValidate, validate], wrapAsyncController(openBuyings));
 router.get('/', [...allBuyingsValidate, validate], wrapAsyncController(getAllBuygins));
 router.get('/summary', [accessTokenValidate], wrapAsyncController(getBuyingSummary));
+router.get('/Wholesaler', [accessTokenValidate, pageValidate, validate], wrapAsyncController(getWholesalerBuyings));
 router.get('/:buyingId', [buyingIdValidate, validate], wrapAsyncController(getBuyingDetail));
 router.get('/:buyingId/wholesaler', [buyingIdValidate, validate], wrapAsyncController(getWholesalerInfo));
 router.post(
