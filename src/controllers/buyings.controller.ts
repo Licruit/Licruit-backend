@@ -112,9 +112,6 @@ export const participateBuying = async (req: Request, res: Response) => {
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
-  if (buying.individualMin > quantity) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '최소 구매 수량보다 요쳥 개수가 적습니다.');
-  }
   if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');
   }
