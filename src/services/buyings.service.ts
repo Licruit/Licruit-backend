@@ -3,13 +3,14 @@ import { sequelize } from '../models';
 import { Buying } from '../models/buyings.model';
 import { DeliveryRegion } from '../models/deliveryRegions.model';
 import { Region } from '../models/regions.model';
-import { col, literal, Op, OrderItem } from 'sequelize';
+import { col, literal, Op, OrderItem, WhereOptions } from 'sequelize';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
 import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
 import { Blacklist } from '../models/blacklists.model';
+import { State } from '../models/states.model';
 
 export const addBuying = async ({
   openDate,
@@ -396,5 +397,67 @@ export const selectWholesalerBuyings = async (companyNumber: string, page: numbe
     return buyingsAndPagination;
   } catch (err) {
     throw new Error('도매업자 공동구매 목록 조회 실패');
+  }
+};
+
+export const selectBuyingOrderList = async (buyingId: number, page: number, type: string) => {
+  try {
+    const LIMIT = 12;
+    const offset = (page - 1) * LIMIT;
+
+    const whereCondition: WhereOptions = {
+      buyingId,
+    };
+
+    if (type === 'cancel') {
+      whereCondition['buyingId'] = buyingId;
+      whereCondition['stateId'] = 6;
+    }
+
+    const orderList = await Order.findAndCountAll({
+      attributes: [
+        'id',
+        'userCompanyNumber',
+        [col('User.contact'), 'contact'],
+        [col('Buying->Liquor.name'), 'liquorName'],
+        [col('Buying.price'), 'liquorPrice'],
+        [col('State.status'), 'status'],
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+        {
+          model: Buying,
+          attributes: [],
+          include: [
+            {
+              model: Liquor,
+              attributes: [],
+            },
+          ],
+        },
+        {
+          model: State,
+          attributes: [],
+        },
+      ],
+      where: whereCondition,
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const orderListAndPagination = {
+      orderList: orderList.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(orderList.count / LIMIT),
+      },
+    };
+
+    return orderListAndPagination;
+  } catch (err) {
+    throw new Error('도매업자 공동구매 주문자 리스트 조회 실패');
   }
 };

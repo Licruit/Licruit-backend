@@ -1,4 +1,3 @@
-
 export type SortType = 'ranking' | 'recent' | 'deadline';
 
 export interface BuyingDTO {
