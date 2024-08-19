@@ -3,13 +3,14 @@ import { sequelize } from '../models';
 import { Buying } from '../models/buyings.model';
 import { DeliveryRegion } from '../models/deliveryRegions.model';
 import { Region } from '../models/regions.model';
-import { col, literal, Op, OrderItem } from 'sequelize';
+import { col, literal, Op, OrderItem, WhereOptions } from 'sequelize';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
 import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
 import { Blacklist } from '../models/blacklists.model';
+import { State } from '../models/states.model';
 
 export const addBuying = async ({
   openDate,
@@ -19,7 +20,6 @@ export const addBuying = async ({
   deliveryEnd,
   totalMin,
   totalMax,
-  individualMin,
   price,
   deliveryFee,
   freeDeliveryFee,
@@ -39,11 +39,10 @@ export const addBuying = async ({
         deliveryStart: deliveryStart,
         deliveryEnd: deliveryEnd,
         totalMin: totalMin,
-        totalMax: totalMax,
-        individualMin: individualMin,
+        totalMax: totalMax || null,
         price: price,
         deliveryFee: deliveryFee,
-        freeDeliveryFee: freeDeliveryFee,
+        freeDeliveryFee: freeDeliveryFee || null,
         title: title,
         content: content,
         liquorId: liquorId,
@@ -352,5 +351,176 @@ export const selectBuyingSummary = async (companyNumber: string) => {
     return summary;
   } catch (err) {
     throw new Error('도매업자 공동구매 현황 조회 실패');
+  }
+};
+
+export const selectWholesalerBuyings = async (companyNumber: string, page: number) => {
+  try {
+    const LIMIT = 12;
+    const offset = (page - 1) * LIMIT;
+    const today = new Date();
+
+    const buyings = await Buying.findAndCountAll({
+      attributes: [
+        'id',
+        'title',
+        'content',
+        [literal('DATEDIFF(Buying.deadline, :today)'), 'leftDate'],
+        [col('Liquor.name'), 'liquorName'],
+        [col('Liquor.img'), 'liquorImg'],
+        [
+          literal(
+            '(SELECT IF(SUM(quantity) IS null, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id)',
+          ),
+          'orderCount',
+        ],
+      ],
+      include: [
+        {
+          model: Liquor,
+          attributes: [],
+        },
+      ],
+      where: {
+        wholesalerCompanyNumber: companyNumber,
+      },
+      replacements: { today: today },
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const buyingsAndPagination = {
+      buyings: buyings.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(buyings.count / LIMIT),
+      },
+    };
+    return buyingsAndPagination;
+  } catch (err) {
+    throw new Error('도매업자 공동구매 목록 조회 실패');
+  }
+};
+
+export const selectBuyingOrderList = async (buyingId: number, page: number, type: string) => {
+  try {
+    const LIMIT = 12;
+    const offset = (page - 1) * LIMIT;
+
+    const whereCondition: WhereOptions = {
+      buyingId,
+    };
+
+    if (type === 'cancel') {
+      whereCondition['buyingId'] = buyingId;
+      whereCondition['stateId'] = 6;
+    }
+
+    const orderList = await Order.findAndCountAll({
+      attributes: [
+        'id',
+        'userCompanyNumber',
+        [col('User.contact'), 'contact'],
+        [col('Buying->Liquor.name'), 'liquorName'],
+        [col('Buying.price'), 'liquorPrice'],
+        [col('State.status'), 'status'],
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+        {
+          model: Buying,
+          attributes: [],
+          include: [
+            {
+              model: Liquor,
+              attributes: [],
+            },
+          ],
+        },
+        {
+          model: State,
+          attributes: [],
+        },
+      ],
+      where: whereCondition,
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const orderListAndPagination = {
+      orderList: orderList.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(orderList.count / LIMIT),
+      },
+    };
+
+    return orderListAndPagination;
+  } catch (err) {
+    throw new Error('도매업자 공동구매 주문자 리스트 조회 실패');
+  }
+};
+
+export const selectBuyingWholesaler = async (orderId: number) => {
+  try {
+    const buyingWholesaler = await Buying.findOne({
+      include: [
+        {
+          model: Order,
+          attributes: [],
+          where: { id: orderId },
+        },
+      ],
+      attributes: ['wholesalerCompanyNumber'],
+    });
+
+    return buyingWholesaler?.getDataValue('wholesalerCompanyNumber');
+  } catch (err) {
+    throw new Error('잘못된 주문번호 입니다.');
+  }
+};
+
+export const selectUserInfo = async (orderId: number) => {
+  try {
+    const userInfo = await Order.findOne({
+      attributes: [
+        'createdAt',
+        [col('User.business_name'), 'businessName'],
+        [col('User.contact'), 'contact'],
+        [col('User.address'), 'address'],
+        [col('Buying->Liquor.name'), 'liquorName'],
+        [col('Buying.price'), 'pricePerBottle'],
+        [
+          literal(
+            '(SELECT IF(buyings.free_delivery_fee <= (Buying.price * Order.quantity), (Buying.price * Order.quantity), (Buying.price * Order.quantity) + buyings.delivery_fee)FROM buyings WHERE buyings.id = Order.buying_id)',
+          ),
+          'totalPrice',
+        ],
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+        {
+          model: Buying,
+          attributes: [],
+          include: [
+            {
+              model: Liquor,
+              attributes: [],
+            },
+          ],
+        },
+      ],
+      where: { id: orderId },
+    });
+
+    return userInfo;
+  } catch (err) {
+    throw new Error('구매자 정보 조회 실패');
   }
 };

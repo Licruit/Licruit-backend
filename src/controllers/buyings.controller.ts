@@ -10,9 +10,13 @@ import {
   selectAllBuyings,
   selectBlacklistCount,
   selectBuyingDetail,
+  selectBuyingOrderList,
   selectBuyingSummary,
+  selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
   selectOneBuying,
+  selectUserInfo,
+  selectWholesalerBuyings,
   selectWholesalerInfo,
 } from '../services/buyings.service';
 
@@ -26,7 +30,6 @@ export const openBuyings = async (req: Request, res: Response) => {
     deliveryEnd,
     totalMin,
     totalMax,
-    individualMin,
     price,
     deliveryFee,
     freeDeliveryFee,
@@ -49,7 +52,6 @@ export const openBuyings = async (req: Request, res: Response) => {
     deliveryEnd,
     totalMin,
     totalMax,
-    individualMin,
     price,
     deliveryFee,
     freeDeliveryFee,
@@ -136,4 +138,50 @@ export const getBuyingSummary = async (req: Request, res: Response) => {
 
   const summary = await selectBuyingSummary(companyNumber);
   return res.status(StatusCodes.OK).json(summary);
+};
+
+export const getWholesalerBuyings = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const page = parseInt(req.query.page as string);
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyings = await selectWholesalerBuyings(companyNumber, page);
+  return res.status(StatusCodes.OK).json(buyings);
+};
+
+export const getBuyingOrderList = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const buyingId = parseInt(req.params.buyingId);
+  const page = parseInt(req.query.page as string);
+  const type = req.query.type as string;
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyingOrderList = await selectBuyingOrderList(buyingId, page, type);
+  return res.status(StatusCodes.OK).json(buyingOrderList);
+};
+
+export const getUserInfo = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const orderId = parseInt(req.params.orderId);
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyingWholesaler = await selectBuyingWholesaler(orderId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  const userInfo = await selectUserInfo(orderId);
+  return res.status(StatusCodes.OK).json(userInfo);
 };
