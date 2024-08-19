@@ -6,6 +6,7 @@ const myCache = new NodeCache({ stdTTL: 180 });
 import jwt from 'jsonwebtoken';
 import { Wholesaler } from '../models/wholesalers.model';
 import { Token } from '../models/tokens.model';
+import mime from 'mime-types';
 import { awsSns, s3Client } from '../utils/aws';
 import dotenv from 'dotenv';
 import { ObjectCannedACL, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -325,7 +326,8 @@ export const updateUser = async (
 export const uploadImg = async (companyNumber: string, file: Express.Multer.File) => {
   try {
     const uploadDirectory = 'profile-images';
-    const filename = `${uploadDirectory}/${companyNumber}_${file.originalname}`;
+    const ext = mime.extension(file.mimetype);
+    const filename = `${uploadDirectory}/${companyNumber}.${ext}`;
 
     const params = {
       Bucket: process.env.AWS_BUCKET as string,
