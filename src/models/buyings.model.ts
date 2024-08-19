@@ -11,11 +11,10 @@ interface BuyingsAttributes {
   deliveryStart: CreationOptional<Date>;
   deliveryEnd: CreationOptional<Date>;
   totalMin: number;
-  totalMax: number;
-  individualMin: number;
+  totalMax?: number | null;
   price: number;
   deliveryFee: number;
-  freeDeliveryFee: number;
+  freeDeliveryFee?: number | null;
   title: string;
   content: string;
   liquorId: number;
@@ -31,11 +30,10 @@ export class Buying extends Model<BuyingsAttributes> {
   public deliveryStart!: CreationOptional<Date>;
   public deliveryEnd!: CreationOptional<Date>;
   public totalMin!: number;
-  public totalMax!: number;
-  public individualMin!: number;
+  public totalMax?: number | null;
   public price!: number;
   public deliveryFee!: number;
-  public freeDeliveryFee!: number;
+  public freeDeliveryFee?: number | null;
   public title!: string;
   public content!: string;
   public liquorId!: number;
@@ -87,13 +85,8 @@ Buying.init(
     },
     totalMax: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       field: 'total_max',
-    },
-    individualMin: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      field: 'individual_min',
     },
     price: {
       type: DataTypes.INTEGER,
@@ -106,7 +99,7 @@ Buying.init(
     },
     freeDeliveryFee: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       field: 'free_delivery_fee',
     },
     title: {

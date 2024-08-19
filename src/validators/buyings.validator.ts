@@ -22,16 +22,10 @@ export const totalMinValidate = body('totalMin')
   .withMessage('공동구매 최소 수량 필요');
 
 export const totalMaxValidate = body('totalMax')
-  .notEmpty()
+  .optional()
   .isNumeric()
   .custom((value: number) => value >= 1)
-  .withMessage('공동구매 최대 수량 필요');
-
-export const individualMinValidate = body('individualMin')
-  .notEmpty()
-  .isNumeric()
-  .custom((value: number) => value >= 1)
-  .withMessage('개인 구매 최소 수량 필요');
+  .withMessage('공동구매 최대 수량');
 
 export const priceValidate = body('price')
   .notEmpty()
@@ -46,10 +40,10 @@ export const deliveryFeeValidate = body('deliveryFee')
   .withMessage('배송비 필요');
 
 export const freeDeliveryFeeValidate = body('freeDeliveryFee')
-  .notEmpty()
+  .optional()
   .isNumeric()
   .custom((value: number) => value >= 0)
-  .withMessage('무료배송 최소 금액 필요');
+  .withMessage('무료배송 최소 금액');
 
 export const titleValidate = body('title').notEmpty().isString().withMessage('공동구매 제목 필요');
 
@@ -95,7 +89,6 @@ export const openValidate = [
   deliveryEndValidate,
   totalMinValidate,
   totalMaxValidate,
-  individualMinValidate,
   priceValidate,
   deliveryEndValidate,
   freeDeliveryFeeValidate,

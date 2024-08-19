@@ -7,11 +7,10 @@ export interface BuyingDTO {
   deliveryStart: Date;
   deliveryEnd: Date;
   totalMin: number;
-  totalMax: number;
-  individualMin: number;
+  totalMax?: number;
   price: number;
   deliveryFee: number;
-  freeDeliveryFee: number;
+  freeDeliveryFee?: number;
   title: string;
   content: string;
   liquorId: number;
