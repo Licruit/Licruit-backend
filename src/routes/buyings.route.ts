@@ -25,7 +25,7 @@ export const router: Router = express.Router();
 router.post('/', [accessTokenValidate, ...openValidate, validate], wrapAsyncController(openBuyings));
 router.get('/', [...allBuyingsValidate, validate], wrapAsyncController(getAllBuygins));
 router.get('/summary', [accessTokenValidate], wrapAsyncController(getBuyingSummary));
-router.get('/Wholesaler', [accessTokenValidate, pageValidate, validate], wrapAsyncController(getWholesalerBuyings));
+router.get('/wholesaler', [accessTokenValidate, pageValidate, validate], wrapAsyncController(getWholesalerBuyings));
 router.get(
   '/wholesaler/:buyingId',
   [accessTokenValidate, pageValidate, validate],
