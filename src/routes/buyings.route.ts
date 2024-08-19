@@ -17,6 +17,7 @@ import {
   getBuyingSummary,
   getWholesalerBuyings,
   getBuyingOrderList,
+  getUserInfo,
 } from '../controllers/buyings.controller';
 import { pageValidate } from '../validators/liquors.validator';
 export const router: Router = express.Router();
@@ -37,3 +38,4 @@ router.post(
   [accessTokenValidate, ...participateBuyingValidate, validate],
   wrapAsyncController(participateBuying),
 );
+router.get('/wholesaler/order/:orderId', [accessTokenValidate], wrapAsyncController(getUserInfo));

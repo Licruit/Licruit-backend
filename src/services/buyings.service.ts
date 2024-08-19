@@ -459,3 +459,64 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
     throw new Error('도매업자 공동구매 주문자 리스트 조회 실패');
   }
 };
+
+export const selectBuyingWholesaler = async (orderId: number) => {
+  try {
+    const buyingWholesaler = await Buying.findOne({
+      include: [
+        {
+          model: Order,
+          attributes: [],
+          where: { id: orderId },
+        },
+      ],
+      attributes: ['wholesalerCompanyNumber'],
+    });
+
+    return buyingWholesaler?.getDataValue('wholesalerCompanyNumber');
+  } catch (err) {
+    throw new Error('잘못된 주문번호 입니다.');
+  }
+};
+
+export const selectUserInfo = async (orderId: number) => {
+  try {
+    const userInfo = await Order.findOne({
+      attributes: [
+        'createdAt',
+        [col('User.business_name'), 'businessName'],
+        [col('User.contact'), 'contact'],
+        [col('User.address'), 'address'],
+        [col('Buying->Liquor.name'), 'liquorName'],
+        [col('Buying.price'), 'pricePerBottle'],
+        [
+          literal(
+            '(SELECT IF(buyings.free_delivery_fee <= (Buying.price * Order.quantity), (Buying.price * Order.quantity), (Buying.price * Order.quantity) + buyings.delivery_fee)FROM buyings WHERE buyings.id = Order.buying_id)',
+          ),
+          'totalPrice',
+        ],
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+        {
+          model: Buying,
+          attributes: [],
+          include: [
+            {
+              model: Liquor,
+              attributes: [],
+            },
+          ],
+        },
+      ],
+      where: { id: orderId },
+    });
+
+    return userInfo;
+  } catch (err) {
+    throw new Error('구매자 정보 조회 실패');
+  }
+};

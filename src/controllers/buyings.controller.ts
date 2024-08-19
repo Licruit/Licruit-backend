@@ -12,8 +12,10 @@ import {
   selectBuyingDetail,
   selectBuyingOrderList,
   selectBuyingSummary,
+  selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
   selectOneBuying,
+  selectUserInfo,
   selectWholesalerBuyings,
   selectWholesalerInfo,
 } from '../services/buyings.service';
@@ -166,4 +168,22 @@ export const getBuyingOrderList = async (req: Request, res: Response) => {
 
   const buyingOrderList = await selectBuyingOrderList(buyingId, page, type);
   return res.status(StatusCodes.OK).json(buyingOrderList);
+};
+
+export const getUserInfo = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const orderId = parseInt(req.params.orderId);
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyingWholesaler = await selectBuyingWholesaler(orderId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  const userInfo = await selectUserInfo(orderId);
+  return res.status(StatusCodes.OK).json(userInfo);
 };
