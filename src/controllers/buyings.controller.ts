@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
-import { TokenRequest } from '../auth';
+import { isExistedAccessToken, TokenRequest } from '../auth';
 import { selectWholesaler } from '../services/users.service';
 import { BuyingDTO, SortType } from '../dto/buyings.dto';
 import {
@@ -79,8 +79,9 @@ export const getAllBuygins = async (req: Request, res: Response) => {
 
 export const getBuyingDetail = async (req: Request, res: Response) => {
   const buyingId = parseInt(req.params.buyingId);
+  const companyNumber = isExistedAccessToken(req) ? (req as TokenRequest).token.companyNumber : null;
 
-  const buyingDetail = await selectBuyingDetail(buyingId);
+  const buyingDetail = await selectBuyingDetail(buyingId, companyNumber);
   if (!buyingDetail) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
@@ -112,9 +113,6 @@ export const participateBuying = async (req: Request, res: Response) => {
   const buying = await selectOneBuying(buyingId);
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
-  }
-  if (quantity < 1) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '1개 이상 주문해야 합니다.');
   }
   if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');

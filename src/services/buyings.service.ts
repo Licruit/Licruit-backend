@@ -104,8 +104,9 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
         'title',
         'content',
         'price',
-        [literal('(SELECT SUM(quantity) FROM orders WHERE orders.buying_id = Buying.id)'), 'orderCount'],
+        [literal('(SELECT IFNULL(SUM(quantity), 0) FROM orders WHERE orders.buying_id = Buying.id)'), 'orderCount'],
         [literal('DATEDIFF(Buying.deadline, :today)'), 'leftDate'],
+        [col('Liquor.img'), 'img'],
         [col('Liquor.name'), 'liquorName'],
         [col('Liquor.alcohol'), 'alcohol'],
         [col('Liquor.volume'), 'volume'],
@@ -148,38 +149,35 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
   }
 };
 
-export const selectBuyingDetail = async (buyingId: number) => {
+export const selectBuyingDetail = async (buyingId: number, companyNumber: string) => {
   try {
     const buying = await Buying.findOne({
-      attributes: {
-        include: [
-          [literal('SUM(Orders.quantity)'), 'orderCount'],
-          [col('Liquor.name'), 'liquorName'],
-          [col('Liquor->LiquorCategory.name'), 'categoryName'],
-          [col('Liquor.ingredient'), 'ingredient'],
-          [col('Liquor.alcohol'), 'alcohol'],
-          [col('Liquor.volume'), 'volume'],
-          [col('Liquor.award'), 'award'],
-          [col('Liquor.etc'), 'etc'],
-          [col('Liquor.description'), 'description'],
-          [col('Liquor.food'), 'food'],
-          [col('Liquor.brewery'), 'brewery'],
-          [col('Liquor.address'), 'address'],
-          [col('Liquor.homepage'), 'homepage'],
-          [col('Liquor.contact'), 'contact'],
+      attributes: [
+        'openDate',
+        'deadline',
+        'deliveryStart',
+        'deliveryEnd',
+        'totalMin',
+        'totalMax',
+        'price',
+        'deliveryFee',
+        'freeDeliveryFee',
+        'title',
+        'content',
+        [literal('SUM(Orders.quantity)'), 'orderCount'],
+        [col('Liquor.id'), 'liquorId'],
+        [col('Liquor.name'), 'liquorName'],
+        [
+          literal(
+            '(SELECT IF(COUNT(*), 1, 0) FROM orders WHERE orders.buying_id = :buyingId AND user_company_number = :companyNumber)',
+          ),
+          'isParticipated',
         ],
-        exclude: ['id', 'openTime', 'totalMax', 'liquorId', 'wholesalerCompanyNumber', 'createdAt'],
-      },
+      ],
       include: [
         {
           model: Liquor,
           attributes: [],
-          include: [
-            {
-              model: LiquorCategory,
-              attributes: [],
-            },
-          ],
         },
         {
           model: Order,
@@ -188,6 +186,10 @@ export const selectBuyingDetail = async (buyingId: number) => {
       ],
       where: {
         id: buyingId,
+      },
+      replacements: {
+        buyingId: buyingId,
+        companyNumber: companyNumber || '',
       },
       group: 'Buying.id',
     });
@@ -285,15 +287,17 @@ export const selectWholesalerInfo = async (wholesalerCompanyNumber: string) => {
   }
 };
 
-export const findBuying = async (buyingTitle: string) => {
+export const findBuying = async (buyingId: number) => {
   try {
-    const buyingInfo = await Buying.findOne({
-      attributes: ['id', ['liquor_id', 'liquorId']],
-      where: { title: buyingTitle },
+    const buying = await Buying.findOne({
+      where: {
+        id: buyingId,
+      },
     });
-    return buyingInfo;
+
+    return buying;
   } catch (err) {
-    throw new Error('구매 정보 조회 실패');
+    throw new Error('공동구매 조회 실패');
   }
 };
 

@@ -23,6 +23,7 @@ export const selectAllOrders = async (companyNumber: string, status: number | un
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.content'), 'content'],
         [col('State.status'), 'status'],
+        [literal('(SELECT COUNT(*) FROM reviews WHERE reviews.order_id = Order.id)'), 'isWroteReview'],
       ],
       include: [
         {
@@ -168,3 +169,24 @@ export const selectOrderDetail = async (orderId: number) => {
     throw new Error('주문 상세 조회 실패');
   }
 };
+
+export const findOrder = async (orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      include: [
+        {
+          model: Buying,
+          attributes: [],
+        },
+      ],
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order;
+  } catch (err) {
+    throw new Error('주문 조회 실패');
+  }
+};
+

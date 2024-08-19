@@ -3,6 +3,9 @@ import { AllLiquorsDTO } from '../dto/liquors.dto';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Liquor } from '../models/liquors.model';
 import { Like } from '../models/likes.model';
+import { Review } from '../models/reviews.model';
+import { User } from '../models/users.model';
+import { Buying } from '../models/buyings.model';
 
 export const selectLiquorCategories = async () => {
   try {
@@ -32,23 +35,25 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
       attributes: {
         include: [
           [col('LiquorCategory.name'), 'categoryName'],
-          [literal('COUNT(*)'), 'likes'],
+          [literal('(SELECT COUNT(*) FROM likes WHERE likes.liquor_id = :liquorId)'), 'likes'],
           [
             literal(
               '(SELECT COUNT(*) FROM likes WHERE likes.liquor_id = :liquorId AND user_company_number = :companyNumber)',
             ),
             'liked',
           ],
+          [literal('IF(Reviews.id IS NULL, 0, COUNT(*))'), 'reviewCount'],
+          [literal('ROUND(IF(AVG(Reviews.score) IS NULL, FORMAT(0.0, 1), AVG(Reviews.score)), 1)'), 'reviewAvg'],
         ],
         exclude: ['id', 'category_id'],
       },
       include: [
         {
-          model: Like,
+          model: LiquorCategory,
           attributes: [],
         },
         {
-          model: LiquorCategory,
+          model: Review,
           attributes: [],
         },
       ],
@@ -59,6 +64,7 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
         liquorId: liquorId,
         companyNumber: companyNumber || '',
       },
+      group: 'Liquor.id',
     });
 
     return liquor;
@@ -67,15 +73,21 @@ export const selectLiquorDetail = async (liquorId: number, companyNumber: string
   }
 };
 
-export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcohol, page }: AllLiquorsDTO) => {
+export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcohol, page, sort }: AllLiquorsDTO) => {
   try {
     const LIMIT = 9;
     const offset = (page! - 1) * LIMIT;
+    const isSorting = sort === '0' || sort === '1';
     let whereCondition = {};
     let replacements = {};
     if (search) {
-      whereCondition = { ...whereCondition, name: literal('MATCH(Liquor.name) AGAINST(:name IN BOOLEAN MODE)') };
-      replacements = { ...replacements, name: `*${search}*` };
+      if (isSorting) {
+        whereCondition = { ...whereCondition, name: literal('Liquor.name LIKE :name') };
+        replacements = { ...replacements, name: `%${search}%` };
+      } else {
+        whereCondition = { ...whereCondition, name: literal('MATCH(Liquor.name) AGAINST(:name IN BOOLEAN MODE)') };
+        replacements = { ...replacements, name: `${search}*` };
+      }
     }
     if (category) {
       whereCondition = { ...whereCondition, category_id: category };
@@ -90,7 +102,19 @@ export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcoho
     }
 
     const liquors = await Liquor.findAndCountAll({
-      attributes: ['id', 'name', 'description', 'img', [col('LiquorCategory.name'), 'categoryName']],
+      attributes: [
+        'id',
+        'name',
+        'description',
+        'img',
+        [col('LiquorCategory.name'), 'categoryName'],
+        [
+          literal(
+            `(SELECT FORMAT(IFNULL(AVG(reviews.score), 0.0), 1) FROM reviews WHERE Liquor.id = reviews.liquor_id)`,
+          ),
+          'reviewAvg',
+        ],
+      ],
       include: [
         {
           model: LiquorCategory,
@@ -99,6 +123,7 @@ export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcoho
       ],
       where: whereCondition,
       replacements: replacements,
+      order: isSorting ? [['reviewAvg', +sort ? 'asc' : 'desc']] : [],
       limit: LIMIT,
       offset: offset,
     });
@@ -153,5 +178,68 @@ export const deleteLike = async (liquorId: number, companyNumber: string) => {
     });
   } catch (err) {
     throw new Error('좋아요 취소 실패');
+  }
+};
+
+export const selectLiquorReviews = async (liquorId: number, page: number, sort: string | undefined) => {
+  try {
+    const LIMIT = 5;
+    const offset = (page - 1) * LIMIT;
+
+    const reviews = await Review.findAndCountAll({
+      attributes: [
+        [col('User.img'), 'img'],
+        [col('User.business_name'), 'name'],
+        'userCompanyNumber',
+        'content',
+        'score',
+        'createdAt',
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [],
+        },
+      ],
+      where: {
+        liquorId: liquorId,
+      },
+      order: [['score', sort === '1' ? 'asc' : 'desc']],
+      limit: LIMIT,
+      offset: offset,
+    });
+
+    const reviewsAndPagination = {
+      reviews: reviews.rows,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(reviews.count / LIMIT),
+      },
+    };
+
+    return reviewsAndPagination;
+  } catch (err) {
+    throw new Error('리뷰 목록 조회 실패');
+  }
+};
+
+export const selectLiquorOngoingBuying = async (liquorId: number) => {
+  try {
+    const buyings = await Buying.findAll({
+      attributes: [
+        'id',
+        [literal('DATEDIFF(deadline, NOW())'), 'leftDate'],
+        ['title', 'buyingTitle'],
+        ['content', 'buyingContent'],
+      ],
+      where: literal(`liquor_id = :liquorId AND CONCAT(open_date, ' ', open_time) <= NOW() AND deadline >= NOW()`),
+      replacements: {
+        liquorId: liquorId,
+      },
+    });
+
+    return buyings;
+  } catch (err) {
+    throw new Error('해당 주류의 진행 중인 공동구매 목록 조회 실패');
   }
 };

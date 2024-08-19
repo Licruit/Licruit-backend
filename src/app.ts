@@ -2,7 +2,7 @@ import './utils/sentry';
 import { errorMiddleware } from './errorHandler/errorMiddleware';
 import * as Sentry from '@sentry/node';
 import express, { Express, NextFunction, Request, Response } from 'express';
-const app: Express = express();
+export const app: Express = express();
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { sequelize } from './models';

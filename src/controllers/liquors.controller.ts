@@ -7,10 +7,12 @@ import {
   selectLiquor,
   selectLiquorCategories,
   selectLiquorDetail,
+  selectLiquorOngoingBuying,
+  selectLiquorReviews,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
 import { Request, Response } from 'express';
-import { AllLiquorsDTO } from '../dto/liquors.dto';
+import { AllLiquorsDTO, LiquorReviewsDTO } from '../dto/liquors.dto';
 import { isExistedAccessToken, TokenRequest } from '../auth';
 
 export const getLiquorCategories = async (req: Request, res: Response) => {
@@ -27,16 +29,20 @@ export const getLiquorDetail = async (req: Request, res: Response) => {
   const liquorId = parseInt(req.params.liquorId);
 
   const liquor = await selectLiquorDetail(liquorId, companyNumber);
-  if (!liquor?.name) {
+  if (!liquor) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 전통주입니다.');
   }
+  const ongoingBuyings = await selectLiquorOngoingBuying(liquorId);
 
-  return res.status(StatusCodes.OK).json(liquor);
+  return res.status(StatusCodes.OK).json({
+    ...liquor.dataValues,
+    buyings: ongoingBuyings,
+  });
 };
 
 export const getAllLiquors = async (req: Request, res: Response) => {
-  const { search, category, minAlcohol, maxAlcohol, page }: AllLiquorsDTO = req.query;
-  const liquorsAndPagination = await selectAllLiquors({ search, category, minAlcohol, maxAlcohol, page });
+  const { search, category, minAlcohol, maxAlcohol, page, sort }: AllLiquorsDTO = req.query;
+  const liquorsAndPagination = await selectAllLiquors({ search, category, minAlcohol, maxAlcohol, page, sort });
   if (!liquorsAndPagination.liquors.length) {
     throw new HttpException(StatusCodes.NOT_FOUND, '조회할 주류 카탈로그가 없습니다.');
   }
@@ -76,4 +82,16 @@ export const unlikeLiquor = async (req: Request, res: Response) => {
   await deleteLike(liquorId, companyNumber);
 
   return res.status(StatusCodes.OK).end();
+};
+
+export const getLiquorReviews = async (req: Request, res: Response) => {
+  const liquorId = parseInt(req.params.liquorId);
+  const { sort, page }: LiquorReviewsDTO = req.query;
+
+  const liquorReviews = await selectLiquorReviews(liquorId, page!, sort);
+  if (!liquorReviews.reviews.length) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '조회할 리뷰 목록이 없습니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(liquorReviews);
 };
