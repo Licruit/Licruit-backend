@@ -1,3 +1,5 @@
+import { BuyingsAttributes } from '../models/buyings.model';
+
 export type SortType = 'ranking' | 'recent' | 'deadline';
 
 export interface BuyingDTO {
@@ -16,4 +18,8 @@ export interface BuyingDTO {
   liquorId: number;
   companyNumber: string;
   regions: Array<string>;
+}
+
+export interface BuyingDetailVO extends BuyingsAttributes {
+  orderCount?: number;
 }
