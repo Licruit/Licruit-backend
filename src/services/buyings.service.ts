@@ -11,6 +11,7 @@ import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
 import { Blacklist } from '../models/blacklists.model';
 import { State } from '../models/states.model';
+import { getTodayDate } from '../utils/date';
 
 export const addBuying = async ({
   openDate,
@@ -97,7 +98,7 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
       orderByColumn = [['deadline', 'ASC']];
     }
 
-    const today = new Date();
+    const today = getTodayDate();
     const buyings = await Buying.findAndCountAll({
       attributes: [
         'id',
@@ -154,6 +155,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
     const buying = await Buying.findOne({
       attributes: [
         'openDate',
+        'openTime',
         'deadline',
         'deliveryStart',
         'deliveryEnd',

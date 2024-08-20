@@ -15,7 +15,6 @@ import {
   selectBuyingSummary,
   selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
-  // selectOneBuying,
   selectOrderWholesaler,
   selectUserInfo,
   selectWholesalerBuyings,
@@ -23,6 +22,7 @@ import {
   updateAllOrderState,
   updateOrderState,
 } from '../services/buyings.service';
+import { getDate, getTodayDate } from '../utils/date';
 
 export const openBuyings = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
@@ -118,8 +118,9 @@ export const participateBuying = async (req: Request, res: Response) => {
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
-  if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');
+  const today = getTodayDate();
+  if (`${buying.openDate} ${buying.openTime}` > today || buying.deadline.toString() < getDate(today, 'YYYY-MM-DD')) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '진행 중인 공동구매가 아닙니다.');
   }
   if (buying.totalMax && buying.totalMax < buying.orderCount + quantity) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '신청 수량이 현재 가능 수량을 초과했습니다.');
