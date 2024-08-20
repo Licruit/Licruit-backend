@@ -354,11 +354,28 @@ export const selectBuyingSummary = async (companyNumber: string) => {
   }
 };
 
-export const selectWholesalerBuyings = async (companyNumber: string, page: number) => {
+export const selectWholesalerBuyings = async (companyNumber: string, page: number, type: string) => {
   try {
     const LIMIT = 12;
     const offset = (page - 1) * LIMIT;
     const today = new Date();
+
+    let whereCondition: WhereOptions = { wholesalerCompanyNumber: companyNumber };
+    if (type === 'achievement') {
+      whereCondition = {
+        ...whereCondition,
+        [Op.and]: literal(`
+        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) >= Buying.total_min
+      `),
+      };
+    } else if (type === 'shortfall') {
+      whereCondition = {
+        ...whereCondition,
+        [Op.and]: literal(`
+        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) < Buying.total_min
+      `),
+      };
+    }
 
     const buyings = await Buying.findAndCountAll({
       attributes: [
@@ -381,9 +398,7 @@ export const selectWholesalerBuyings = async (companyNumber: string, page: numbe
           attributes: [],
         },
       ],
-      where: {
-        wholesalerCompanyNumber: companyNumber,
-      },
+      where: whereCondition,
       replacements: { today: today },
       limit: LIMIT,
       offset: offset,

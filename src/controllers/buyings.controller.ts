@@ -143,13 +143,14 @@ export const getBuyingSummary = async (req: Request, res: Response) => {
 export const getWholesalerBuyings = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const page = parseInt(req.query.page as string);
+  const type = req.query.type as string;
 
   const wholesaler = await selectWholesaler(companyNumber);
   if (!wholesaler) {
     throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
   }
 
-  const buyings = await selectWholesalerBuyings(companyNumber, page);
+  const buyings = await selectWholesalerBuyings(companyNumber, page, type);
   return res.status(StatusCodes.OK).json(buyings);
 };
 
