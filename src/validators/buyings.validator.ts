@@ -72,6 +72,11 @@ export const buyingIdValidate = param('buyingId')
   .custom((value) => value >= 1)
   .withMessage('공동구매 아이디 확인 필요');
 
+export const orderIdValidate = param('orderId')
+  .isNumeric()
+  .custom((value) => value >= 1)
+  .withMessage('주문번호 확인 필요');
+
 export const quantityValidate = body('quantity')
   .isNumeric()
   .custom((value) => value >= 1)
@@ -97,3 +102,5 @@ export const openValidate = [
   liquorIdValidate,
   regionsValidate,
 ];
+
+export const confirmValidate = [buyingIdValidate, orderIdValidate];

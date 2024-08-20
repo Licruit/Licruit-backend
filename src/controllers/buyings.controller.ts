@@ -15,9 +15,12 @@ import {
   selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
   selectOneBuying,
+  selectOrderWholesaler,
   selectUserInfo,
   selectWholesalerBuyings,
   selectWholesalerInfo,
+  updateAllOrderState,
+  updateOrderState,
 } from '../services/buyings.service';
 
 export const openBuyings = async (req: Request, res: Response) => {
@@ -143,13 +146,14 @@ export const getBuyingSummary = async (req: Request, res: Response) => {
 export const getWholesalerBuyings = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const page = parseInt(req.query.page as string);
+  const type = req.query.type as string;
 
   const wholesaler = await selectWholesaler(companyNumber);
   if (!wholesaler) {
     throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
   }
 
-  const buyings = await selectWholesalerBuyings(companyNumber, page);
+  const buyings = await selectWholesalerBuyings(companyNumber, page, type);
   return res.status(StatusCodes.OK).json(buyings);
 };
 
@@ -177,11 +181,47 @@ export const getUserInfo = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
   }
 
-  const buyingWholesaler = await selectBuyingWholesaler(orderId);
+  const buyingWholesaler = await selectOrderWholesaler(orderId);
   if (companyNumber !== buyingWholesaler) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
   }
 
   const userInfo = await selectUserInfo(orderId);
   return res.status(StatusCodes.OK).json(userInfo);
+};
+
+export const confirmAllOrder = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const buyingId = parseInt(req.params.buyingId);
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyingWholesaler = await selectBuyingWholesaler(buyingId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+  await updateAllOrderState(buyingId);
+  return res.status(StatusCodes.OK).json({ message: '모든 주문 상태가 업데이트 되었습니다.' });
+};
+
+export const confirmOrder = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const buyingId = parseInt(req.params.buyingId);
+  const orderId = parseInt(req.params.orderId);
+
+  const wholesaler = await selectWholesaler(companyNumber);
+  if (!wholesaler) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
+  }
+
+  const buyingWholesaler = await selectOrderWholesaler(orderId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  await updateOrderState(buyingId, orderId);
+  return res.status(StatusCodes.OK).json({ message: '주문 상태가 업데이트 되었습니다.' });
 };

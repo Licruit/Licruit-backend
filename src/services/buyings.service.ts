@@ -354,11 +354,28 @@ export const selectBuyingSummary = async (companyNumber: string) => {
   }
 };
 
-export const selectWholesalerBuyings = async (companyNumber: string, page: number) => {
+export const selectWholesalerBuyings = async (companyNumber: string, page: number, type: string) => {
   try {
     const LIMIT = 12;
     const offset = (page - 1) * LIMIT;
     const today = new Date();
+
+    let whereCondition: WhereOptions = { wholesalerCompanyNumber: companyNumber };
+    if (type === 'achievement') {
+      whereCondition = {
+        ...whereCondition,
+        [Op.and]: literal(`
+        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) >= Buying.total_min
+      `),
+      };
+    } else if (type === 'shortfall') {
+      whereCondition = {
+        ...whereCondition,
+        [Op.and]: literal(`
+        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) < Buying.total_min
+      `),
+      };
+    }
 
     const buyings = await Buying.findAndCountAll({
       attributes: [
@@ -381,9 +398,7 @@ export const selectWholesalerBuyings = async (companyNumber: string, page: numbe
           attributes: [],
         },
       ],
-      where: {
-        wholesalerCompanyNumber: companyNumber,
-      },
+      where: whereCondition,
       replacements: { today: today },
       limit: LIMIT,
       offset: offset,
@@ -464,7 +479,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
   }
 };
 
-export const selectBuyingWholesaler = async (orderId: number) => {
+export const selectOrderWholesaler = async (orderId: number) => {
   try {
     const buyingWholesaler = await Buying.findOne({
       include: [
@@ -480,6 +495,19 @@ export const selectBuyingWholesaler = async (orderId: number) => {
     return buyingWholesaler?.getDataValue('wholesalerCompanyNumber');
   } catch (err) {
     throw new Error('잘못된 주문번호 입니다.');
+  }
+};
+
+export const selectBuyingWholesaler = async (buyingId: number) => {
+  try {
+    const buyingWholesaler = await Buying.findOne({
+      attributes: ['wholesalerCompanyNumber'],
+      where: { id: buyingId },
+    });
+
+    return buyingWholesaler?.getDataValue('wholesalerCompanyNumber');
+  } catch (err) {
+    throw new Error('잘못된 공동구매 번호 입니다.');
   }
 };
 
@@ -522,5 +550,31 @@ export const selectUserInfo = async (orderId: number) => {
     return userInfo;
   } catch (err) {
     throw new Error('구매자 정보 조회 실패');
+  }
+};
+
+export const updateAllOrderState = async (buyingId: number) => {
+  try {
+    await Order.update(
+      {
+        stateId: 3,
+      },
+      { where: { buyingId: buyingId } },
+    );
+  } catch (err) {
+    throw new Error('공동구매 전체 주문자 상태 업데이트 실패');
+  }
+};
+
+export const updateOrderState = async (buyingId: number, orderId: number) => {
+  try {
+    await Order.update(
+      {
+        stateId: 3,
+      },
+      { where: { id: orderId, buyingId: buyingId } },
+    );
+  } catch (err) {
+    throw new Error('공동구매 주문자 상태 업데이트 실패');
   }
 };
