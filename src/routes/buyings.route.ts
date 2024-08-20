@@ -3,6 +3,7 @@ import { accessTokenValidate } from '../auth';
 import {
   allBuyingsValidate,
   buyingIdValidate,
+  confirmValidate,
   openValidate,
   participateBuyingValidate,
 } from '../validators/buyings.validator';
@@ -18,6 +19,8 @@ import {
   getWholesalerBuyings,
   getBuyingOrderList,
   getUserInfo,
+  confirmAllOrder,
+  confirmOrder,
 } from '../controllers/buyings.controller';
 import { pageValidate } from '../validators/liquors.validator';
 export const router: Router = express.Router();
@@ -39,3 +42,13 @@ router.post(
   wrapAsyncController(participateBuying),
 );
 router.get('/wholesaler/order/:orderId', [accessTokenValidate], wrapAsyncController(getUserInfo));
+router.put(
+  '/wholesaler/confirm/:buyingId',
+  [accessTokenValidate, buyingIdValidate, validate],
+  wrapAsyncController(confirmAllOrder),
+);
+router.put(
+  '/wholesaler/confirm/:buyingId/:orderId',
+  [accessTokenValidate, ...confirmValidate, validate],
+  wrapAsyncController(confirmOrder),
+);
