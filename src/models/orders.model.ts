@@ -4,7 +4,7 @@ import { Buying } from './buyings.model';
 import { User } from './users.model';
 import { State } from './states.model';
 
-interface OrdersAttributes {
+export interface OrdersAttributes {
   id?: CreationOptional<number>;
   buyingId: number;
   userCompanyNumber: string;

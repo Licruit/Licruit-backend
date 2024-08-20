@@ -121,7 +121,7 @@ export const participateBuying = async (req: Request, res: Response) => {
   if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');
   }
-  if ((buying.totalMax as number) < buying.orderCount + quantity) {
+  if (buying.totalMax && buying.totalMax < buying.orderCount + quantity) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '신청 수량이 현재 가능 수량을 초과했습니다.');
   }
 

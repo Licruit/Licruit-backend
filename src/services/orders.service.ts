@@ -116,19 +116,30 @@ export const isOrderOwner = async (companyNumber: string, orderId: number) => {
   }
 };
 
-export const updateCanceledOrder = async (orderId: number) => {
+export const updateCanceledOrder = async (orderId: number, deadline: string) => {
   try {
-    await Order.update(
-      {
-        stateId: 6,
-        updatedAt: new Date(),
-      },
-      {
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
+
+    if (today < new Date(deadline)) {
+      await Order.destroy({
         where: {
           id: orderId,
         },
-      },
-    );
+      });
+    } else {
+      await Order.update(
+        {
+          stateId: 6,
+          updatedAt: new Date(),
+        },
+        {
+          where: {
+            id: orderId,
+          },
+        },
+      );
+    }
   } catch (err) {
     throw new Error('주문 취소 실패');
   }
@@ -151,5 +162,26 @@ export const findOrder = async (orderId: number) => {
     return order;
   } catch (err) {
     throw new Error('주문 조회 실패');
+  }
+};
+
+export const selectOwnerAndDeadline = async (orderId: number) => {
+  try {
+    const order = await Order.findOne({
+      attributes: ['userCompanyNumber', [col('Buying.deadline'), 'deadline']],
+      include: [
+        {
+          model: Buying,
+          attributes: [],
+        },
+      ],
+      where: {
+        id: orderId,
+      },
+    });
+
+    return order;
+  } catch (err) {
+    throw new Error('주문자와 마감일 조회 실패');
   }
 };
