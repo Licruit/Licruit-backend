@@ -83,10 +83,10 @@ export const addBuying = async ({
   }
 };
 
-export const selectAllBuyings = async (sort: SortType, page: number) => {
+export const selectAllBuyings = async (sort: SortType, page: number, region: number | undefined) => {
   try {
     const LIMIT = 8;
-    const offset = (page - 1) * LIMIT;
+    const offset = (+page - 1) * LIMIT;
 
     let orderByColumn = [['orderCount', 'DESC']];
     if (sort === 'recent') {
@@ -125,6 +125,11 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
             },
           ],
         },
+        {
+          model: DeliveryRegion,
+          attributes: [],
+          where: region ? { regionId: region } : {},
+        },
       ],
       where: {
         openDate: { [Op.lte]: today },
@@ -134,12 +139,13 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
       order: orderByColumn as OrderItem[],
       limit: LIMIT,
       offset: offset,
+      subQuery: false,
     });
 
     const buyingsAndPagination = {
       buyings: buyings.rows,
       pagination: {
-        currentPage: page,
+        currentPage: +page,
         totalPage: Math.ceil(buyings.count / LIMIT),
       },
     };

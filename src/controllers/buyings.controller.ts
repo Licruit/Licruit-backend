@@ -3,7 +3,7 @@ import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
 import { isExistedAccessToken, TokenRequest } from '../auth';
 import { selectWholesaler } from '../services/users.service';
-import { BuyingDetailVO, BuyingDTO, SortType } from '../dto/buyings.dto';
+import { AllBuyingsDTO, BuyingDetailVO, BuyingDTO } from '../dto/buyings.dto';
 import {
   addBuying,
   findBuying,
@@ -70,10 +70,9 @@ export const openBuyings = async (req: Request, res: Response) => {
 };
 
 export const getAllBuygins = async (req: Request, res: Response) => {
-  const sort = req.query.sort as SortType;
-  const page = parseInt(req.query.page as string);
+  const { sort, page, region }: AllBuyingsDTO = req.query;
 
-  const buyingList = await selectAllBuyings(sort, page);
+  const buyingList = await selectAllBuyings(sort!, page!, region);
   if (!buyingList.buyings.length) {
     throw new HttpException(StatusCodes.NOT_FOUND, '조회할 공동구매 목록이 없습니다.');
   }

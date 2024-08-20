@@ -82,7 +82,13 @@ export const quantityValidate = body('quantity')
   .custom((value) => value >= 1)
   .withMessage('구매 수량 확인 필요');
 
-export const allBuyingsValidate = [pageValidate, buyingsListFilterValidate];
+export const regionIdValidate = query('region')
+  .optional()
+  .isNumeric()
+  .custom((value) => value >= 1)
+  .withMessage('지역 번호 확인 필요');
+
+export const allBuyingsValidate = [pageValidate, buyingsListFilterValidate, regionIdValidate];
 
 export const participateBuyingValidate = [buyingIdValidate, quantityValidate];
 
