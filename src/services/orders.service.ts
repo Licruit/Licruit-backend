@@ -18,12 +18,20 @@ export const selectAllOrders = async (companyNumber: string, status: number | un
       attributes: [
         'id',
         [literal('DATE(DATE_ADD(Order.created_at, INTERVAL 9 HOUR))'), 'createdAt'],
+        [col('Buying.id'), 'buyingId'],
         [col('Buying->Liquor.img'), 'img'],
         [col('Buying.title'), 'title'],
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.content'), 'content'],
         [col('State.status'), 'status'],
-        [literal('(SELECT COUNT(*) FROM reviews WHERE reviews.order_id = Order.id)'), 'isWroteReview'],
+        [literal('EXISTS(SELECT * FROM reviews WHERE reviews.order_id = Order.id)'), 'isWroteReview'],
+        [
+          literal(
+            'IF(Buying.free_delivery_fee <= Buying.price * Order.quantity, 0, Buying.delivery_fee) + Buying.price * Order.quantity',
+          ),
+          'totalPrice',
+        ],
+        'quantity',
       ],
       include: [
         {
@@ -126,50 +134,6 @@ export const updateCanceledOrder = async (orderId: number) => {
   }
 };
 
-export const selectOrderDetail = async (orderId: number) => {
-  try {
-    const order = await Order.findOne({
-      attributes: [
-        [col('Buying->Liquor.img'), 'img'],
-        [col('Buying.title'), 'title'],
-        [col('Buying->Liquor.name'), 'liquorName'],
-        [col('Buying.content'), 'content'],
-        [col('State.status'), 'status'],
-        'createdAt',
-        'quantity',
-        [col('Buying.price'), 'pricePerBottle'],
-        [
-          literal('IF(Buying.free_delivery_fee <= Buying.price * Order.quantity, 0, Buying.delivery_fee)'),
-          'devlieryFee',
-        ],
-      ],
-      include: [
-        {
-          model: Buying,
-          attributes: [],
-          include: [
-            {
-              model: Liquor,
-              attributes: [],
-            },
-          ],
-        },
-        {
-          model: State,
-          attributes: [],
-        },
-      ],
-      where: {
-        id: orderId,
-      },
-    });
-
-    return order;
-  } catch (err) {
-    throw new Error('주문 상세 조회 실패');
-  }
-};
-
 export const findOrder = async (orderId: number) => {
   try {
     const order = await Order.findOne({
@@ -189,4 +153,3 @@ export const findOrder = async (orderId: number) => {
     throw new Error('주문 조회 실패');
   }
 };
-
