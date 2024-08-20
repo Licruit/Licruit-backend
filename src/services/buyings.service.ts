@@ -169,7 +169,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
         [col('Liquor.name'), 'liquorName'],
         [
           literal(
-            '(SELECT IF(COUNT(*), 1, 0) FROM orders WHERE orders.buying_id = :buyingId AND user_company_number = :companyNumber)',
+            'EXISTS(SELECT * FROM orders WHERE orders.buying_id = :buyingId AND user_company_number = :companyNumber)',
           ),
           'isParticipated',
         ],
@@ -222,16 +222,6 @@ export const selectDeliveryAvaliableAreas = async (buyingId: number) => {
     return regionArray;
   } catch (err) {
     throw new Error('배송 가능 지역 조회 실패');
-  }
-};
-
-export const selectOneBuying = async (buyingId: number) => {
-  try {
-    const buying = await Buying.findOne({ where: { id: buyingId } });
-
-    return buying;
-  } catch (err) {
-    throw new Error('공동구매 개별 조회 실패');
   }
 };
 

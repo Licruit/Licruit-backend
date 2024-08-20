@@ -3,9 +3,10 @@ import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
 import { isExistedAccessToken, TokenRequest } from '../auth';
 import { selectWholesaler } from '../services/users.service';
-import { BuyingDTO, SortType } from '../dto/buyings.dto';
+import { BuyingDetailVO, BuyingDTO, SortType } from '../dto/buyings.dto';
 import {
   addBuying,
+  findBuying,
   insertOrder,
   selectAllBuyings,
   selectBlacklistCount,
@@ -14,7 +15,7 @@ import {
   selectBuyingSummary,
   selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
-  selectOneBuying,
+  // selectOneBuying,
   selectOrderWholesaler,
   selectUserInfo,
   selectWholesalerBuyings,
@@ -99,7 +100,7 @@ export const getBuyingDetail = async (req: Request, res: Response) => {
 export const getWholesalerInfo = async (req: Request, res: Response) => {
   const buyingId = parseInt(req.params.buyingId);
 
-  const buying = await selectOneBuying(buyingId);
+  const buying = await findBuying(buyingId);
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
@@ -113,12 +114,15 @@ export const participateBuying = async (req: Request, res: Response) => {
   const buyingId = parseInt(req.params.buyingId);
   const { quantity } = req.body;
 
-  const buying = await selectOneBuying(buyingId);
+  const buying = (await selectBuyingDetail(buyingId, companyNumber))?.dataValues as BuyingDetailVO;
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
   if (new Date(`${buying.openDate} ${buying.openTime}`) > new Date()) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '아직 오픈되지 않은 공동구매입니다.');
+  }
+  if (buying.totalMax && buying.totalMax < buying.orderCount + quantity) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '신청 수량이 현재 가능 수량을 초과했습니다.');
   }
 
   const blacklistCount = await selectBlacklistCount(companyNumber);

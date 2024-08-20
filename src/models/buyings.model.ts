@@ -3,7 +3,7 @@ import { sequelize } from './index';
 import { Liquor } from './liquors.model';
 import { Wholesaler } from './wholesalers.model';
 
-interface BuyingsAttributes {
+export interface BuyingsAttributes {
   id?: CreationOptional<number>;
   openDate: CreationOptional<Date>;
   deadline: CreationOptional<Date>;

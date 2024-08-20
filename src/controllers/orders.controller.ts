@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { TokenRequest } from '../auth';
-import { AllOrdersDTO } from '../dto/orders.dto';
+import { AllOrdersDTO, OwnerAndDeadlineVO } from '../dto/orders.dto';
 import {
-  isOrderOwner,
   selectAllOrders,
-  selectOrderDetail,
   selectOrderSummary,
+  selectOwnerAndDeadline,
   updateCanceledOrder,
 } from '../services/orders.service';
 import HttpException from '../utils/httpExeption';
@@ -35,24 +34,12 @@ export const cancelOrder = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const orderId = parseInt(req.params.orderId);
 
-  const isOwner = await isOrderOwner(companyNumber, orderId);
-  if (!isOwner) {
+  const order = (await selectOwnerAndDeadline(orderId))?.dataValues as OwnerAndDeadlineVO;
+  if (!order || order.userCompanyNumber !== companyNumber) {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '해당 주문에 접근 권한이 없습니다.');
   }
-  await updateCanceledOrder(orderId);
+
+  await updateCanceledOrder(orderId, order.deadline!);
 
   return res.status(StatusCodes.OK).end();
-};
-
-export const getOrderDetail = async (req: Request, res: Response) => {
-  const companyNumber = (req as TokenRequest).token.companyNumber;
-  const orderId = parseInt(req.params.orderId);
-
-  const isOwner = await isOrderOwner(companyNumber, orderId);
-  if (!isOwner) {
-    throw new HttpException(StatusCodes.UNAUTHORIZED, '해당 주문에 접근 권한이 없습니다.');
-  }
-  const orderDetail = await selectOrderDetail(orderId);
-
-  return res.status(StatusCodes.OK).json(orderDetail);
 };
