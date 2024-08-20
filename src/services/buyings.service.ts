@@ -164,7 +164,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
         'freeDeliveryFee',
         'title',
         'content',
-        [literal('SUM(Orders.quantity)'), 'orderCount'],
+        [literal('CAST(SUM(Orders.quantity) AS SIGNED)'), 'orderCount'],
         [col('Liquor.id'), 'liquorId'],
         [col('Liquor.name'), 'liquorName'],
         [
