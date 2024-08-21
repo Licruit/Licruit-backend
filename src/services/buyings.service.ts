@@ -577,8 +577,15 @@ export const updateOrderState = async (buyingId: number, orderId: number) => {
 
 export const deleteBuying = async (buyingId: number) => {
   try {
-    await Buying.destroy({ where: { id: buyingId } });
+    const today = getTodayDate('YYYY-MM-DD');
+
+    const result = await Buying.destroy({ where: { id: buyingId, deadline: { [Op.gt]: today } } });
+    if (result === 0) {
+      throw new Error('삭제할 수 있는 공동구매가 없거나, 이미 마감되었음');
+    }
   } catch (err) {
-    throw new Error('공동구매 삭제 실패');
+    if (err instanceof Error) {
+      throw new Error(`공동구매 삭제 실패: ${err.message}`);
+    }
   }
 };
