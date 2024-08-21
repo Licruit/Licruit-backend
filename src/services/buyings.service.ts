@@ -11,6 +11,7 @@ import { Wholesaler } from '../models/wholesalers.model';
 import { User } from '../models/users.model';
 import { Blacklist } from '../models/blacklists.model';
 import { State } from '../models/states.model';
+import { getTodayDate } from '../utils/date';
 
 export const addBuying = async ({
   openDate,
@@ -82,10 +83,10 @@ export const addBuying = async ({
   }
 };
 
-export const selectAllBuyings = async (sort: SortType, page: number) => {
+export const selectAllBuyings = async (sort: SortType, page: number, region: number | undefined) => {
   try {
     const LIMIT = 8;
-    const offset = (page - 1) * LIMIT;
+    const offset = (+page - 1) * LIMIT;
 
     let orderByColumn = [['orderCount', 'DESC']];
     if (sort === 'recent') {
@@ -97,7 +98,7 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
       orderByColumn = [['deadline', 'ASC']];
     }
 
-    const today = new Date();
+    const today = getTodayDate();
     const buyings = await Buying.findAndCountAll({
       attributes: [
         'id',
@@ -124,6 +125,11 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
             },
           ],
         },
+        {
+          model: DeliveryRegion,
+          attributes: [],
+          where: region ? { regionId: region } : {},
+        },
       ],
       where: {
         openDate: { [Op.lte]: today },
@@ -133,12 +139,13 @@ export const selectAllBuyings = async (sort: SortType, page: number) => {
       order: orderByColumn as OrderItem[],
       limit: LIMIT,
       offset: offset,
+      subQuery: false,
     });
 
     const buyingsAndPagination = {
       buyings: buyings.rows,
       pagination: {
-        currentPage: page,
+        currentPage: +page,
         totalPage: Math.ceil(buyings.count / LIMIT),
       },
     };
@@ -154,6 +161,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
     const buying = await Buying.findOne({
       attributes: [
         'openDate',
+        'openTime',
         'deadline',
         'deliveryStart',
         'deliveryEnd',
@@ -164,7 +172,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
         'freeDeliveryFee',
         'title',
         'content',
-        [literal('SUM(Orders.quantity)'), 'orderCount'],
+        [literal('CAST(SUM(Orders.quantity) AS SIGNED)'), 'orderCount'],
         [col('Liquor.id'), 'liquorId'],
         [col('Liquor.name'), 'liquorName'],
         [

@@ -23,3 +23,9 @@ export interface BuyingDTO {
 export interface BuyingDetailVO extends BuyingsAttributes {
   orderCount?: number;
 }
+
+export interface AllBuyingsDTO {
+  sort?: SortType;
+  page?: number;
+  region?: number;
+}
