@@ -230,6 +230,10 @@ export const removeBuying = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
   }
 
-  await deleteBuying(buyingId);
+  const result = await deleteBuying(buyingId);
+  if (result === 0) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 마감된 공동구매 입니다.');
+  }
+
   return res.status(StatusCodes.OK).end();
 };

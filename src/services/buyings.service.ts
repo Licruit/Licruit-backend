@@ -580,12 +580,8 @@ export const deleteBuying = async (buyingId: number) => {
     const today = getTodayDate('YYYY-MM-DD');
 
     const result = await Buying.destroy({ where: { id: buyingId, deadline: { [Op.gt]: today } } });
-    if (result === 0) {
-      throw new Error('삭제할 수 있는 공동구매가 없거나, 이미 마감되었음');
-    }
+    return result;
   } catch (err) {
-    if (err instanceof Error) {
-      throw new Error(`공동구매 삭제 실패: ${err.message}`);
-    }
+    throw new Error('공동구매 삭제 실패');
   }
 };
