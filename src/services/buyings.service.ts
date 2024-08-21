@@ -100,7 +100,7 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
 
     const today = getTodayDate('YYYY-MM-DD');
     const currentTime = getTodayDate('HH:mm:ss');
-    console.log('currentTime', currentTime);
+
     const buyings = await Buying.findAndCountAll({
       attributes: [
         'id',
