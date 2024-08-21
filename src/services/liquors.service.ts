@@ -248,7 +248,6 @@ export const selectLiquorOngoingBuyings = async (liquorId: number) => {
 
     return buyings;
   } catch (err) {
-    console.log(err);
     throw new Error('해당 주류의 진행 중인 공동구매 목록 조회 실패');
   }
 };
