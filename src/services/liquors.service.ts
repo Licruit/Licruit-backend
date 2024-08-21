@@ -213,7 +213,7 @@ export const selectLiquorReviews = async (liquorId: number, page: number, sort: 
     const reviewsAndPagination = {
       reviews: reviews.rows,
       pagination: {
-        currentPage: page,
+        currentPage: +page,
         totalPage: Math.ceil(reviews.count / LIMIT),
       },
     };
