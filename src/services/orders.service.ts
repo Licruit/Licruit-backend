@@ -3,7 +3,7 @@ import { Order } from '../models/orders.model';
 import { Buying } from '../models/buyings.model';
 import { Liquor } from '../models/liquors.model';
 import { State } from '../models/states.model';
-import { getDate, getTodayDate } from '../utils/date';
+import { getTodayDate } from '../utils/date';
 
 export const selectAllOrders = async (companyNumber: string, status: number | undefined, page: number) => {
   try {
@@ -119,7 +119,7 @@ export const isOrderOwner = async (companyNumber: string, orderId: number) => {
 
 export const updateCanceledOrder = async (orderId: number, deadline: string) => {
   try {
-    const today = getDate(getTodayDate(), 'YYYY-MM-DD');
+    const today = getTodayDate('YYYY-MM-DD');
 
     if (today <= deadline) {
       await Order.destroy({

@@ -22,7 +22,7 @@ import {
   updateAllOrderState,
   updateOrderState,
 } from '../services/buyings.service';
-import { getDate, getTodayDate } from '../utils/date';
+import { getTodayDate } from '../utils/date';
 
 export const openBuyings = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
@@ -117,8 +117,8 @@ export const participateBuying = async (req: Request, res: Response) => {
   if (!buying) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 공동구매입니다.');
   }
-  const today = getTodayDate();
-  if (`${buying.openDate} ${buying.openTime}` > today || buying.deadline.toString() < getDate(today, 'YYYY-MM-DD')) {
+  const today = getTodayDate('YYYY-MM-DD HH:mm:ss');
+  if (`${buying.openDate} ${buying.openTime}` > today || buying.deadline.toString() < today.substring(0, 10)) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '진행 중인 공동구매가 아닙니다.');
   }
   if (buying.totalMax && buying.totalMax < buying.orderCount + quantity) {
