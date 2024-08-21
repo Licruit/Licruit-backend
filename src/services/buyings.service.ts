@@ -362,18 +362,13 @@ export const selectWholesalerBuyings = async (companyNumber: string, page: numbe
     const today = new Date();
 
     let whereCondition: WhereOptions = { wholesalerCompanyNumber: companyNumber };
-    if (type === 'achievement') {
+    if (type === 'achievement' || type === 'shortfall') {
+      const operator = type === 'achievement' ? '>=' : '<';
+
       whereCondition = {
         ...whereCondition,
         [Op.and]: literal(`
-        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) >= Buying.total_min
-      `),
-      };
-    } else if (type === 'shortfall') {
-      whereCondition = {
-        ...whereCondition,
-        [Op.and]: literal(`
-        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) < Buying.total_min
+        (SELECT IF(SUM(quantity) IS NULL, 0, SUM(quantity)) FROM orders WHERE orders.buying_id = Buying.id) ${operator} Buying.total_min
       `),
       };
     }
