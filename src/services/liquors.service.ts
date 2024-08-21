@@ -251,3 +251,24 @@ export const selectLiquorOngoingBuyings = async (liquorId: number) => {
     throw new Error('해당 주류의 진행 중인 공동구매 목록 조회 실패');
   }
 };
+
+export const selectNewLiquors = async () => {
+  try {
+    const newLiquors = await Liquor.findAll({
+      attributes: ['id', [col('LiquorCategory.name'), 'categoryName'], 'name', 'description', 'img'],
+      include: [
+        {
+          model: LiquorCategory,
+          attributes: [],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 3,
+    });
+
+    return newLiquors;
+  } catch (err) {
+    console.log(err);
+    throw new Error('최신 주류 조회 실패');
+  }
+};

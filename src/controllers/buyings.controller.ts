@@ -6,6 +6,7 @@ import { selectWholesaler } from '../services/users.service';
 import { AllBuyingsDTO, BuyingDetailVO, BuyingDTO } from '../dto/buyings.dto';
 import {
   addBuying,
+  deleteBuying,
   findBuying,
   insertOrder,
   selectAllBuyings,
@@ -198,17 +199,12 @@ export const confirmAllOrder = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
   const buyingId = parseInt(req.params.buyingId);
 
-  const wholesaler = await selectWholesaler(companyNumber);
-  if (!wholesaler) {
-    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
-  }
-
   const buyingWholesaler = await selectBuyingWholesaler(buyingId);
   if (companyNumber !== buyingWholesaler) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
   }
   await updateAllOrderState(buyingId);
-  return res.status(StatusCodes.OK).json({ message: '모든 주문 상태가 업데이트 되었습니다.' });
+  return res.status(StatusCodes.OK).end();
 };
 
 export const confirmOrder = async (req: Request, res: Response) => {
@@ -216,16 +212,28 @@ export const confirmOrder = async (req: Request, res: Response) => {
   const buyingId = parseInt(req.params.buyingId);
   const orderId = parseInt(req.params.orderId);
 
-  const wholesaler = await selectWholesaler(companyNumber);
-  if (!wholesaler) {
-    throw new HttpException(StatusCodes.NOT_FOUND, '도매업자가 아닙니다.');
-  }
-
   const buyingWholesaler = await selectOrderWholesaler(orderId);
   if (companyNumber !== buyingWholesaler) {
     throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
   }
 
   await updateOrderState(buyingId, orderId);
-  return res.status(StatusCodes.OK).json({ message: '주문 상태가 업데이트 되었습니다.' });
+  return res.status(StatusCodes.OK).end();
+};
+
+export const removeBuying = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const buyingId = parseInt(req.params.buyingId);
+
+  const buyingWholesaler = await selectBuyingWholesaler(buyingId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  const result = await deleteBuying(buyingId);
+  if (result === 0) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 마감된 공동구매 입니다.');
+  }
+
+  return res.status(StatusCodes.OK).end();
 };

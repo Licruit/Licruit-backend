@@ -9,6 +9,7 @@ import {
   selectLiquorDetail,
   selectLiquorOngoingBuyings,
   selectLiquorReviews,
+  selectNewLiquors,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
 import { Request, Response } from 'express';
@@ -92,6 +93,7 @@ export const getLiquorReviews = async (req: Request, res: Response) => {
   return res.status(StatusCodes.OK).json(liquorReviews);
 };
 
+
 export const getLiquorOngoingBuyings = async (req: Request, res: Response) => {
   const liquorId = parseInt(req.params.liquorId);
 
@@ -101,4 +103,13 @@ export const getLiquorOngoingBuyings = async (req: Request, res: Response) => {
   }
 
   return res.status(StatusCodes.OK).json(buyings);
+}
+
+export const getNewLiquors = async (req: Request, res: Response) => {
+  const newLiquors = await selectNewLiquors();
+  if (!newLiquors) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '등록된 주류가 존재하지 않습니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(newLiquors);
 };

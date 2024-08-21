@@ -7,6 +7,7 @@ import {
   getLiquorDetail,
   getLiquorOngoingBuyings,
   getLiquorReviews,
+  getNewLiquors,
   likeLiquor,
   unlikeLiquor,
 } from '../controllers/liquors.controller';
@@ -17,6 +18,8 @@ import { accessTokenValidate } from '../auth';
 router.get('/', [pageValidate, validate], wrapAsyncController(getAllLiquors));
 
 router.get('/category', wrapAsyncController(getLiquorCategories));
+
+router.get('/new', wrapAsyncController(getNewLiquors));
 
 router.get('/:liquorId', [liquorIdValidate, validate], wrapAsyncController(getLiquorDetail));
 
