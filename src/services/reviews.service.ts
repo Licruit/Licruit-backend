@@ -62,7 +62,6 @@ export const selectReviews = async (page: number) => {
 
     return reviewsAndPagination;
   } catch (err) {
-    console.log(err);
     throw new Error('리뷰 조회 실패');
   }
 };
