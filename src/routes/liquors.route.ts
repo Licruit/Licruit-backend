@@ -5,6 +5,7 @@ import {
   getAllLiquors,
   getLiquorCategories,
   getLiquorDetail,
+  getLiquorOngoingBuyings,
   getLiquorReviews,
   getNewLiquors,
   likeLiquor,
@@ -27,3 +28,5 @@ router.post('/:liquorId/likes', [accessTokenValidate, liquorIdValidate, validate
 router.delete('/:liquorId/likes', [accessTokenValidate, liquorIdValidate, validate], wrapAsyncController(unlikeLiquor));
 
 router.get('/:liquorId/reviews', [...liquorReviewsValidate, validate], wrapAsyncController(getLiquorReviews));
+
+router.get('/:liquorId/buyings', [liquorIdValidate, validate], wrapAsyncController(getLiquorOngoingBuyings));

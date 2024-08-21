@@ -6,6 +6,7 @@ import { Like } from '../models/likes.model';
 import { Review } from '../models/reviews.model';
 import { User } from '../models/users.model';
 import { Buying } from '../models/buyings.model';
+import { getTodayDate } from '../utils/date';
 
 export const selectLiquorCategories = async () => {
   try {
@@ -212,7 +213,7 @@ export const selectLiquorReviews = async (liquorId: number, page: number, sort: 
     const reviewsAndPagination = {
       reviews: reviews.rows,
       pagination: {
-        currentPage: page,
+        currentPage: +page,
         totalPage: Math.ceil(reviews.count / LIMIT),
       },
     };
@@ -223,18 +224,25 @@ export const selectLiquorReviews = async (liquorId: number, page: number, sort: 
   }
 };
 
-export const selectLiquorOngoingBuying = async (liquorId: number) => {
+export const selectLiquorOngoingBuyings = async (liquorId: number) => {
   try {
+    const todayDateTime = getTodayDate('YYYY-MM-DD HH:mm:ss');
+    const todayDate = todayDateTime.substring(0, 10);
+
     const buyings = await Buying.findAll({
       attributes: [
         'id',
-        [literal('DATEDIFF(deadline, NOW())'), 'leftDate'],
+        [literal('DATEDIFF(deadline, :todayDate)'), 'leftDate'],
         ['title', 'buyingTitle'],
         ['content', 'buyingContent'],
       ],
-      where: literal(`liquor_id = :liquorId AND CONCAT(open_date, ' ', open_time) <= NOW() AND deadline >= NOW()`),
+      where: literal(
+        `liquor_id = :liquorId AND CONCAT(open_date, ' ', open_time) <= :todayDateTime AND deadline >= :todayDate`,
+      ),
       replacements: {
-        liquorId: liquorId,
+        liquorId,
+        todayDateTime,
+        todayDate,
       },
     });
 

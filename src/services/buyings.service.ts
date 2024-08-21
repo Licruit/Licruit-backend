@@ -98,9 +98,9 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
       orderByColumn = [['deadline', 'ASC']];
     }
 
-    const today = getTodayDate('YYYY-MM-DD');
-    const currentTime = getTodayDate('HH:mm:ss');
-    console.log('currentTime', currentTime);
+    const todayDateTime = getTodayDate('YYYY-MM-DD HH:mm:ss');
+    const todayDate = todayDateTime.substring(0, 10);
+
     const buyings = await Buying.findAndCountAll({
       attributes: [
         'id',
@@ -108,7 +108,7 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
         'content',
         'price',
         [literal('(SELECT IFNULL(SUM(quantity), 0) FROM orders WHERE orders.buying_id = Buying.id)'), 'orderCount'],
-        [literal('DATEDIFF(Buying.deadline, :today)'), 'leftDate'],
+        [literal('DATEDIFF(Buying.deadline, :todayDate)'), 'leftDate'],
         [col('Liquor.img'), 'img'],
         [col('Liquor.name'), 'liquorName'],
         [col('Liquor.alcohol'), 'alcohol'],
@@ -133,12 +133,8 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
           where: region ? { regionId: region } : {},
         },
       ],
-      where: {
-        openDate: { [Op.lte]: today },
-        openTime: { [Op.lte]: currentTime },
-        deadline: { [Op.gte]: today },
-      },
-      replacements: { today: today },
+      where: literal(`CONCAT(open_date, ' ', open_time) <= :todayDateTime AND deadline >= :todayDate`),
+      replacements: { todayDate, todayDateTime },
       order: orderByColumn as OrderItem[],
       limit: LIMIT,
       offset: offset,

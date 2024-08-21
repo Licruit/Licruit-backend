@@ -3,7 +3,7 @@ import { TokenRequest } from '../auth';
 import { findBuying } from '../services/buyings.service';
 import { ReviewInputDTO } from '../dto/reviews.dto';
 import { StatusCodes } from 'http-status-codes';
-import { insertReview } from '../services/reviews.service';
+import { insertReview, selectReviews } from '../services/reviews.service';
 import HttpException from '../utils/httpExeption';
 import { findOrder } from '../services/orders.service';
 
@@ -23,4 +23,15 @@ export const addReview = async (req: Request, res: Response) => {
 
   const review = await insertReview({ orderId, liquorId, companyNumber, score, title, content });
   return res.status(StatusCodes.CREATED).json(review);
+};
+
+export const getReviews = async (req: Request, res: Response) => {
+  const page = parseInt(req.query.page as string);
+
+  const reviews = await selectReviews(page);
+  if (!reviews.reviews.length) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '조회할 리뷰가 없습니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(reviews);
 };
