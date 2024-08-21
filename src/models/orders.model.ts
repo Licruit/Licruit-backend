@@ -10,7 +10,6 @@ export interface OrdersAttributes {
   userCompanyNumber: string;
   quantity: number;
   stateId: number;
-  updatedAt: CreationOptional<Date>;
   createdAt?: CreationOptional<Date>;
 }
 
@@ -20,7 +19,6 @@ export class Order extends Model<OrdersAttributes> {
   public userCompanyNumber!: string;
   public quantity!: number;
   public stateId!: number;
-  public updatedAt!: CreationOptional<Date>;
   public createdAt!: CreationOptional<Date>;
 
   public static associations: {
@@ -67,11 +65,6 @@ Order.init(
         model: 'states',
         key: 'id',
       },
-    },
-    updatedAt: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-      field: 'updated_at',
     },
     createdAt: {
       type: DataTypes.DATE,

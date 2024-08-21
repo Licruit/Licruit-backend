@@ -243,7 +243,6 @@ export const insertOrder = async (buyingId: number, companyNumber: string, quant
       userCompanyNumber: companyNumber,
       quantity: quantity,
       stateId: 1,
-      updatedAt: new Date(),
     });
   } catch (err) {
     throw new Error('공동구매 참여 실패');

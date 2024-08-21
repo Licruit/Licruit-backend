@@ -1,4 +1,4 @@
-import { Association, DataTypes, Model } from 'sequelize';
+import { Association, CreationOptional, DataTypes, literal, Model } from 'sequelize';
 import { sequelize } from './index';
 import { LiquorCategory } from './liquorCategories.model';
 
@@ -18,6 +18,7 @@ interface LiquorsAttributes {
   address?: string;
   homepage?: string;
   contact?: string;
+  createdAt?: CreationOptional<Date>;
 }
 
 export class Liquor extends Model<LiquorsAttributes> {
@@ -36,6 +37,7 @@ export class Liquor extends Model<LiquorsAttributes> {
   public address!: string | null;
   public homepage!: string | null;
   public contact!: string | null;
+  public createdAt!: CreationOptional<Date>;
 
   public static associations: {
     liquorCategoryTag: Association<LiquorCategory, Liquor>;
@@ -114,6 +116,12 @@ Liquor.init(
     contact: {
       type: DataTypes.STRING(20),
       allowNull: true,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: 'created_at',
+      defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
