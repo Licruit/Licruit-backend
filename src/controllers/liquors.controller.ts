@@ -7,7 +7,7 @@ import {
   selectLiquor,
   selectLiquorCategories,
   selectLiquorDetail,
-  selectLiquorOngoingBuying,
+  selectLiquorOngoingBuyings,
   selectLiquorReviews,
 } from '../services/liquors.service';
 import HttpException from '../utils/httpExeption';
@@ -32,12 +32,8 @@ export const getLiquorDetail = async (req: Request, res: Response) => {
   if (!liquor) {
     throw new HttpException(StatusCodes.NOT_FOUND, '존재하지 않는 전통주입니다.');
   }
-  const ongoingBuyings = await selectLiquorOngoingBuying(liquorId);
 
-  return res.status(StatusCodes.OK).json({
-    ...liquor.dataValues,
-    buyings: ongoingBuyings,
-  });
+  return res.status(StatusCodes.OK).json(liquor);
 };
 
 export const getAllLiquors = async (req: Request, res: Response) => {
@@ -94,4 +90,15 @@ export const getLiquorReviews = async (req: Request, res: Response) => {
   }
 
   return res.status(StatusCodes.OK).json(liquorReviews);
+};
+
+export const getLiquorOngoingBuyings = async (req: Request, res: Response) => {
+  const liquorId = parseInt(req.params.liquorId);
+
+  const buyings = await selectLiquorOngoingBuyings(liquorId);
+  if (!buyings) {
+    throw new HttpException(StatusCodes.NOT_FOUND, '진행 중인 공동구매가 없습니다.');
+  }
+
+  return res.status(StatusCodes.OK).json(buyings);
 };
