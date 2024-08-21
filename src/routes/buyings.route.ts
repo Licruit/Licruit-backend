@@ -21,6 +21,7 @@ import {
   getUserInfo,
   confirmAllOrder,
   confirmOrder,
+  removeBuying,
 } from '../controllers/buyings.controller';
 import { pageValidate } from '../validators/liquors.validator';
 export const router: Router = express.Router();
@@ -52,3 +53,5 @@ router.put(
   [accessTokenValidate, ...confirmValidate, validate],
   wrapAsyncController(confirmOrder),
 );
+
+router.delete('/wholesaler/:buyingId', [accessTokenValidate, buyingIdValidate], wrapAsyncController(removeBuying));

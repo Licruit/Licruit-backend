@@ -579,3 +579,11 @@ export const updateOrderState = async (buyingId: number, orderId: number) => {
     throw new Error('공동구매 주문자 상태 업데이트 실패');
   }
 };
+
+export const deleteBuying = async (buyingId: number) => {
+  try {
+    await Buying.destroy({ where: { id: buyingId } });
+  } catch (err) {
+    throw new Error('공동구매 삭제 실패');
+  }
+};

@@ -6,6 +6,7 @@ import { selectWholesaler } from '../services/users.service';
 import { AllBuyingsDTO, BuyingDetailVO, BuyingDTO } from '../dto/buyings.dto';
 import {
   addBuying,
+  deleteBuying,
   findBuying,
   insertOrder,
   selectAllBuyings,
@@ -228,4 +229,17 @@ export const confirmOrder = async (req: Request, res: Response) => {
 
   await updateOrderState(buyingId, orderId);
   return res.status(StatusCodes.OK).json({ message: '주문 상태가 업데이트 되었습니다.' });
+};
+
+export const removeBuying = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const buyingId = parseInt(req.params.buyingId);
+
+  const buyingWholesaler = await selectBuyingWholesaler(buyingId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  await deleteBuying(buyingId);
+  return res.status(StatusCodes.OK).end();
 };
