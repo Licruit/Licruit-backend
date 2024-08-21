@@ -131,7 +131,6 @@ export const updateCanceledOrder = async (orderId: number, deadline: string) => 
       await Order.update(
         {
           stateId: 6,
-          updatedAt: new Date(),
         },
         {
           where: {
