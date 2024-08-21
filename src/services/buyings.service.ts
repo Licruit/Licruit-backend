@@ -98,7 +98,9 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
       orderByColumn = [['deadline', 'ASC']];
     }
 
-    const today = getTodayDate();
+    const today = getTodayDate('YYYY-MM-DD');
+    const currentTime = getTodayDate('HH:mm:ss');
+    console.log('currentTime', currentTime);
     const buyings = await Buying.findAndCountAll({
       attributes: [
         'id',
@@ -133,6 +135,7 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
       ],
       where: {
         openDate: { [Op.lte]: today },
+        openTime: { [Op.lte]: currentTime },
         deadline: { [Op.gte]: today },
       },
       replacements: { today: today },
