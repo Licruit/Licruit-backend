@@ -5,17 +5,14 @@ import { Liquor } from '../models/liquors.model';
 import { State } from '../models/states.model';
 import { getTodayDate } from '../utils/date';
 
-export const selectAllOrders = async (companyNumber: string, status: number | undefined, page: number) => {
+export const selectAllOrders = async (companyNumber: string, status: number | undefined) => {
   try {
-    const LIMIT = 8;
-    const offset = (page - 1) * LIMIT;
-
     const statusWhereCondition: { stateId?: number } = {};
     if (status) {
       statusWhereCondition.stateId = status;
     }
 
-    const orders = await Order.findAndCountAll({
+    const orders = await Order.findAll({
       attributes: [
         'id',
         [literal('DATE(DATE_ADD(Order.created_at, INTERVAL 9 HOUR))'), 'createdAt'],
@@ -55,19 +52,9 @@ export const selectAllOrders = async (companyNumber: string, status: number | un
         userCompanyNumber: companyNumber,
         createdAt: { [Op.gte]: literal('DATE_SUB(NOW(), INTERVAL 1 YEAR)') },
       },
-      limit: LIMIT,
-      offset: offset,
     });
 
-    const ordersAndPagination = {
-      orders: orders.rows,
-      pagination: {
-        currentPage: +page,
-        totalPage: Math.ceil(orders.count / LIMIT),
-      },
-    };
-
-    return ordersAndPagination;
+    return orders;
   } catch (err) {
     throw new Error('공동구매 참여 목록 조회 실패');
   }
@@ -79,7 +66,12 @@ export const selectOrderSummary = async (companyNumber: string) => {
       attributes: [
         [col('State.id'), 'id'],
         [col('State.status'), 'status'],
-        [literal('COUNT(IF(user_company_number = :companyNumber, 1, null))'), 'statusCount'],
+        [
+          literal(
+            'COUNT(IF(user_company_number = :companyNumber AND Order.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR), 1, null))',
+          ),
+          'statusCount',
+        ],
       ],
       include: [
         {
@@ -91,9 +83,7 @@ export const selectOrderSummary = async (companyNumber: string) => {
       replacements: {
         companyNumber: companyNumber,
       },
-      where: literal(
-        '(Order.created_at is NULL OR Order.created_at >= DATE_SUB(NOW(), INTERVAL 1 YEAR)) AND State.id IN (1, 2, 3, 4)',
-      ),
+      where: literal('State.id IN (1, 2, 3, 4)'),
       group: 'State.id',
     });
 
