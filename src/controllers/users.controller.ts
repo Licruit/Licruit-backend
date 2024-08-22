@@ -76,8 +76,8 @@ export const login = async (req: Request, res: Response) => {
   }
   const wholesaler = await selectWholesaler(companyNumber);
 
-  const accessToken = createToken(companyNumber, 'access', '1h');
-  const refreshToken = createToken(companyNumber, 'refresh', '30d');
+  const accessToken = createToken(companyNumber, 'access', process.env.ACCESS_TOKEN_EXPIRATION_PERIOD || '1h');
+  const refreshToken = createToken(companyNumber, 'refresh', process.env.REFRESH_TOKEN_EXPIRATION_PERIOD || '30d');
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
@@ -96,7 +96,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  const accessToken = createToken(companyNumber, 'access', '1h');
+  const accessToken = createToken(companyNumber, 'access', process.env.ACCESS_TOKEN_EXPIRATION_PERIOD || '1h');
 
   return res.status(StatusCodes.OK).json({
     accessToken: accessToken,
