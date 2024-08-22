@@ -12,10 +12,10 @@ import HttpException from '../utils/httpExeption';
 
 export const getAllOrders = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
-  const { status, page }: AllOrdersDTO = req.query;
+  const { status }: AllOrdersDTO = req.query;
 
-  const allOrders = await selectAllOrders(companyNumber, status, page!);
-  if (!allOrders.orders.length) {
+  const allOrders = await selectAllOrders(companyNumber, status);
+  if (!allOrders.length) {
     throw new HttpException(StatusCodes.NOT_FOUND, '조회할 주문 내역이 없습니다.');
   }
 
