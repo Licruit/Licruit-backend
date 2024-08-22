@@ -43,23 +43,37 @@ export const insertUser = async ({
   sectorId,
   isMarketing,
 }: RegisterDTO) => {
+  const transaction = await sequelize.transaction();
   try {
     const { salt, hashPassword } = passwordEncryption(password);
 
-    const newUser = await User.create({
-      companyNumber: companyNumber,
-      salt: salt,
-      password: hashPassword,
-      businessName: businessName,
-      contact: contact,
-      address: address,
-      sectorId: sectorId,
-      img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
-      isMarketing: isMarketing,
-    });
+    await User.create(
+      {
+        companyNumber: companyNumber,
+        salt: salt,
+        password: hashPassword,
+        businessName: businessName,
+        contact: contact,
+        address: address,
+        sectorId: sectorId,
+        img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
+        isMarketing: isMarketing,
+      },
+      { transaction },
+    );
 
-    return newUser;
+    if (sectorId === 8) {
+      await Wholesaler.create(
+        {
+          userCompanyNumber: companyNumber,
+        },
+        { transaction },
+      );
+    }
+
+    await transaction.commit();
   } catch {
+    await transaction.rollback();
     throw new Error('사용자 생성 실패');
   }
 };
@@ -73,18 +87,6 @@ export const selectWholesaler = async (companyNumber: string) => {
     return wholesalers;
   } catch (err) {
     throw new Error('도매업자 조회 실패');
-  }
-};
-
-export const insertWholesaler = async (companyNumber: string) => {
-  try {
-    const newWholesaler = await Wholesaler.create({
-      userCompanyNumber: `${companyNumber}`,
-    });
-
-    return newWholesaler;
-  } catch (err) {
-    throw new Error('도매업자 권한 신청 실패');
   }
 };
 

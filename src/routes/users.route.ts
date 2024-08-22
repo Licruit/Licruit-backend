@@ -1,7 +1,6 @@
 import express, { Router } from 'express';
 import {
   addUser,
-  addWholesaler,
   checkOCR,
   createNewAccessToken,
   getProfile,
@@ -38,8 +37,6 @@ export const router: Router = express.Router();
 router.post('/company-number/check', [companyNumberValidate, validate], wrapAsyncController(getUser));
 
 router.post('/register', [...registerValidate, validate], wrapAsyncController(addUser));
-
-router.post('/admin', [accessTokenValidate], wrapAsyncController(addWholesaler));
 
 router.post('/login', [...loginValidate, validate], wrapAsyncController(login));
 

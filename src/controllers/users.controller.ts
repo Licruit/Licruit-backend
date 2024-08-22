@@ -7,7 +7,6 @@ import {
   deleteToken,
   findUser,
   insertUser,
-  insertWholesaler,
   insertWithdrawal,
   isSamePassword,
   requestOCR,
@@ -60,19 +59,6 @@ export const addUser = async (req: Request, res: Response) => {
     sectorId,
     isMarketing,
   });
-
-  return res.status(StatusCodes.CREATED).end();
-};
-
-export const addWholesaler = async (req: Request, res: Response) => {
-  const companyNumber = (req as TokenRequest).token.companyNumber;
-
-  const wholesaler = await selectWholesaler(companyNumber);
-  if (wholesaler) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 도매업체 권한으로 전환된 사업자번호입니다.');
-  }
-
-  await insertWholesaler(companyNumber);
 
   return res.status(StatusCodes.CREATED).end();
 };
