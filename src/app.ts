@@ -13,7 +13,7 @@ app.use(express.json());
 dotenv.config();
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://licruit.site'],
+  origin: ['http://localhost:5173', 'https://www.licruit.site', 'https://licruit-admin.site'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Refresh', 'Verify', 'Origin', 'Accept'],
   optionsSuccessStatus: 204,
