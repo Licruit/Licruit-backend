@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import {
   addUser,
   addWholesaler,
+  checkOCR,
   createNewAccessToken,
   getProfile,
   getUser,
@@ -29,7 +30,7 @@ import {
 } from '../validators/users.validator';
 import { validate } from '../validators/validate';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
-import { accessTokenValidate, refreshTokenValidate, verifyTokenValidate } from '../auth';
+import { accessTokenValidate, refreshTokenValidate } from '../auth';
 import { imageUploader } from '../utils/aws';
 export const router: Router = express.Router();
 
@@ -64,3 +65,5 @@ router.put(
 );
 
 router.delete('/withdrawal', [accessTokenValidate, ...withdrawalValidate, validate], wrapAsyncController(removeUser));
+
+router.post('/biz-check', [imageUploader.single('image')], wrapAsyncController(checkOCR));

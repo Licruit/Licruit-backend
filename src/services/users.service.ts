@@ -17,6 +17,8 @@ import { Withdrawal } from '../models/withdrawals.model';
 import { Order } from '../models/orders.model';
 import { Review } from '../models/reviews.model';
 import { Buying } from '../models/buyings.model';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -393,5 +395,40 @@ export const insertWithdrawal = async (companyNumber: string, reason: string) =>
   } catch (err) {
     await transaction.rollback();
     throw new Error('회원 탈퇴 실패');
+  }
+};
+
+export const requestOCR = async (image: Express.Multer.File) => {
+  try {
+    const extension = mime.extension(image.mimetype);
+    console.log(`extension:${extension}`);
+
+    const ocrResult = await axios.post(
+      process.env.OCR_URL!,
+      {
+        message: {
+          version: 'V2',
+          requestId: uuidv4(),
+          timestamp: Date.now(),
+          // images: [{ format: extension, data: image.buffer, name: 'biz_img' }],
+          images: [{ format: extension, name: 'biz_img' }],
+        },
+        file: image.stream,
+      },
+      {
+        headers: {
+          // 'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
+          'X-OCR-SECRET': process.env.OCR_SECRET,
+        },
+      },
+    );
+
+    console.log(ocrResult);
+
+    return ocrResult;
+  } catch (err) {
+    console.log(err);
+    throw new Error('OCR 조회 실패');
   }
 };

@@ -10,6 +10,7 @@ import {
   insertWholesaler,
   insertWithdrawal,
   isSamePassword,
+  requestOCR,
   selectToken,
   selectUserProfile,
   selectWholesaler,
@@ -221,4 +222,13 @@ export const removeUser = async (req: Request, res: Response) => {
   await insertWithdrawal(companyNumber, reason);
 
   return res.status(StatusCodes.OK).end();
+};
+
+export const checkOCR = async (req: Request, res: Response) => {
+  const image = req.file as Express.Multer.File;
+  console.log('image: ', image);
+
+  const ocrResult = await requestOCR(image);
+
+  return res.status(StatusCodes.OK).json(ocrResult);
 };
