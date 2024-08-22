@@ -268,7 +268,6 @@ export const selectNewLiquors = async () => {
 
     return newLiquors;
   } catch (err) {
-    console.log(err);
     throw new Error('최신 주류 조회 실패');
   }
 };

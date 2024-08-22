@@ -11,6 +11,7 @@
     "@sentry/profiling-node": "^8.24.0",
     "@slack/webhook": "^7.0.2",
     "aws-sdk": "^2.1665.0",
+    "axios": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -27,6 +28,7 @@
     "node-cache": "^5.1.2",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
+    "uuid": "^10.0.0",
     "winston": "^3.14.1",
     "winston-daily-rotate-file": "^5.0.0"
   },
@@ -41,6 +43,7 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.14.11",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
     "concurrently": "^8.2.2",

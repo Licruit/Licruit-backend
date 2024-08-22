@@ -17,6 +17,8 @@ import { Withdrawal } from '../models/withdrawals.model';
 import { Order } from '../models/orders.model';
 import { Review } from '../models/reviews.model';
 import { Buying } from '../models/buyings.model';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -41,23 +43,37 @@ export const insertUser = async ({
   sectorId,
   isMarketing,
 }: RegisterDTO) => {
+  const transaction = await sequelize.transaction();
   try {
     const { salt, hashPassword } = passwordEncryption(password);
 
-    const newUser = await User.create({
-      companyNumber: companyNumber,
-      salt: salt,
-      password: hashPassword,
-      businessName: businessName,
-      contact: contact,
-      address: address,
-      sectorId: sectorId,
-      img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
-      isMarketing: isMarketing,
-    });
+    await User.create(
+      {
+        companyNumber: companyNumber,
+        salt: salt,
+        password: hashPassword,
+        businessName: businessName,
+        contact: contact,
+        address: address,
+        sectorId: sectorId,
+        img: 'https://licruit-img-uploader.s3.ap-northeast-2.amazonaws.com/profile-images/default.jpeg',
+        isMarketing: isMarketing,
+      },
+      { transaction },
+    );
 
-    return newUser;
+    if (sectorId === 8) {
+      await Wholesaler.create(
+        {
+          userCompanyNumber: companyNumber,
+        },
+        { transaction },
+      );
+    }
+
+    await transaction.commit();
   } catch {
+    await transaction.rollback();
     throw new Error('사용자 생성 실패');
   }
 };
@@ -71,18 +87,6 @@ export const selectWholesaler = async (companyNumber: string) => {
     return wholesalers;
   } catch (err) {
     throw new Error('도매업자 조회 실패');
-  }
-};
-
-export const insertWholesaler = async (companyNumber: string) => {
-  try {
-    const newWholesaler = await Wholesaler.create({
-      userCompanyNumber: `${companyNumber}`,
-    });
-
-    return newWholesaler;
-  } catch (err) {
-    throw new Error('도매업자 권한 신청 실패');
   }
 };
 
@@ -393,5 +397,38 @@ export const insertWithdrawal = async (companyNumber: string, reason: string) =>
   } catch (err) {
     await transaction.rollback();
     throw new Error('회원 탈퇴 실패');
+  }
+};
+
+export const requestOCR = async (image: Express.Multer.File) => {
+  try {
+    const extension = mime.extension(image.mimetype);
+
+    const ocrResult = await axios.post(
+      process.env.OCR_URL!,
+      {
+        version: 'V2',
+        requestId: uuidv4(),
+        timestamp: Date.now(),
+        images: [{ format: extension, data: image.buffer.toString('base64'), name: 'bizImg' }],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-OCR-SECRET': process.env.OCR_SECRET,
+        },
+      },
+    );
+
+    const companyNumberObj = ocrResult.data.images[0].bizLicense.result.registerNumber;
+    const companyNumber: string | null = companyNumberObj ? companyNumberObj[0].text.replaceAll('-', '') : null;
+    const bisTypeArr = ocrResult.data.images[0].bizLicense.result.bisType;
+    const isWholesaler: boolean = bisTypeArr
+      ? bisTypeArr.map((industry: { text?: string }) => industry.text).includes('주류 도매업')
+      : false;
+
+    return { companyNumber, isWholesaler };
+  } catch (err) {
+    throw new Error('OCR 조회 실패');
   }
 };

@@ -7,9 +7,9 @@ import {
   deleteToken,
   findUser,
   insertUser,
-  insertWholesaler,
   insertWithdrawal,
   isSamePassword,
+  requestOCR,
   selectToken,
   selectUserProfile,
   selectWholesaler,
@@ -63,19 +63,6 @@ export const addUser = async (req: Request, res: Response) => {
   return res.status(StatusCodes.CREATED).end();
 };
 
-export const addWholesaler = async (req: Request, res: Response) => {
-  const companyNumber = (req as TokenRequest).token.companyNumber;
-
-  const wholesaler = await selectWholesaler(companyNumber);
-  if (wholesaler) {
-    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 도매업체 권한으로 전환된 사업자번호입니다.');
-  }
-
-  await insertWholesaler(companyNumber);
-
-  return res.status(StatusCodes.CREATED).end();
-};
-
 export const login = async (req: Request, res: Response) => {
   const { companyNumber, password }: LoginDTO = req.body;
 
@@ -89,8 +76,8 @@ export const login = async (req: Request, res: Response) => {
   }
   const wholesaler = await selectWholesaler(companyNumber);
 
-  const accessToken = createToken(companyNumber, 'access', '1h');
-  const refreshToken = createToken(companyNumber, 'refresh', '30d');
+  const accessToken = createToken(companyNumber, 'access', process.env.ACCESS_TOKEN_EXPIRATION_PERIOD || '1h');
+  const refreshToken = createToken(companyNumber, 'refresh', process.env.REFRESH_TOKEN_EXPIRATION_PERIOD || '30d');
 
   await setToken(companyNumber, 'refresh', refreshToken);
 
@@ -109,7 +96,7 @@ export const createNewAccessToken = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '존재하지 않는 refresh toekn입니다.');
   }
 
-  const accessToken = createToken(companyNumber, 'access', '1h');
+  const accessToken = createToken(companyNumber, 'access', process.env.ACCESS_TOKEN_EXPIRATION_PERIOD || '1h');
 
   return res.status(StatusCodes.OK).json({
     accessToken: accessToken,
@@ -221,4 +208,12 @@ export const removeUser = async (req: Request, res: Response) => {
   await insertWithdrawal(companyNumber, reason);
 
   return res.status(StatusCodes.OK).end();
+};
+
+export const checkOCR = async (req: Request, res: Response) => {
+  const image = req.file as Express.Multer.File;
+
+  const ocrResult = await requestOCR(image);
+
+  return res.status(StatusCodes.OK).json(ocrResult);
 };
