@@ -49,6 +49,18 @@ export const uploadImgValidate = check('file')
 
 export const reasonValidate = body('reason').notEmpty().withMessage('탈퇴 사유 확인 필요');
 
+export const bizCertificateImageValidate = check('file')
+  .custom((value, { req }) => req.file)
+  .withMessage('사업자등록증 이미지 필요')
+  .custom((value, { req }) => {
+    const contentType = req.file.mimetype;
+    const allowTypes = ['image/png', 'image/jpeg'];
+    return allowTypes.includes(contentType);
+  })
+  .withMessage('허용되지 않는 파일 확장자')
+  .custom((value, { req }) => req.file.size < 30 * 1024 * 1024)
+  .withMessage('이미지 용량 초과');
+
 export const registerValidate = [
   contactValidate,
   companyNumberValidate,

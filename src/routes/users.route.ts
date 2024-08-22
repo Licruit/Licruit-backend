@@ -17,6 +17,7 @@ import {
   verifyOtp,
 } from '../controllers/users.controller';
 import {
+  bizCertificateImageValidate,
   changePwValidate,
   companyNumberValidate,
   loginValidate,
@@ -66,4 +67,8 @@ router.put(
 
 router.delete('/withdrawal', [accessTokenValidate, ...withdrawalValidate, validate], wrapAsyncController(removeUser));
 
-router.post('/biz-check', [imageUploader.single('image')], wrapAsyncController(checkOCR));
+router.post(
+  '/biz-check',
+  [imageUploader.single('image'), bizCertificateImageValidate, validate],
+  wrapAsyncController(checkOCR),
+);

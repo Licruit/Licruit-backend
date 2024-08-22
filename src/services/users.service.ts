@@ -401,34 +401,32 @@ export const insertWithdrawal = async (companyNumber: string, reason: string) =>
 export const requestOCR = async (image: Express.Multer.File) => {
   try {
     const extension = mime.extension(image.mimetype);
-    console.log(`extension:${extension}`);
 
     const ocrResult = await axios.post(
       process.env.OCR_URL!,
       {
-        message: {
-          version: 'V2',
-          requestId: uuidv4(),
-          timestamp: Date.now(),
-          // images: [{ format: extension, data: image.buffer, name: 'biz_img' }],
-          images: [{ format: extension, name: 'biz_img' }],
-        },
-        file: image.stream,
+        version: 'V2',
+        requestId: uuidv4(),
+        timestamp: Date.now(),
+        images: [{ format: extension, data: image.buffer.toString('base64'), name: 'bizImg' }],
       },
       {
         headers: {
-          // 'Content-Type': 'application/json',
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
           'X-OCR-SECRET': process.env.OCR_SECRET,
         },
       },
     );
 
-    console.log(ocrResult);
+    const companyNumberObj = ocrResult.data.images[0].bizLicense.result.registerNumber;
+    const companyNumber: string | null = companyNumberObj ? companyNumberObj[0].text.replaceAll('-', '') : null;
+    const bisTypeArr = ocrResult.data.images[0].bizLicense.result.bisType;
+    const isWholesaler: boolean = bisTypeArr
+      ? bisTypeArr.map((industry: { text?: string }) => industry.text).includes('주류 도매업')
+      : false;
 
-    return ocrResult;
+    return { companyNumber, isWholesaler };
   } catch (err) {
-    console.log(err);
     throw new Error('OCR 조회 실패');
   }
 };
