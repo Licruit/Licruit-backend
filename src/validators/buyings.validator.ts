@@ -40,9 +40,9 @@ export const deliveryFeeValidate = body('deliveryFee')
   .withMessage('배송비 필요');
 
 export const freeDeliveryFeeValidate = body('freeDeliveryFee')
-  .optional()
+  .optional({ nullable: true })
   .isNumeric()
-  .custom((value: number) => value >= 0)
+  .custom((value: number | null) => value === null || value >= 0)
   .withMessage('무료배송 최소 금액');
 
 export const titleValidate = body('title').notEmpty().isString().withMessage('공동구매 제목 필요');
