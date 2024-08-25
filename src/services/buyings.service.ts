@@ -425,7 +425,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
     const orderList = await Order.findAndCountAll({
       attributes: [
         'id',
-        'userCompanyNumber',
+        [col('User.business_name'), 'businessName'],
         [col('User.contact'), 'contact'],
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.price'), 'liquorPrice'],
