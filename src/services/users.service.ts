@@ -264,6 +264,7 @@ export const selectWholesalerProfile = async (companyNumber: string) => {
         ['company_number', 'companyNumber'],
         ['business_name', 'businessName'],
         'contact',
+        'address',
         'img',
         [col('Sector.name'), 'sectorName'],
         [col('Wholesaler.homepage'), 'homepage'],
@@ -294,6 +295,7 @@ export const updateUser = async (
   homepage: string,
   introduce: string,
   contact: string,
+  address: string,
   sectorId: number,
   img: string,
 ) => {
@@ -303,6 +305,7 @@ export const updateUser = async (
       {
         businessName: businessName,
         contact: contact,
+        address: address,
         sectorId: sectorId,
         img: img,
       },
