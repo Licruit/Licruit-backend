@@ -22,7 +22,7 @@ export const totalMinValidate = body('totalMin')
   .withMessage('공동구매 최소 수량 필요');
 
 export const totalMaxValidate = body('totalMax')
-  .optional()
+  .optional({ nullable: true })
   .isNumeric()
   .custom((value: number) => value >= 1)
   .withMessage('공동구매 최대 수량');
