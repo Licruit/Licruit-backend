@@ -179,9 +179,9 @@ export const getProfile = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: Request, res: Response) => {
   const companyNumber = (req as TokenRequest).token.companyNumber;
-  const { businessName, introduce, homepage, contact, sectorId, img } = req.body;
+  const { businessName, introduce, homepage, contact, address, sectorId, img } = req.body;
 
-  await updateUser(companyNumber, businessName, introduce, homepage, contact, sectorId, img);
+  await updateUser(companyNumber, businessName, introduce, homepage, contact, address, sectorId, img);
   return res.status(StatusCodes.OK).end();
 };
 
