@@ -341,6 +341,7 @@ export const uploadImg = async (companyNumber: string, file: Express.Multer.File
       Key: filename,
       Body: file.buffer,
       ContentType: file.mimetype,
+      CacheControl: 'max-age=0, no-cache, no-store, must-revalidate',
       ACL: 'public-read-write' as ObjectCannedACL,
     };
 
