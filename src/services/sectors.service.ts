@@ -1,8 +1,10 @@
+import { Op } from 'sequelize';
 import { Sector } from '../models/sectors.model';
 
 export const selectSectors = async () => {
   try {
     const sectors = await Sector.findAll({
+      where: { id: { [Op.ne]: 8 } },
       order: [['id', 'asc']],
     });
 
