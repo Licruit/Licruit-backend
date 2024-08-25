@@ -19,7 +19,6 @@ import { Review } from '../models/reviews.model';
 import { Buying } from '../models/buyings.model';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import HttpException from '../utils/httpExeption';
 
 dotenv.config();
 
@@ -421,20 +420,20 @@ export const requestOCR = async (image: Express.Multer.File) => {
       },
     );
 
-    const companyNumberObj = ocrResult.data.images[0].bizLicense.result.registerNumber;
-    const companyNumber: string | null = companyNumberObj ? companyNumberObj[0].text.replaceAll('-', '') : null;
-    const bisTypeArr = ocrResult.data.images[0].bizLicense.result.bisType;
+    const inferResult = ocrResult.data.images[0].inferResult;
+    if (inferResult === 'ERROR') {
+      return { companyNumber: null, isWholesaler: false };
+    }
+
+    const ocrResultObj = ocrResult.data.images[0].bizLicense.result;
+    const companyNumber = ocrResultObj.registerNumber ? ocrResultObj.registerNumber[0].text.replaceAll('-', '') : null;
+    const bisTypeArr = ocrResultObj.bisType;
     const isWholesaler: boolean = bisTypeArr
       ? bisTypeArr.map((industry: { text?: string }) => industry.text).includes('주류 도매업')
       : false;
 
     return { companyNumber, isWholesaler };
   } catch (err) {
-    // throw new Error('OCR 조회 실패');
-    if (err instanceof Error) {
-      throw new HttpException(500, err.message);
-    } else {
-      throw new Error('OCR 조회 실패');
-    }
+    throw new Error('OCR 조회 실패');
   }
 };
