@@ -19,6 +19,7 @@ import { Review } from '../models/reviews.model';
 import { Buying } from '../models/buyings.model';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import HttpException from '../utils/httpExeption';
 
 dotenv.config();
 
@@ -429,6 +430,11 @@ export const requestOCR = async (image: Express.Multer.File) => {
 
     return { companyNumber, isWholesaler };
   } catch (err) {
-    throw new Error('OCR 조회 실패');
+    // throw new Error('OCR 조회 실패');
+    if (err instanceof Error) {
+      throw new HttpException(500, err.message);
+    } else {
+      throw new Error('OCR 조회 실패');
+    }
   }
 };
