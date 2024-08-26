@@ -214,6 +214,13 @@ export const checkOCR = async (req: Request, res: Response) => {
   const image = req.file as Express.Multer.File;
 
   const ocrResult = await requestOCR(image);
+  if (!ocrResult.companyNumber) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '인식할 수 없는 이미지입니다.');
+  }
+  const foundUser = await findUser(ocrResult.companyNumber);
+  if (foundUser) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '이미 사용된 사업자번호입니다.');
+  }
 
   return res.status(StatusCodes.OK).json(ocrResult);
 };
