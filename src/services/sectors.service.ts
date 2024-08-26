@@ -4,7 +4,7 @@ import { Sector } from '../models/sectors.model';
 export const selectSectors = async () => {
   try {
     const sectors = await Sector.findAll({
-      where: { id: { [Op.ne]: 8 } },
+      where: { name: { [Op.ne]: '도매업체' } },
       order: [['id', 'asc']],
     });
 
