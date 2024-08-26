@@ -430,7 +430,9 @@ export const requestOCR = async (image: Express.Multer.File) => {
     }
 
     const ocrResultObj = ocrResult.data.images[0].bizLicense.result;
-    const companyNumber = ocrResultObj.registerNumber ? ocrResultObj.registerNumber[0].text.replaceAll('-', '') : null;
+    const companyNumber: string | null = ocrResultObj.registerNumber
+      ? ocrResultObj.registerNumber[0].text.replaceAll('-', '')
+      : null;
     const bisTypeArr = ocrResultObj.bisType;
     const isWholesaler: boolean = bisTypeArr
       ? bisTypeArr.map((industry: { text?: string }) => industry.text).includes('주류 도매업')
