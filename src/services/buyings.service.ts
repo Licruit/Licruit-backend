@@ -205,7 +205,6 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
 
     return buying;
   } catch (err) {
-    console.log(err);
     throw new Error('공동구매 상세 조회 실패');
   }
 };
