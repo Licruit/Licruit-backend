@@ -23,6 +23,7 @@ import {
 import HttpException from '../utils/httpExeption';
 import { StatusCodes } from 'http-status-codes';
 import { TokenRequest, verifyTokenValidate } from '../auth';
+import { selectBlacklistCount } from '../services/buyings.service';
 
 type CookieType = {
   sameSite: 'none' | 'strict' | 'lax';
@@ -75,6 +76,7 @@ export const login = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.UNAUTHORIZED, '아이디 또는 비밀번호가 잘못되었습니다.');
   }
   const wholesaler = await selectWholesaler(companyNumber);
+  const blacklistCount = await selectBlacklistCount(companyNumber);
 
   const accessToken = createToken(companyNumber, 'access', process.env.ACCESS_TOKEN_EXPIRATION_PERIOD || '1h');
   const refreshToken = createToken(companyNumber, 'refresh', process.env.REFRESH_TOKEN_EXPIRATION_PERIOD || '30d');
@@ -85,6 +87,7 @@ export const login = async (req: Request, res: Response) => {
     accessToken: accessToken,
     refreshToken: refreshToken,
     isWholesaler: wholesaler ? true : false,
+    isBlacklist: blacklistCount > 2 ? true : false,
   });
 };
 

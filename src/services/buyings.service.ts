@@ -3,7 +3,7 @@ import { sequelize } from '../models';
 import { Buying } from '../models/buyings.model';
 import { DeliveryRegion } from '../models/deliveryRegions.model';
 import { Region } from '../models/regions.model';
-import { col, literal, Op, OrderItem, WhereOptions } from 'sequelize';
+import { col, fn, literal, Op, OrderItem, WhereOptions } from 'sequelize';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
@@ -103,6 +103,7 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
 
     const buyings = await Buying.findAndCountAll({
       attributes: [
+        [fn('DISTINCT', col('Buying.id')), 'id'],
         'id',
         'title',
         'content',
@@ -115,7 +116,6 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
         [col('Liquor.volume'), 'volume'],
         [col('Liquor->LiquorCategory.name'), 'categoryName'],
       ],
-
       include: [
         {
           model: Liquor,
@@ -139,6 +139,7 @@ export const selectAllBuyings = async (sort: SortType, page: number, region: num
       limit: LIMIT,
       offset: offset,
       subQuery: false,
+      distinct: true,
     });
 
     const buyingsAndPagination = {
@@ -165,15 +166,16 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
         'deliveryStart',
         'deliveryEnd',
         'totalMin',
-        'totalMax',
+        [literal('IFNULL(Buying.total_max, 0)'), 'totalMax'],
         'price',
         'deliveryFee',
-        'freeDeliveryFee',
+        [literal('IFNULL(Buying.free_delivery_fee, 0)'), 'freeDeliveryFee'],
         'title',
         'content',
-        [literal('CAST(SUM(Orders.quantity) AS SIGNED)'), 'orderCount'],
+        [literal('CAST(IFNULL(SUM(Orders.quantity), 0) AS SIGNED)'), 'orderCount'],
         [col('Liquor.id'), 'liquorId'],
         [col('Liquor.name'), 'liquorName'],
+        [col('Liquor.img'), 'img'],
         [
           literal(
             'EXISTS(SELECT * FROM orders WHERE orders.buying_id = :buyingId AND user_company_number = :companyNumber)',
