@@ -433,7 +433,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
         [col('Buying.price'), 'liquorPrice'],
         [
           literal(
-            `CASE WHEN State.id = 1 THEN '신청' WHEN State.id IN (2, 3, 4, 5) THEN '확정' WHEN State.id = 6 THEN '취소' END`,
+            `CASE WHEN State.status = '신청' THEN '신청' WHEN State.status IN ('승인대기', '배송중', '배송완료', '마감') THEN '확정' WHEN State.status = '취소' THEN '취소' END`,
           ),
           'status',
         ],
@@ -473,6 +473,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
 
     return orderListAndPagination;
   } catch (err) {
+    console.log(err);
     throw new Error('도매업자 공동구매 주문자 리스트 조회 실패');
   }
 };
