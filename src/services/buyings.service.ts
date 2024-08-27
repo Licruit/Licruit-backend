@@ -431,7 +431,12 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
         [col('User.contact'), 'contact'],
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.price'), 'liquorPrice'],
-        [col('State.status'), 'status'],
+        [
+          literal(
+            `CASE WHEN State.status = '신청' THEN '신청' WHEN State.status IN ('승인대기', '배송중', '배송완료', '마감') THEN '확정' WHEN State.status = '취소' THEN '취소' END`,
+          ),
+          'status',
+        ],
       ],
       include: [
         {
