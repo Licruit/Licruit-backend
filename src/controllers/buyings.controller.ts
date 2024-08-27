@@ -7,7 +7,9 @@ import { AllBuyingsDTO, BuyingDetailVO, BuyingDTO } from '../dto/buyings.dto';
 import {
   addBuying,
   deleteBuying,
+  deleteOrder,
   findBuying,
+  insertBlacklist,
   insertOrder,
   selectAllBuyings,
   selectBlacklistCount,
@@ -16,6 +18,7 @@ import {
   selectBuyingSummary,
   selectBuyingWholesaler,
   selectDeliveryAvaliableAreas,
+  selectOrderInfo,
   selectOrderWholesaler,
   selectUserInfo,
   selectWholesalerBuyings,
@@ -235,5 +238,36 @@ export const removeBuying = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.BAD_REQUEST, '이미 마감된 공동구매 입니다.');
   }
 
+  return res.status(StatusCodes.OK).end();
+};
+
+export const removeOrder = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const orderId = parseInt(req.params.orderId);
+
+  const buyingWholesaler = await selectOrderWholesaler(orderId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  await deleteOrder(orderId);
+  return res.status(StatusCodes.OK).end();
+};
+
+export const addBlacklist = async (req: Request, res: Response) => {
+  const companyNumber = (req as TokenRequest).token.companyNumber;
+  const orderId = parseInt(req.params.orderId);
+
+  const buyingWholesaler = await selectOrderWholesaler(orderId);
+  if (companyNumber !== buyingWholesaler) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '공동구매 도매업자와 일치하지 않습니다.');
+  }
+
+  const orderInfo = await selectOrderInfo(orderId);
+  if (!orderInfo) {
+    throw new HttpException(StatusCodes.BAD_REQUEST, '주문자 정보를 찾을 수 없습니다.');
+  }
+
+  await insertBlacklist(orderInfo.buyingId, orderInfo.userCompanyNumber, companyNumber);
   return res.status(StatusCodes.OK).end();
 };
