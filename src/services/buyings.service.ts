@@ -580,3 +580,15 @@ export const deleteBuying = async (buyingId: number) => {
     throw new Error('공동구매 삭제 실패');
   }
 };
+
+export const deleteOrder = async (orderId: number) => {
+  try {
+    await Order.destroy({
+      where: {
+        id: orderId,
+      },
+    });
+  } catch (err) {
+    throw new Error('공동구매 주문 취소 실패');
+  }
+};

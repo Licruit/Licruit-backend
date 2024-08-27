@@ -5,6 +5,7 @@ import {
   buyingIdValidate,
   confirmValidate,
   openValidate,
+  orderIdValidate,
   participateBuyingValidate,
 } from '../validators/buyings.validator';
 import { wrapAsyncController } from '../utils/wrapAsyncController';
@@ -22,6 +23,7 @@ import {
   confirmAllOrder,
   confirmOrder,
   removeBuying,
+  removeOrder,
 } from '../controllers/buyings.controller';
 import { pageValidate } from '../validators/liquors.validator';
 export const router: Router = express.Router();
@@ -55,3 +57,4 @@ router.put(
 );
 
 router.delete('/wholesaler/:buyingId', [accessTokenValidate, buyingIdValidate], wrapAsyncController(removeBuying));
+router.delete('/wholesaler/order/:orderId', [accessTokenValidate, orderIdValidate], wrapAsyncController(removeOrder));
