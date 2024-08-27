@@ -431,7 +431,12 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
         [col('User.contact'), 'contact'],
         [col('Buying->Liquor.name'), 'liquorName'],
         [col('Buying.price'), 'liquorPrice'],
-        [col('State.status'), 'status'],
+        [
+          literal(
+            `CASE WHEN State.id = 1 THEN '신청' WHEN State.id IN (2, 3, 4, 5) THEN '확정' WHEN State.id = 6 THEN '취소' END`,
+          ),
+          'status',
+        ],
       ],
       include: [
         {
