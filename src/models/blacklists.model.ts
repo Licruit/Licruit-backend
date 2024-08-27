@@ -5,15 +5,15 @@ import { User } from './users.model';
 import { Wholesaler } from './wholesalers.model';
 
 interface BlacklistsAttributes {
-  id: number;
+  id?: CreationOptional<number>;
   buyingId: number;
   userCompanyNumber: string;
   wholesalerCompanyNumber: string;
-  createdAt: CreationOptional<Date>;
+  createdAt?: CreationOptional<Date>;
 }
 
 export class Blacklist extends Model<BlacklistsAttributes> {
-  public readonly id!: number;
+  public readonly id!: CreationOptional<number>;
   public buyingId!: number;
   public userCompanyNumber!: string;
   public wholesalerCompanyNumber!: string;
@@ -32,6 +32,7 @@ Blacklist.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
+      autoIncrement: true,
     },
     buyingId: {
       type: DataTypes.INTEGER,

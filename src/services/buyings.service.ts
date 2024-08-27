@@ -592,3 +592,28 @@ export const deleteOrder = async (orderId: number) => {
     throw new Error('공동구매 주문 취소 실패');
   }
 };
+
+export const selectOrderInfo = async (orderId: number) => {
+  try {
+    const orderInfo = await Order.findOne({
+      attributes: ['buyingId', 'userCompanyNumber'],
+      where: { id: orderId },
+    });
+
+    return orderInfo;
+  } catch (err) {
+    throw new Error('유저 조회 실패');
+  }
+};
+
+export const insertBlacklist = async (buyingId: number, userCompanyNumber: string, wholesalerCompanyNumber: string) => {
+  try {
+    await Blacklist.create({
+      buyingId: buyingId,
+      userCompanyNumber: userCompanyNumber,
+      wholesalerCompanyNumber: wholesalerCompanyNumber,
+    });
+  } catch (err) {
+    throw new Error('블랙리스트 추가 실패');
+  }
+};
