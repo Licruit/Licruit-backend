@@ -174,6 +174,7 @@ export const selectBuyingDetail = async (buyingId: number, companyNumber: string
         [literal('CAST(SUM(Orders.quantity) AS SIGNED)'), 'orderCount'],
         [col('Liquor.id'), 'liquorId'],
         [col('Liquor.name'), 'liquorName'],
+        [col('Liquor.img'), 'liquorImg'],
         [
           literal(
             'EXISTS(SELECT * FROM orders WHERE orders.buying_id = :buyingId AND user_company_number = :companyNumber)',
