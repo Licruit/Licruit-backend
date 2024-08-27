@@ -473,7 +473,6 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
 
     return orderListAndPagination;
   } catch (err) {
-    console.log(err);
     throw new Error('도매업자 공동구매 주문자 리스트 조회 실패');
   }
 };
