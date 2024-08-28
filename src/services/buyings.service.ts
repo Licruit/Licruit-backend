@@ -3,7 +3,7 @@ import { sequelize } from '../models';
 import { Buying } from '../models/buyings.model';
 import { DeliveryRegion } from '../models/deliveryRegions.model';
 import { Region } from '../models/regions.model';
-import { col, fn, literal, Op, OrderItem, WhereOptions } from 'sequelize';
+import { col, fn, literal, Op, OrderItem, where, WhereOptions } from 'sequelize';
 import { Liquor } from '../models/liquors.model';
 import { LiquorCategory } from '../models/liquorCategories.model';
 import { Order } from '../models/orders.model';
@@ -590,11 +590,12 @@ export const deleteBuying = async (buyingId: number) => {
 
 export const deleteOrder = async (orderId: number) => {
   try {
-    await Order.destroy({
-      where: {
-        id: orderId,
+    await Order.update(
+      {
+        stateId: 6,
       },
-    });
+      { where: { id: orderId } },
+    );
   } catch (err) {
     throw new Error('공동구매 주문 취소 실패');
   }
