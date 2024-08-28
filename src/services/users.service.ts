@@ -239,6 +239,7 @@ export const selectUserProfile = async (companyNumber: string) => {
         ['company_number', 'companyNumber'],
         ['business_name', 'businessName'],
         'contact',
+        'address',
         'img',
         [col('Sector.name'), 'sectorName'],
       ],
