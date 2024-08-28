@@ -421,7 +421,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
 
     if (type === 'cancel') {
       whereCondition['buyingId'] = buyingId;
-      whereCondition['stateId'] = 6;
+      whereCondition['stateId'] = [6, 7];
     }
 
     const orderList = await Order.findAndCountAll({
@@ -433,7 +433,7 @@ export const selectBuyingOrderList = async (buyingId: number, page: number, type
         [col('Buying.price'), 'liquorPrice'],
         [
           literal(
-            `CASE WHEN State.status = '신청' THEN '신청' WHEN State.status IN ('승인대기', '배송중', '배송완료', '마감') THEN '확정' WHEN State.status = '취소' THEN '취소' END`,
+            `CASE WHEN State.status = '신청' THEN '신청' WHEN State.status IN ('승인대기', '배송중', '배송완료', '마감') THEN '확정' WHEN State.status = '경고' THEN '경고' WHEN State.status = '취소' THEN '취소' END`,
           ),
           'status',
         ],
@@ -614,14 +614,32 @@ export const selectOrderInfo = async (orderId: number) => {
   }
 };
 
-export const insertBlacklist = async (buyingId: number, userCompanyNumber: string, wholesalerCompanyNumber: string) => {
+export const insertBlacklist = async (
+  buyingId: number,
+  userCompanyNumber: string,
+  wholesalerCompanyNumber: string,
+  orderId: number,
+) => {
+  const transaction = await sequelize.transaction();
   try {
-    await Blacklist.create({
-      buyingId: buyingId,
-      userCompanyNumber: userCompanyNumber,
-      wholesalerCompanyNumber: wholesalerCompanyNumber,
-    });
+    await Blacklist.create(
+      {
+        buyingId: buyingId,
+        userCompanyNumber: userCompanyNumber,
+        wholesalerCompanyNumber: wholesalerCompanyNumber,
+      },
+      { transaction: transaction },
+    );
+
+    await Order.update(
+      {
+        stateId: 7,
+      },
+      { where: { id: orderId } },
+    );
+    await transaction.commit();
   } catch (err) {
+    await transaction.rollback();
     throw new Error('블랙리스트 추가 실패');
   }
 };

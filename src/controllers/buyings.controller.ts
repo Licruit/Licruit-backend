@@ -268,6 +268,6 @@ export const addBlacklist = async (req: Request, res: Response) => {
     throw new HttpException(StatusCodes.BAD_REQUEST, '주문자 정보를 찾을 수 없습니다.');
   }
 
-  await insertBlacklist(orderInfo.buyingId, orderInfo.userCompanyNumber, companyNumber);
+  await insertBlacklist(orderInfo.buyingId, orderInfo.userCompanyNumber, companyNumber, orderId);
   return res.status(StatusCodes.OK).end();
 };
