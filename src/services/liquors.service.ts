@@ -124,7 +124,12 @@ export const selectAllLiquors = async ({ search, category, minAlcohol, maxAlcoho
       ],
       where: whereCondition,
       replacements: replacements,
-      order: isSorting ? [['reviewAvg', +sort ? 'asc' : 'desc']] : [],
+      order: isSorting
+        ? [
+            ['reviewAvg', +sort ? 'asc' : 'desc'],
+            ['id', 'asc'],
+          ]
+        : [['id', 'asc']],
       limit: LIMIT,
       offset: offset,
     });
