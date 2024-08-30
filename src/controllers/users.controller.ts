@@ -158,13 +158,13 @@ export const postOtp = async (req: Request, res: Response) => {
 
 export const verifyOtp = async (req: Request, res: Response) => {
   const { contact, otp }: OtpVerificationDTO = req.body;
-  return res.status(StatusCodes.OK).end();
-  // const isVerified = await checkOtp(contact, otp);
-  // if (isVerified) {
-  //   return res.status(StatusCodes.OK).end();
-  // } else {
-  //   throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
-  // }
+
+  const isVerified = await checkOtp(contact, otp);
+  if (isVerified) {
+    return res.status(StatusCodes.OK).end();
+  } else {
+    throw new HttpException(StatusCodes.UNAUTHORIZED, '인증번호가 올바르지 않습니다.');
+  }
 };
 
 export const getProfile = async (req: Request, res: Response) => {
